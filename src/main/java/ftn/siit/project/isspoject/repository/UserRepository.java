@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
+// Automatski omogucuje sav rad sa bazom, procitajte o Spring Data i JpaRepository
 }
