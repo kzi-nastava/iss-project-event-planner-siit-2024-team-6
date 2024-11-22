@@ -93,10 +93,10 @@ public class UserController {
 
 
         if (user instanceof Organizer) {
-            Organizer organizer = (Organizer) user;
+//            Organizer organizer = (Organizer) user;
 
         } else if (user instanceof Provider) {
-            Provider provider = (Provider) user;
+//            Provider provider = (Provider) user;
             if (updatedUser instanceof ProviderDTO) {
                 ProviderDTO providerDTO = (ProviderDTO) updatedUser;
                 ((Provider) user).setDescription(providerDTO.getDescription());
