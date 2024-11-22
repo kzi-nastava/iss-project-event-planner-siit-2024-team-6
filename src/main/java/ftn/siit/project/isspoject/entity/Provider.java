@@ -16,4 +16,8 @@ public class Provider extends User{
     private String openingTime;
     private String closingTime;
     private List<Offer> myOffers;
+
+    public boolean hasActiveServices() {
+        return false;
+    }
 }

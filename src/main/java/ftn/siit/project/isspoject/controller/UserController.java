@@ -2,6 +2,8 @@ package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.RegistrationRequestDTO;
 import ftn.siit.project.isspoject.dto.UserDTO;
+import ftn.siit.project.isspoject.entity.Organizer;
+import ftn.siit.project.isspoject.entity.Provider;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,12 +88,23 @@ public class UserController {
     }
 
     @DeleteMapping("/{email}")
-    public ResponseEntity<Void> deleteUser(@PathVariable String email) {
+    public ResponseEntity<String> deleteUser(@PathVariable String email) {
         User user = userService.findByEmail(email);
         if (user == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+        }
+        if (user instanceof Organizer organizer) {
+            if (organizer.hasFutureEvents()) {
+                return new ResponseEntity<>("Cannot deactivate organizer with future events", HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        if (user instanceof Provider provider) {
+            if (provider.hasActiveServices()) {
+                return new ResponseEntity<>("Cannot deactivate provider with active services", HttpStatus.BAD_REQUEST);
+            }
         }
         userService.delete(user);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>("User deactivated", HttpStatus.NO_CONTENT);
     }
 }
