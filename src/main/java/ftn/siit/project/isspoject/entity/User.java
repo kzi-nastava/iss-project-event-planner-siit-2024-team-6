@@ -10,10 +10,11 @@ import java.util.List;
 
 @Data
 public class User {
+    private Integer id;
     private String email;
     private String password;
     private String photoUrl;
-    private boolean isActive;
+    private Boolean isActive;
     private LocalDateTime suspendedSince;
     private String name;
     private String lastname;
