@@ -13,5 +13,7 @@ public interface UserService {
     List<User> findAll();
 
     void save(RegistrationRequestDTO registrationRequestDTO);
+
+    void delete(User user);
     // Za SRP i OCP
 }
