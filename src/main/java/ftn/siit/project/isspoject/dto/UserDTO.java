@@ -1,5 +1,8 @@
 package ftn.siit.project.isspoject.dto;
 
+import ftn.siit.project.isspoject.entity.Event;
+import ftn.siit.project.isspoject.entity.Notification;
+import ftn.siit.project.isspoject.entity.Offer;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -14,11 +17,8 @@ public class UserDTO {
     private String phoneNumber;
     private String photoUrl;
     private boolean isActive;
+
     private LocalDateTime suspendedSince;
-    private List<String> favouriteOffers;
-    private List<String> favouriteEvents;
-    private List<String> attends;
-    private List<String> notifications;
 
 }
 
