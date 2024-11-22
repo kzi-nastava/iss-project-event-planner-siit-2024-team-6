@@ -115,7 +115,7 @@ public class UserController {
         if (user == null) {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
         }
-        if (!user.getPassword().equals(user.getPassword().equals(newPassword))) {
+        if (!user.getPassword().equals(newPassword)) {
             return new ResponseEntity<>("Old password is incorrect", HttpStatus.BAD_REQUEST);
         }
 
