@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService{
         user.setEmail("john.doe@gmail.com");
         user.setPassword("123");
         user.setPhotoUrl("https://example.com/photo.jpg");
-        user.setActive(true);
+        user.setIsActive(true);
         user.setSuspendedSince(LocalDateTime.now());
         user.setName("John");
         user.setLastname("Doe");
@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService{
         user1.setEmail("john.doe@gmail.com");
         user1.setPassword("123");
         user1.setPhotoUrl("https://example.com/photo.jpg");
-        user1.setActive(true);
+        user1.setIsActive(true);
         user1.setSuspendedSince(LocalDateTime.now());
         user1.setName("John");
         user1.setLastname("Doe");
@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService{
         user2.setEmail("jane.smith@example.com");
         user2.setPassword("456");
         user2.setPhotoUrl("https://example.com/jane.jpg");
-        user2.setActive(false);
+        user2.setIsActive(false);
         user2.setSuspendedSince(null);
         user2.setName("Jane");
         user2.setLastname("Smith");
@@ -78,6 +78,16 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void delete(User user) {
+
+    }
+
+    @Override
+    public User findById(Integer id) {
+        return null;
+    }
+
+    @Override
+    public void save(User user) {
 
     }
 }

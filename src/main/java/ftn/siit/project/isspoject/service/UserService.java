@@ -15,5 +15,9 @@ public interface UserService {
     void save(RegistrationRequestDTO registrationRequestDTO);
 
     void delete(User user);
+
+    User findById(Integer id);
+
+    void save(User user);
     // Za SRP i OCP
 }
