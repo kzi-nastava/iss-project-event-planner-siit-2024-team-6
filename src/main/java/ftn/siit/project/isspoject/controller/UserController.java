@@ -109,6 +109,17 @@ public class UserController {
         userService.save(user);
         return new ResponseEntity<>("Profile updated successfully", HttpStatus.OK);
     }
+    @PutMapping("/{id}/change-password")
+    public ResponseEntity<String> changePassword(@PathVariable Integer id, @RequestBody String newPassword) {
+        User user = userService.findById(id);
+        if (user == null) {
+            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+        }
+
+
+        userService.save(user);
+        return new ResponseEntity<>("Password changed successfully", HttpStatus.OK);
+    }
 
 
     @GetMapping("/activate/{token}")
