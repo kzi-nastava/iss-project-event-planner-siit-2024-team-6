@@ -119,7 +119,7 @@ public class UserController {
             return new ResponseEntity<>("Old password is incorrect", HttpStatus.BAD_REQUEST);
         }
 
-
+        user.setPassword(newPassword);
 
         userService.save(user);
         return new ResponseEntity<>("Password changed successfully", HttpStatus.OK);
