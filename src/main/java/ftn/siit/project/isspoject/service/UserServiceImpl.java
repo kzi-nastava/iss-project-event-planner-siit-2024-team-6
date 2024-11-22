@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.service;
 
+import ftn.siit.project.isspoject.dto.RegistrationRequestDTO;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,16 +41,6 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void saveOrganizer() {
-
-    }
-
-    @Override
-    public void saveProvider() {
-
-    }
-
-    @Override
     public List<User> findAll() {
         User user1 = new User();
         user1.setEmail("john.doe@gmail.com");
@@ -78,5 +69,10 @@ public class UserServiceImpl implements UserService{
         users.add(user2);
 
         return users;
+    }
+
+    @Override
+    public void save(RegistrationRequestDTO registrationRequestDTO) {
+
     }
 }

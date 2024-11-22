@@ -36,11 +36,7 @@ public class UserController {
         if(registrationRequestDTO == null){
             return new ResponseEntity<>("Error, invalid user", HttpStatus.BAD_REQUEST);
         }
-        if(registrationRequestDTO.getRole().equals("ORGANIZER")){
-            userService.saveOrganizer();
-        }else{
-            userService.saveProvider();
-        }
+            userService.save(registrationRequestDTO);
         return new ResponseEntity<>("User was registered, check out the activation code", HttpStatus.CREATED);
     }
 
@@ -66,7 +62,7 @@ public class UserController {
             return new ResponseEntity<>("Account is not active", HttpStatus.FORBIDDEN);
         }
 
-        return new ResponseEntity<>("Success", HttpStatus.OK);
+        return new ResponseEntity<>("Successfully logged in", HttpStatus.OK);
     }
 
 
