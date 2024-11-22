@@ -38,6 +38,8 @@ public class UserController {
         }
         if(registrationRequestDTO.getRole().equals("ORGANIZER")){
             userService.saveOrganizer();
+        }else{
+            userService.saveProvider();
         }
         return new ResponseEntity<>("User was registered, check out the activation code", HttpStatus.CREATED);
     }
