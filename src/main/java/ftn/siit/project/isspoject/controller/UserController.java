@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping(value = "api/users")
 public class UserController {
 
     @Autowired
@@ -27,20 +27,10 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody RegistrationRequestDTO registrationRequestDTO) {
-//        if (userService.existsByEmail(user.getEmail())) {
-//            return new ResponseEntity<>("", HttpStatus.BAD_REQUEST);
-//        }
-//
-//        user.setActive(false);
-//        user.setSuspendedSince(null);
-//
-//        userService.save(user);
-//
-//        userService.sendActivationEmail(user.getEmail());
-        if(registrationRequestDTO == null){
+        if (registrationRequestDTO.getEmail() == null) {
             return new ResponseEntity<>("Error, invalid user", HttpStatus.BAD_REQUEST);
         }
-            userService.save(registrationRequestDTO);
+        userService.save(registrationRequestDTO);
         return new ResponseEntity<>("User was registered, check out the activation code", HttpStatus.CREATED);
     }
 
