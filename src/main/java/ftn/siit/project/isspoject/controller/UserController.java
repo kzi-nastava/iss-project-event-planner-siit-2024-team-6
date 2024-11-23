@@ -197,6 +197,6 @@ public class UserController {
             }
         }
         userService.delete(user);
-        return new ResponseEntity<>("User deactivated", HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>("User deactivated", HttpStatus.OK);
     }
 }

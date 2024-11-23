@@ -82,7 +82,13 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User findById(Integer id) {
-        return findAll().get(id);
+        User user = null;
+        try{
+            user = findAll().get(id);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return user;
     }
 
     @Override
