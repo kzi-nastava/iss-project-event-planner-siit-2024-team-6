@@ -142,16 +142,38 @@ public class UserController {
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<User> users = userService.findAll();
         List<UserDTO> userDTOs = users.stream().map(user -> {
-            UserDTO dto = new UserDTO();
-            dto.setEmail(user.getEmail());
-            dto.setName(user.getName());
-            dto.setLastname(user.getLastname());
-            dto.setAddress(user.getAddress());
-            dto.setPhoneNumber(user.getPhoneNumber());
-            dto.setPhotoUrl(user.getPhotoUrl());
-            dto.setActive(user.getIsActive());
-            dto.setSuspendedSince(user.getSuspendedSince());
-            return dto;
+            if (user instanceof Provider) {
+                Provider provider = (Provider) user;
+                ProviderDTO providerDTO = new ProviderDTO();
+                providerDTO.setEmail(provider.getEmail());
+                providerDTO.setName(provider.getName());
+                providerDTO.setLastname(provider.getLastname());
+                providerDTO.setAddress(provider.getAddress());
+                providerDTO.setPhoneNumber(provider.getPhoneNumber());
+                providerDTO.setPhotoUrl(provider.getPhotoUrl());
+                providerDTO.setActive(provider.getIsActive());
+                providerDTO.setSuspendedSince(provider.getSuspendedSince());
+
+                providerDTO.setCompanyEmail(provider.getCompanyEmail());
+                providerDTO.setCompanyName(provider.getCompanyName());
+                providerDTO.setCompanyAddress(provider.getCompanyAddress());
+                providerDTO.setDescription(provider.getDescription());
+                providerDTO.setCompanyPhotos(provider.getCompanyPhotos());
+                providerDTO.setOpeningTime(provider.getOpeningTime());
+                providerDTO.setClosingTime(provider.getClosingTime());
+                return providerDTO;
+            } else {
+                UserDTO dto = new UserDTO();
+                dto.setEmail(user.getEmail());
+                dto.setName(user.getName());
+                dto.setLastname(user.getLastname());
+                dto.setAddress(user.getAddress());
+                dto.setPhoneNumber(user.getPhoneNumber());
+                dto.setPhotoUrl(user.getPhotoUrl());
+                dto.setActive(user.getIsActive());
+                dto.setSuspendedSince(user.getSuspendedSince());
+                return dto;
+            }
         }).collect(Collectors.toList());
 
         return new ResponseEntity<>(userDTOs, HttpStatus.OK);
