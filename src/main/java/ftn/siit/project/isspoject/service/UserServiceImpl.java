@@ -28,16 +28,12 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User findByEmail(String email) {
-        User user = new User();
-        user.setEmail("john.doe@gmail.com");
-        user.setPassword("123");
-        user.setPhotoUrl("https://example.com/photo.jpg");
-        user.setIsActive(true);
-        user.setSuspendedSince(LocalDateTime.now());
-        user.setName("John");
-        user.setLastname("Doe");
-        user.setAddress("221B Baker Street, London");
-        user.setPhoneNumber("+44 20 7946 0958");
+        List<User> users = findAll();
+        User user = null;
+        for(User u: users){
+            if(u.getEmail().equals(email))
+                user = u;
+        }
         return user;
     }
 

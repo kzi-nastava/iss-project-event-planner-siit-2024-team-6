@@ -1,9 +1,6 @@
 package ftn.siit.project.isspoject.controller;
 
-import ftn.siit.project.isspoject.dto.OrganizerDTO;
-import ftn.siit.project.isspoject.dto.ProviderDTO;
-import ftn.siit.project.isspoject.dto.RegistrationRequestDTO;
-import ftn.siit.project.isspoject.dto.UserDTO;
+import ftn.siit.project.isspoject.dto.*;
 import ftn.siit.project.isspoject.entity.Organizer;
 import ftn.siit.project.isspoject.entity.Provider;
 import ftn.siit.project.isspoject.entity.User;
@@ -105,8 +102,8 @@ public class UserController {
         if (user == null) {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
         }
-        if (!user.getPassword().equals(newPassword)) {
-            return new ResponseEntity<>("Old password is incorrect", HttpStatus.BAD_REQUEST);
+        if (user.getPassword().equals(newPassword)) {
+            return new ResponseEntity<>("New password matches the old one", HttpStatus.BAD_REQUEST);
         }
 
         user.setPassword(newPassword);
@@ -127,10 +124,10 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestParam String email, @RequestParam String password) {
-        User user = userService.findByEmail(email);
+    public ResponseEntity<String> loginUser(@RequestBody LoginRequestDTO loginRequest) {
+        User user = userService.findByEmail(loginRequest.getEmail());
 
-        if (user == null || !user.getPassword().equals(password)) {
+        if (user == null || !user.getEmail().equals(loginRequest.getEmail()) || !user.getPassword().equals(loginRequest.getPassword())) {
             return new ResponseEntity<>("Wrong email or password", HttpStatus.UNAUTHORIZED);
         }
         if (!user.getIsActive()) {
