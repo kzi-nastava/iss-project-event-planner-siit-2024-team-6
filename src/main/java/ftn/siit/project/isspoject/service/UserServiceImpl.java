@@ -14,11 +14,11 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService{
     // dependency inversion
-    private final UserRepository userRepository;
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+//    private final UserRepository userRepository;
+//    @Autowired
+//    public UserServiceImpl(UserRepository userRepository) {
+//        this.userRepository = userRepository;
+//    }
 
     @Override
     public boolean existsByEmail(String email) {
