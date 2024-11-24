@@ -11,6 +11,6 @@ import java.util.List;
 public class EventTypeDTO {
     private String name;
     private String description;
-    private boolean isDeleted;
+    private Boolean isDeleted;
     private List<Category> categories;
 }
