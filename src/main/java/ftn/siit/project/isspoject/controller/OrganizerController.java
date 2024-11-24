@@ -168,5 +168,24 @@ public class OrganizerController {
         return new ResponseEntity<>(agenda, HttpStatus.OK);
     }
 
+    @GetMapping("events/{organizerId}/{eventId}/generate-pdf")
+    public ResponseEntity<byte[]> generateGuestListPDF(
+            @PathVariable Integer organizerId,
+            @PathVariable Integer eventId) {
+        Organizer organizer = organizerService.findById(organizerId);
+        if (organizer == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
+        Event event = eventService.findById(eventId);
+        if (event == null || !event.getOrganizer().equals(organizer)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        byte[] pdf = pdfGeneratorService.generateGuestListPDF(event);
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=guest-list.pdf")
+                .body(pdf);
+    }
 }
