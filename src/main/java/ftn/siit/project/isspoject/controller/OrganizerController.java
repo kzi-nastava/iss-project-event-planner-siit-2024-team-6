@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping(value = "api/organizers")
 public class OrganizerController {
@@ -41,5 +44,29 @@ public class OrganizerController {
         eventService.save(event);
         return new ResponseEntity<>("Event created successfully", HttpStatus.CREATED);
     }
+    @GetMapping("events/{organizerId}/all")
+    public ResponseEntity<List<EventDTO>> getOrganizerEvents(@PathVariable Integer organizerId) {
+        Organizer organizer = organizerService.findById(organizerId);
+        if (organizer == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        List<Event> events = eventService.findByOrganizer(organizer);
+        List<EventDTO> eventDTOs = events.stream().map(event -> {
+            EventDTO dto = new EventDTO();
+            dto.setId(event.getId());
+            dto.setName(event.getName());
+            dto.setDescription(event.getDescription());
+            dto.setMaxParticipants(event.getMaxParticipants());
+            dto.setIsPublic(event.getIsPublic());
+            dto.setPlace(event.getPlace());
+            dto.setDate(event.getDate());
+            dto.setEventType(event.getEventType());
+            return dto;
+        }).collect(Collectors.toList());
+
+        return new ResponseEntity<>(eventDTOs, HttpStatus.OK);
+    }
+
 
 }
