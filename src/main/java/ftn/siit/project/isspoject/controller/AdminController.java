@@ -49,5 +49,20 @@ public class AdminController {
         return new ResponseEntity<>(eventTypeDTOs, HttpStatus.OK);
     }
 
+    @PutMapping("event-type/{id}/update")
+    public ResponseEntity<String> updateEventType(
+            @PathVariable Long id,
+            @RequestBody EventTypeDTO eventTypeDTO) {
+        EventType eventType = eventTypeService.findById(id);
+        if (eventType == null) {
+            return new ResponseEntity<>("Event type not found", HttpStatus.NOT_FOUND);
+        }
+
+        eventType.setDescription(eventTypeDTO.getDescription());
+        eventType.setCategories(eventTypeDTO.getCategories());
+        eventTypeService.save(eventType);
+
+        return new ResponseEntity<>("Event type updated successfully", HttpStatus.OK);
+    }
 
 }

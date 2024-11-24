@@ -8,4 +8,6 @@ public interface EventTypeService {
     void save(EventType eventType);
 
     List<EventType> findAll();
+
+    EventType findById(Long id);
 }
