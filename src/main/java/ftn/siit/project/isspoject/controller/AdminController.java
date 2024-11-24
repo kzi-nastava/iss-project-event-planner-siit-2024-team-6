@@ -64,5 +64,16 @@ public class AdminController {
 
         return new ResponseEntity<>("Event type updated successfully", HttpStatus.OK);
     }
+    @PutMapping("event-type/{id}/activate")
+    public ResponseEntity<String> activateEventType(@PathVariable Long id) {
+        EventType eventType = eventTypeService.findById(id);
+        if (eventType == null) {
+            return new ResponseEntity<>("Event type not found", HttpStatus.NOT_FOUND);
+        }
+
+        eventType.setIsDeleted(false);
+        eventTypeService.save(eventType);
+        return new ResponseEntity<>("Event type activated", HttpStatus.OK);
+    }
 
 }
