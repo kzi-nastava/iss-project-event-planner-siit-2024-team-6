@@ -51,7 +51,7 @@ public class AdminController {
 
     @PutMapping("event-type/{id}/update")
     public ResponseEntity<String> updateEventType(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody EventTypeDTO eventTypeDTO) {
         EventType eventType = eventTypeService.findById(id);
         if (eventType == null) {
@@ -65,7 +65,7 @@ public class AdminController {
         return new ResponseEntity<>("Event type updated successfully", HttpStatus.OK);
     }
     @PutMapping("event-type/{id}/activate")
-    public ResponseEntity<String> activateEventType(@PathVariable Long id) {
+    public ResponseEntity<String> activateEventType(@PathVariable Integer id) {
         EventType eventType = eventTypeService.findById(id);
         if (eventType == null) {
             return new ResponseEntity<>("Event type not found", HttpStatus.NOT_FOUND);
@@ -75,5 +75,15 @@ public class AdminController {
         eventTypeService.save(eventType);
         return new ResponseEntity<>("Event type activated", HttpStatus.OK);
     }
+    @PutMapping("event-type/{id}/deactivate")
+    public ResponseEntity<String> deactivateEventType(@PathVariable Integer id) {
+        EventType eventType = eventTypeService.findById(id);
+        if (eventType == null) {
+            return new ResponseEntity<>("Event type not found", HttpStatus.NOT_FOUND);
+        }
 
+        eventType.setIsDeleted(true);
+        eventTypeService.save(eventType);
+        return new ResponseEntity<>("Event type deactivated", HttpStatus.OK);
+    }
 }

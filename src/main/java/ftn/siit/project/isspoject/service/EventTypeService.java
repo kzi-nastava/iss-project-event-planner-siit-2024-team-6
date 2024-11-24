@@ -10,4 +10,6 @@ public interface EventTypeService {
     List<EventType> findAll();
 
     EventType findById(Long id);
+
+    EventType findById(Integer id);
 }

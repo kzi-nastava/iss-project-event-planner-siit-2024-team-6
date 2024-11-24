@@ -9,6 +9,7 @@ import java.util.List;
 
 @Data
 public class EventTypeDTO {
+    private Integer id;
     private String name;
     private String description;
     private Boolean isDeleted;
