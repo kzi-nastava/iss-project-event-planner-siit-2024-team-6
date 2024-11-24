@@ -1,10 +1,10 @@
 package ftn.siit.project.isspoject.repository;
 
-import ftn.siit.project.isspoject.entity.Event;
+import ftn.siit.project.isspoject.entity.Offer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-//extends JpaRepository<Event, Integer>
-public interface EventRepository {
+//extends JpaRepository<Offer, Integer>
+public interface OfferRepository {
 }
