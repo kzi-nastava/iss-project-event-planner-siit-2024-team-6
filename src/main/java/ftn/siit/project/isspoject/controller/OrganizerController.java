@@ -142,4 +142,31 @@ public class OrganizerController {
         return new ResponseEntity<>("Agenda added successfully", HttpStatus.OK);
     }
 
+    @GetMapping("events/{organizerId}/{eventId}/agenda")
+    public ResponseEntity<List<ActivityDTO>> getAgenda(
+            @PathVariable Integer organizerId,
+            @PathVariable Integer eventId) {
+        Organizer organizer = organizerService.findById(organizerId);
+        if (organizer == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Event event = eventService.findById(eventId);
+        if (event == null || !event.getOrganizer().equals(organizer)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        List<ActivityDTO> agenda = event.getActivities().stream().map(activity -> {
+            ActivityDTO dto = new ActivityDTO();
+            dto.setName(activity.getName());
+            dto.setDescription(activity.getDescription());
+            dto.setTime(activity.getTime());
+            dto.setLocation(activity.getLocation());
+            return dto;
+        }).collect(Collectors.toList());
+
+        return new ResponseEntity<>(agenda, HttpStatus.OK);
+    }
+
+
 }
