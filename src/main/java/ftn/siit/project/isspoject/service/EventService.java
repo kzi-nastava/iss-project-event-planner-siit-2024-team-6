@@ -6,11 +6,15 @@ import ftn.siit.project.isspoject.entity.Organizer;
 import java.util.List;
 
 public interface EventService {
-    void save(Event event);
 
+    List<Event> findAll();
+    Event findById(Integer eventId);
     List<Event> findByOrganizer(Organizer organizer);
 
-    Event findById(Integer eventId);
+    List<Event> findTopFive();
 
+    void save(Event event);
+    void update(Event event);
     void delete(Event event);
+
 }

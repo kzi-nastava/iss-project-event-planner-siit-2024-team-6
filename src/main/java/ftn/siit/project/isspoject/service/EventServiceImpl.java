@@ -2,15 +2,23 @@ package ftn.siit.project.isspoject.service;
 
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.Organizer;
+import ftn.siit.project.isspoject.repository.EventRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class EventServiceImpl implements EventService{
-    @Override
-    public void save(Event event) {
 
+    //@Autowired
+    //private EventRepository eventRepository;
+    @Override
+    public List<Event> findAll() { return null;}
+
+    @Override
+    public Event findById(Integer eventId) {
+        return null;
     }
 
     @Override
@@ -19,9 +27,14 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    public Event findById(Integer eventId) {
-        return null;
+    public List<Event> findTopFive() { return null;}
+
+
+    @Override
+    public void save(Event event) {
     }
+    @Override
+    public void update(Event event){}
 
     @Override
     public void delete(Event event) {
