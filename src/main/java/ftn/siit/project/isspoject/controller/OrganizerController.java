@@ -93,6 +93,20 @@ public class OrganizerController {
 
         return new ResponseEntity<>("Event updated successfully", HttpStatus.OK);
     }
+    @DeleteMapping("/{organizerId}/delete/{eventId}")
+    public ResponseEntity<String> deleteEvent(@PathVariable Integer organizerId, @PathVariable Integer eventId) {
+        Organizer organizer = organizerService.findById(organizerId);
+        if (organizer == null) {
+            return new ResponseEntity<>("Organizer not found", HttpStatus.NOT_FOUND);
+        }
 
+        Event event = eventService.findById(eventId);
+        if (event == null || !event.getOrganizer().equals(organizer)) {
+            return new ResponseEntity<>("Event not found or not owned by this organizer", HttpStatus.NOT_FOUND);
+        }
+
+        eventService.delete(event);
+        return new ResponseEntity<>("Event deleted successfully", HttpStatus.OK);
+    }
 
 }
