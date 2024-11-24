@@ -10,4 +10,5 @@ public class EventType {
     private String description;
     private boolean isDeleted;
     private List<Event> events;
+    private List<Offer> offers;
 }
