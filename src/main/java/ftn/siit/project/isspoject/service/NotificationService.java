@@ -14,4 +14,5 @@ public interface NotificationService {
     void save(Notification notification);
 
     void notifyUsers(List<User> users, String message);
+    void notifyUser(User user, String message);
 }

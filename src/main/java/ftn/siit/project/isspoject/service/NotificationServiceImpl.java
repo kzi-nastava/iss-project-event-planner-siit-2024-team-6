@@ -40,4 +40,9 @@ public class NotificationServiceImpl implements NotificationService {
             this.save(notification);
         }
     }
+
+    @Override
+    public void notifyUser(User user, String message) {
+
+    }
 }
