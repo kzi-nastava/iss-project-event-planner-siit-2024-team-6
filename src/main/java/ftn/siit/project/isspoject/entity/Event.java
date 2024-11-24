@@ -9,12 +9,12 @@ import java.util.List;
 //@Entity
 public class Event {
 //    @Id
-    private int id;
+    private Integer id;
     private String name;
     private String description;
-    private int maxParticipants;
-    private int participants = 0;
-    private boolean isPublic;
+    private Integer maxParticipants;
+    private Integer participants = 0;
+    private Boolean isPublic;
     private String place;
     private LocalDateTime date;
     private EventType eventType;
