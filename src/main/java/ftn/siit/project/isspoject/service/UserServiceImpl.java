@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<User> findByEventId(Integer eventId) {
+    public List<User> findEventAttendees(Integer eventId) {
         return List.of();
     }
 }

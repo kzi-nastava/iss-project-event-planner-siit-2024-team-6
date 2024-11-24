@@ -84,7 +84,7 @@ public class EventController {
 
         Event updatedEvent = eventService.save(existingEvent);
 
-        List<User> attendees = userService.findByEventId(id);
+        List<User> attendees = userService.findEventAttendees(id);
         String notificationMessage = "The event '" + updatedEvent.getName() + "' has been updated.";
         notificationService.notifyUsers(attendees, notificationMessage);
 
