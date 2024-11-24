@@ -68,5 +68,31 @@ public class OrganizerController {
         return new ResponseEntity<>(eventDTOs, HttpStatus.OK);
     }
 
+    @PutMapping("/{organizerId}/update/{eventId}")
+    public ResponseEntity<String> updateEvent(
+            @PathVariable Integer organizerId,
+            @PathVariable Integer eventId,
+            @RequestBody EventDTO eventDTO) {
+        Organizer organizer = organizerService.findById(organizerId);
+        if (organizer == null) {
+            return new ResponseEntity<>("Organizer not found", HttpStatus.NOT_FOUND);
+        }
+
+        Event event = eventService.findById(eventId);
+        if (event == null || !event.getOrganizer().equals(organizer)) {
+            return new ResponseEntity<>("Event not found or not owned by this organizer", HttpStatus.NOT_FOUND);
+        }
+
+        event.setName(eventDTO.getName());
+        event.setDescription(eventDTO.getDescription());
+        event.setMaxParticipants(eventDTO.getMaxParticipants());
+        event.setIsPublic(eventDTO.getIsPublic());
+        event.setPlace(eventDTO.getPlace());
+        event.setDate(eventDTO.getDate());
+        eventService.save(event);
+
+        return new ResponseEntity<>("Event updated successfully", HttpStatus.OK);
+    }
+
 
 }
