@@ -13,8 +13,7 @@ public interface EventService {
 
     List<Event> findTopFive();
 
-    void save(Event event);
-    void update(Event event);
+    Event save(Event event);
     void delete(Event event);
 
 }

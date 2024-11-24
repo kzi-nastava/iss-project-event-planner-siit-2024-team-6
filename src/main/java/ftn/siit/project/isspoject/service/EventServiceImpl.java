@@ -11,8 +11,9 @@ import java.util.List;
 @Service
 public class EventServiceImpl implements EventService{
 
-    //@Autowired
-    //private EventRepository eventRepository;
+    @Autowired
+    private EventRepository eventRepository;
+
     @Override
     public List<Event> findAll() { return null;}
 
@@ -31,10 +32,7 @@ public class EventServiceImpl implements EventService{
 
 
     @Override
-    public void save(Event event) {
-    }
-    @Override
-    public void update(Event event){}
+    public Event save(Event event) { return null;}
 
     @Override
     public void delete(Event event) {

@@ -2,14 +2,14 @@ package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.EventDTO;
 import ftn.siit.project.isspoject.entity.Event;
+import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.service.EventService;
+import ftn.siit.project.isspoject.service.NotificationService;
+import ftn.siit.project.isspoject.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -21,6 +21,10 @@ public class EventController {
 
     @Autowired
     private EventService eventService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    NotificationService notificationService;
 
 
     @GetMapping("/{id}")
@@ -60,5 +64,32 @@ public class EventController {
                 .map(EventDTO::new)
                 .toList();
         return ResponseEntity.ok(dtos);
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<EventDTO>  updateEvent(@PathVariable int id, @RequestBody EventDTO dto) {
+        Event existingEvent = eventService.findById(id);
+        if (existingEvent == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        existingEvent.setName(dto.getName());
+        existingEvent.setDescription(dto.getDescription());
+        existingEvent.setMaxParticipants(dto.getMaxParticipants());
+        existingEvent.setParticipants(dto.getParticipants());
+        existingEvent.setIsPublic(dto.getIsPublic());
+        existingEvent.setPlace(dto.getPlace());
+        existingEvent.setDate(dto.getDate());
+        existingEvent.setEventType(dto.getEventType());
+
+        Event updatedEvent = eventService.save(existingEvent);
+
+        List<User> attendees = userService.findByEventId(id);
+        String notificationMessage = "The event '" + updatedEvent.getName() + "' has been updated.";
+        notificationService.notifyUsers(attendees, notificationMessage);
+
+        return ResponseEntity.ok(new EventDTO(updatedEvent));
+
+
     }
 }
