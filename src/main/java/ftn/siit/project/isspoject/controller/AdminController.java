@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "api/admin")
@@ -18,7 +19,7 @@ public class AdminController {
     @Autowired
     private EventTypeService eventTypeService;
 
-    @PostMapping("events/add")
+    @PostMapping("event-type/add")
     public ResponseEntity<String> addEventType(@RequestBody EventTypeDTO eventTypeDTO) {
         if (eventTypeDTO == null || eventTypeDTO.getName() == null || eventTypeDTO.getDescription() == null) {
             return new ResponseEntity<>("Invalid event type data", HttpStatus.BAD_REQUEST);
@@ -28,10 +29,25 @@ public class AdminController {
         eventType.setName(eventTypeDTO.getName());
         eventType.setDescription(eventTypeDTO.getDescription());
         eventType.setCategories(eventTypeDTO.getCategories());
-        eventType.setDeleted(false);
+        eventType.setIsDeleted(false);
 
         eventTypeService.save(eventType);
         return new ResponseEntity<>("Event type added successfully", HttpStatus.CREATED);
     }
+    @GetMapping("event-type/all")
+    public ResponseEntity<List<EventTypeDTO>> getAllEventTypes() {
+        List<EventType> eventTypes = eventTypeService.findAll();
+        List<EventTypeDTO> eventTypeDTOs = eventTypes.stream().map(eventType -> {
+            EventTypeDTO dto = new EventTypeDTO();
+            dto.setName(eventType.getName());
+            dto.setDescription(eventType.getDescription());
+            dto.setCategories(eventType.getCategories());
+            dto.setIsDeleted(eventType.getIsDeleted());
+            return dto;
+        }).collect(Collectors.toList());
+
+        return new ResponseEntity<>(eventTypeDTOs, HttpStatus.OK);
+    }
+
 
 }
