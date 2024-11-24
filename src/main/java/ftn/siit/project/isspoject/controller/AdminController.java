@@ -14,12 +14,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "api/admin")
+@RequestMapping(value = "api/admins")
 public class AdminController {
     @Autowired
     private EventTypeService eventTypeService;
 
-    @PostMapping("event-type/add")
+    @PostMapping("event-types/add")
     public ResponseEntity<String> addEventType(@RequestBody EventTypeDTO eventTypeDTO) {
         if (eventTypeDTO == null || eventTypeDTO.getName() == null || eventTypeDTO.getDescription() == null) {
             return new ResponseEntity<>("Invalid event type data", HttpStatus.BAD_REQUEST);
@@ -34,7 +34,7 @@ public class AdminController {
         eventTypeService.save(eventType);
         return new ResponseEntity<>("Event type added successfully", HttpStatus.CREATED);
     }
-    @GetMapping("event-type/all")
+    @GetMapping("event-types/all")
     public ResponseEntity<List<EventTypeDTO>> getAllEventTypes() {
         List<EventType> eventTypes = eventTypeService.findAll();
         List<EventTypeDTO> eventTypeDTOs = eventTypes.stream().map(eventType -> {
@@ -49,7 +49,7 @@ public class AdminController {
         return new ResponseEntity<>(eventTypeDTOs, HttpStatus.OK);
     }
 
-    @PutMapping("event-type/{id}/update")
+    @PutMapping("event-types/{id}/update")
     public ResponseEntity<String> updateEventType(
             @PathVariable Integer id,
             @RequestBody EventTypeDTO eventTypeDTO) {
@@ -64,7 +64,7 @@ public class AdminController {
 
         return new ResponseEntity<>("Event type updated successfully", HttpStatus.OK);
     }
-    @PutMapping("event-type/{id}/activate")
+    @PutMapping("event-types/{id}/activate")
     public ResponseEntity<String> activateEventType(@PathVariable Integer id) {
         EventType eventType = eventTypeService.findById(id);
         if (eventType == null) {
@@ -75,7 +75,7 @@ public class AdminController {
         eventTypeService.save(eventType);
         return new ResponseEntity<>("Event type activated", HttpStatus.OK);
     }
-    @PutMapping("event-type/{id}/deactivate")
+    @PutMapping("event-types/{id}/deactivate")
     public ResponseEntity<String> deactivateEventType(@PathVariable Integer id) {
         EventType eventType = eventTypeService.findById(id);
         if (eventType == null) {
