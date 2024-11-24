@@ -95,4 +95,9 @@ public class UserServiceImpl implements UserService{
     public void save(User user) {
         System.out.println(user);
     }
+
+    @Override
+    public List<User> findByEventId(Integer eventId) {
+        return List.of();
+    }
 }

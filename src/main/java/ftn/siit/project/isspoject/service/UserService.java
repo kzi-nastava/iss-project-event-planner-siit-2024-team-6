@@ -20,4 +20,6 @@ public interface UserService {
 
     void save(User user);
     // Za SRP i OCP
+
+    List<User> findByEventId(Integer eventId);
 }
