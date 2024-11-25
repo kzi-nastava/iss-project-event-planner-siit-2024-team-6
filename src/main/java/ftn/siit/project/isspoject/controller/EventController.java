@@ -74,5 +74,25 @@ public class EventController {
 
         return new ResponseEntity<>("Event added to favorites", HttpStatus.OK);
     }
+    @DeleteMapping("/{userId}/{eventId}/favorite")
+    public ResponseEntity<String> removeEventFromFavorites(@PathVariable Integer userId, @PathVariable Integer eventId) {
+        User user = userService.findById(userId);
+        if (user == null) {
+            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+        }
 
+        Event event = eventService.findById(eventId);
+        if (event == null) {
+            return new ResponseEntity<>("Event not found", HttpStatus.NOT_FOUND);
+        }
+
+        if (!user.getFavouriteEvents().contains(event)) {
+            return new ResponseEntity<>("Event is not in favorites", HttpStatus.BAD_REQUEST);
+        }
+
+        user.getFavouriteEvents().remove(event);
+        userService.save(user);
+
+        return new ResponseEntity<>("Event removed from favorites", HttpStatus.OK);
+    }
 }
