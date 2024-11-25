@@ -22,6 +22,7 @@ public class Event {
     private EventType eventType;
     private Organizer organizer;
     private List<Activity> activities;
+    private Budget budget;
 
     public Event() {}
     public Event(EventDTO eventDTO) {
