@@ -43,4 +43,8 @@ public class PDFGeneratorService {
 
         return out.toByteArray();
     }
+
+    public byte[] generateEventPDF(Event event) {
+        return null;
+    }
 }

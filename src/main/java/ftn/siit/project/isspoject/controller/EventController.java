@@ -34,5 +34,17 @@ public class EventController {
 
         return new ResponseEntity<>(eventDTO, HttpStatus.OK);
     }
+    @GetMapping("/{eventId}/generate-pdf")
+    public ResponseEntity<byte[]> generateEventPDF(@PathVariable Integer eventId) {
+        Event event = eventService.findById(eventId);
+        if (event == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
+        byte[] pdf = pdfGeneratorService.generateEventPDF(event);
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=event-details.pdf")
+                .body(pdf);
+    }
 }
