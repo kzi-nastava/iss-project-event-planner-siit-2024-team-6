@@ -97,16 +97,21 @@ public class UserController {
         return new ResponseEntity<>("Profile updated successfully", HttpStatus.OK);
     }
     @PutMapping("/{id}/change-password")
-    public ResponseEntity<String> changePassword(@PathVariable Integer id, @RequestBody String newPassword) {
+    public ResponseEntity<String> changePassword(@PathVariable Integer id, @RequestBody PasswordChangeDTO passwordChangeDTO) {
         User user = userService.findById(id);
         if (user == null) {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
         }
-        if (user.getPassword().equals(newPassword)) {
-            return new ResponseEntity<>("New password matches the old one", HttpStatus.BAD_REQUEST);
+        if (!user.getPassword().equals(passwordChangeDTO.getOldPassword())) {
+            return new ResponseEntity<>("Wrong password", HttpStatus.FORBIDDEN);
         }
-
-        user.setPassword(newPassword);
+        if (!passwordChangeDTO.getNewPasswordFirst().equals(passwordChangeDTO.getOldPassword())) {
+            return new ResponseEntity<>("New password matches the old one!", HttpStatus.FORBIDDEN);
+        }
+        if (!passwordChangeDTO.getNewPasswordFirst().equals(passwordChangeDTO.getNewPasswordSecond())) {
+            return new ResponseEntity<>("Bad new-password confirmation", HttpStatus.FORBIDDEN);
+        }
+        user.setPassword(passwordChangeDTO.getNewPasswordFirst());
 
         userService.save(user);
         return new ResponseEntity<>("Password changed successfully", HttpStatus.OK);
