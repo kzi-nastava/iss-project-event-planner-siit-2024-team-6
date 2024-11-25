@@ -1,5 +1,6 @@
-package ftn.siit.project.isspoject.entity;
+package ftn.siit.project.isspoject.dto;
 
+import ftn.siit.project.isspoject.entity.Offer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -7,7 +8,7 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class Provider extends User{
+public class ProviderDTO extends UserDTO{
     private String companyEmail;
     private String companyName;
     private String companyAddress;
@@ -15,9 +16,4 @@ public class Provider extends User{
     private String[] companyPhotos;
     private String openingTime;
     private String closingTime;
-    private List<Offer> myOffers;
-
-    public boolean hasActiveServices() {
-        return false;
-    }
 }

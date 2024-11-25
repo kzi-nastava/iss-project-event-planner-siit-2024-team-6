@@ -6,8 +6,10 @@ import java.util.List;
 
 @Data
 public class EventType {
+    private Integer id;
     private String name;
     private String description;
-    private boolean isDeleted;
+    private Boolean isDeleted;
     private List<Event> events;
+    private List<Category> categories;
 }

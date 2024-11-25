@@ -7,7 +7,8 @@ import java.util.List;
 
 @Data
 public class TimeSlot {
+    private Integer id;
     private LocalDateTime start;
-    private int duration;
+    private Integer duration;
     private List<Activity> activities;
 }

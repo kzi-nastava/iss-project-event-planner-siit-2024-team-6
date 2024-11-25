@@ -9,19 +9,19 @@ import java.util.List;
 //@Entity
 public class Offer {
 //    @Id
-    private int id;
+    private Integer id;
     private Status status;
     private String name;
     private String description;
-    private double price;
-    private double sale;
+    private Double price;
+    private Double sale;
 //    @ElementCollection
     //@CollectionTable(name = "offer_photos", joinColumns = @JoinColumn(name = "offer_id"))
     //@Column(name = "photo_url")
     private List<String> photos;
-    private boolean isVisible;
-    private boolean isAvailable;
-    private boolean isDeleted;
+    private Boolean isVisible;
+    private Boolean isAvailable;
+    private Boolean isDeleted;
     private LocalDateTime lastChanged;
     private Category category;
 }

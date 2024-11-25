@@ -9,4 +9,8 @@ import java.util.List;
 @Data
 public class Organizer extends User{
     private List<Event> myEvents;
+
+    public boolean hasFutureEvents() {
+        return false;
+    }
 }

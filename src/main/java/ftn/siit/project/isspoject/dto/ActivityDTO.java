@@ -1,10 +1,11 @@
-package ftn.siit.project.isspoject.entity;
+package ftn.siit.project.isspoject.dto;
 
+import ftn.siit.project.isspoject.entity.Event;
+import ftn.siit.project.isspoject.entity.TimeSlot;
 import lombok.Data;
 
 @Data
-public class Activity {
-    private Integer id;
+public class ActivityDTO {
     private String name;
     private String description;
     private String location;

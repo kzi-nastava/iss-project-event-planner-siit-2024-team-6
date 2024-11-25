@@ -1,14 +1,12 @@
-package ftn.siit.project.isspoject.entity;
+package ftn.siit.project.isspoject.dto;
 
-import jakarta.persistence.*;
+import ftn.siit.project.isspoject.entity.EventType;
 import lombok.Data;
+
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
-//@Entity
-public class Event {
-//    @Id
+public class EventDTO {
     private Integer id;
     private String name;
     private String description;
@@ -18,6 +16,4 @@ public class Event {
     private String place;
     private LocalDateTime date;
     private EventType eventType;
-    private Organizer organizer;
-    private List<Activity> activities;
 }
