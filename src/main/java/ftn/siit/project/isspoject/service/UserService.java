@@ -22,4 +22,5 @@ public interface UserService {
     // Za SRP i OCP
 
     List<User> findEventAttendees(Integer eventId);
+    public void updateRole(Integer userId, String newRole);
 }
