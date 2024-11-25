@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.service;
 
+import ftn.siit.project.isspoject.dto.ClosedEventDTO;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.Organizer;
 import ftn.siit.project.isspoject.entity.User;
@@ -44,4 +45,19 @@ public class EventServiceImpl implements EventService{
     public List<Event> getEventsUserAttends(Integer userId) {
         return List.of();
     }
+
+    public void addClosedEvent(ClosedEventDTO eventDTO) {
+        Event event = new Event();
+        event.setIsPublic(eventDTO.getIsPublic());
+        event.setName(eventDTO.getName());
+        event.setDescription(eventDTO.getDescription());
+        event.setPlace(eventDTO.getPlace());
+        event.setDate(eventDTO.getDate());
+        event.setMaxParticipants(eventDTO.getMaxParticipants());
+
+        Event savedEvent = eventRepository.save(event);
+
+        sendInvitations("",eventDTO.getEmails());
+    }
+    private void sendInvitations(String text,List<String> emails) {}
 }

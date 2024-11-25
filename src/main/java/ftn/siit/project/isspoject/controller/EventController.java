@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.controller;
 
+import ftn.siit.project.isspoject.dto.ClosedEventDTO;
 import ftn.siit.project.isspoject.dto.EventDTO;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.User;
@@ -64,6 +65,11 @@ public class EventController {
                 .map(EventDTO::new)
                 .toList();
         return ResponseEntity.ok(dtos);
+    }
+    @PostMapping("/add-closed")
+    public ResponseEntity<String> addClosed(@RequestBody ClosedEventDTO eventDTO) {
+        eventService.addClosedEvent(eventDTO);
+        return ResponseEntity.ok("Event created and invitations sent.");
     }
 
     @PutMapping("/update/{id}")
