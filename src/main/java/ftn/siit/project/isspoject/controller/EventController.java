@@ -1,8 +1,10 @@
 package ftn.siit.project.isspoject.controller;
 import ftn.siit.project.isspoject.dto.EventDTO;
 import ftn.siit.project.isspoject.entity.Event;
+import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.service.EventService;
 import ftn.siit.project.isspoject.service.PDFGeneratorService;
+import ftn.siit.project.isspoject.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,9 @@ public class EventController {
 
     @Autowired
     private PDFGeneratorService pdfGeneratorService;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/{eventId}/details")
     public ResponseEntity<EventDTO> getEvent(@PathVariable Integer eventId) {
@@ -47,4 +52,27 @@ public class EventController {
                 .header("Content-Disposition", "attachment; filename=event-details.pdf")
                 .body(pdf);
     }
+
+    @PostMapping("/{userId}/{eventId}/favorite")
+    public ResponseEntity<String> addEventToFavorites(@PathVariable Integer userId, @PathVariable Integer eventId) {
+        User user = userService.findById(userId);
+        if (user == null) {
+            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+        }
+
+        Event event = eventService.findById(eventId);
+        if (event == null) {
+            return new ResponseEntity<>("Event not found", HttpStatus.NOT_FOUND);
+        }
+
+        if (user.getFavouriteEvents().contains(event)) {
+            return new ResponseEntity<>("Event is already in favorites", HttpStatus.BAD_REQUEST);
+        }
+
+        user.getFavouriteEvents().add(event);
+        userService.save(user);
+
+        return new ResponseEntity<>("Event added to favorites", HttpStatus.OK);
+    }
+
 }
