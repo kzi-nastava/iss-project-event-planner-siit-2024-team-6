@@ -47,4 +47,8 @@ public class PDFGeneratorService {
     public byte[] generateEventPDF(Event event) {
         return null;
     }
+
+    public byte[] generateEventAnalyticsPDF(Event event) {
+        return null;
+    }
 }

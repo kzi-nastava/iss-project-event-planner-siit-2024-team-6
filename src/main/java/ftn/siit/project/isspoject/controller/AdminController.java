@@ -6,6 +6,7 @@ import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.service.EventService;
 import ftn.siit.project.isspoject.service.EventTypeService;
+import ftn.siit.project.isspoject.service.PDFGeneratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,8 @@ public class AdminController {
     private EventTypeService eventTypeService;
     @Autowired
     private EventService eventService;
-
+    @Autowired
+    private PDFGeneratorService pdfGeneratorService;
     @PostMapping("event-types/add")
     public ResponseEntity<String> addEventType(@RequestBody EventTypeDTO eventTypeDTO) {
         if (eventTypeDTO == null || eventTypeDTO.getName() == null || eventTypeDTO.getDescription() == null) {
@@ -110,5 +112,17 @@ public class AdminController {
         return new ResponseEntity<>(analytics, HttpStatus.OK);
     }
 
+    @GetMapping("/{eventId}/generate-analytics-pdf")
+    public ResponseEntity<byte[]> generateAnalyticsPDF(@PathVariable Integer eventId) {
+        Event event = eventService.findById(eventId);
+        if (event == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
+        byte[] pdf = pdfGeneratorService.generateEventAnalyticsPDF(event);
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=event-analytics.pdf")
+                .body(pdf);
+    }
 }
