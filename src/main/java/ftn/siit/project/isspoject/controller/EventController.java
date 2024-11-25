@@ -17,5 +17,22 @@ public class EventController {
     @Autowired
     private PDFGeneratorService pdfGeneratorService;
 
+    @GetMapping("/{eventId}/details")
+    public ResponseEntity<EventDTO> getEvent(@PathVariable Integer eventId) {
+        Event event = eventService.findById(eventId);
+        if (event == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        EventDTO eventDTO = new EventDTO();
+        eventDTO.setName(event.getName());
+        eventDTO.setDescription(event.getDescription());
+        eventDTO.setPlace(event.getPlace());
+        eventDTO.setDate(event.getDate());
+        eventDTO.setMaxParticipants(event.getMaxParticipants());
+        eventDTO.setIsPublic(event.getIsPublic());
+
+        return new ResponseEntity<>(eventDTO, HttpStatus.OK);
+    }
 
 }
