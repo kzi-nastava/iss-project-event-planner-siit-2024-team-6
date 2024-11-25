@@ -13,8 +13,8 @@ import java.util.List;
 @Service
 public class EventServiceImpl implements EventService{
 
-    @Autowired
-    private EventRepository eventRepository;
+    //@Autowired
+    //private EventRepository eventRepository;
 
     @Override
     public List<Event> findAll() { return null;}
@@ -55,7 +55,7 @@ public class EventServiceImpl implements EventService{
         event.setDate(eventDTO.getDate());
         event.setMaxParticipants(eventDTO.getMaxParticipants());
 
-        Event savedEvent = eventRepository.save(event);
+        //Event savedEvent = eventRepository.save(event);
 
         sendInvitations("",eventDTO.getEmails());
     }
