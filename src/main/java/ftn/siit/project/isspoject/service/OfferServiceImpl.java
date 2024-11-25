@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.service;
 
+import ftn.siit.project.isspoject.dto.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.Offer;
 import ftn.siit.project.isspoject.entity.Provider;
 import ftn.siit.project.isspoject.repository.OfferRepository;
@@ -12,6 +13,19 @@ public class OfferServiceImpl implements OfferService {
 
     //@Autowired
     //private OfferRepository offerRepository;
+
+    @Override
+    public List<PriceListOfferDTO> getPriceList(List<Offer> offers) {
+        return List.of();
+    }
+
+    @Override
+    public Offer updatePrice(PriceListOfferDTO priceListOfferDTO) {
+        Offer offer = findById(priceListOfferDTO.getId());
+        offer.setPrice(priceListOfferDTO.getPrice());
+        offer.setSale(priceListOfferDTO.getSale());
+        return update(offer);
+    }
 
     @Override
     public List<Offer> findAll() {
@@ -38,8 +52,8 @@ public class OfferServiceImpl implements OfferService {
     }
 
     @Override
-    public void update(Offer offer) {
-
+    public Offer update(Offer offer) {
+        return null;
     }
 
     @Override

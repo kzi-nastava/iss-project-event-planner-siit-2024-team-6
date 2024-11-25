@@ -2,15 +2,14 @@ package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.EventDTO;
 import ftn.siit.project.isspoject.dto.OfferDTO;
+import ftn.siit.project.isspoject.dto.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.Offer;
-import ftn.siit.project.isspoject.service.EventService;
-import ftn.siit.project.isspoject.service.OfferService;
+import ftn.siit.project.isspoject.entity.Provider;
+import ftn.siit.project.isspoject.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +21,12 @@ public class OfferController {
 
     @Autowired
     private OfferService offerService;
+    @Autowired
+    private OfferHistoryService offerHistoryService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private OfferServiceImpl offerServiceImpl;
 
     @GetMapping("/all")
     public ResponseEntity<List<OfferDTO>> getAll() {
@@ -47,5 +52,21 @@ public class OfferController {
                 .map(OfferDTO::new)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
+    }
+
+    @PutMapping("/update-price")
+    public ResponseEntity<PriceListOfferDTO> updatePrice(@RequestBody PriceListOfferDTO dto) {
+        Offer updatedOffer = offerService.updatePrice(dto);
+        // add implementation of updating the offer in the list of its provider's offers
+        offerHistoryService.add(offerService.findById(dto.getId()));
+        return ResponseEntity.ok(new PriceListOfferDTO(updatedOffer));
+    }
+
+    @GetMapping("/price-list/{providerId}")
+    public ResponseEntity<List<PriceListOfferDTO>> getPriceList(@PathVariable Integer providerId) {
+        Provider provider = (Provider) userService.findById(providerId);
+        List<PriceListOfferDTO> prices = offerService.getPriceList(provider.getMyOffers());
+        if (prices.isEmpty()) {return ResponseEntity.noContent().build();}
+        return ResponseEntity.ok(prices);
     }
 }
