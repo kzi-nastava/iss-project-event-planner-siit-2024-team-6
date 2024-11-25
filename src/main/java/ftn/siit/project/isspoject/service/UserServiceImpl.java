@@ -17,8 +17,6 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService{
 
-    @Autowired
-    private UserRepository userRepository;
     // dependency inversion
 //    private final UserRepository userRepository;
 //    @Autowired
@@ -108,22 +106,22 @@ public class UserServiceImpl implements UserService{
     }
     @Override
     public void updateRole(Integer userId, String newRole){
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User with ID " + userId + " not found"));
-
-        // Check and update the role
-        if ("Provider".equalsIgnoreCase(newRole)) {
-            if (!(user instanceof Provider)) {
-                Provider provider = new Provider(user); // Transform User into Provider
-                userRepository.save(provider);
-            }
-        } else if ("Organizer".equalsIgnoreCase(newRole)) {
-            if (!(user instanceof Organizer)) {
-                Organizer organizer = new Organizer(user); // Transform User into Organizer
-                userRepository.save(organizer);
-            }
-        } else {
-            throw new IllegalArgumentException("Invalid role: " + newRole + ". Allowed roles are 'Provider' or 'Organizer'.");
-        }
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new NotFoundException("User with ID " + userId + " not found"));
+//
+//        // Check and update the role
+//        if ("Provider".equalsIgnoreCase(newRole)) {
+//            if (!(user instanceof Provider)) {
+//                Provider provider = new Provider(user); // Transform User into Provider
+//                userRepository.save(provider);
+//            }
+//        } else if ("Organizer".equalsIgnoreCase(newRole)) {
+//            if (!(user instanceof Organizer)) {
+//                Organizer organizer = new Organizer(user); // Transform User into Organizer
+//                userRepository.save(organizer);
+//            }
+//        } else {
+//            throw new IllegalArgumentException("Invalid role: " + newRole + ". Allowed roles are 'Provider' or 'Organizer'.");
+//        }
     }
 }

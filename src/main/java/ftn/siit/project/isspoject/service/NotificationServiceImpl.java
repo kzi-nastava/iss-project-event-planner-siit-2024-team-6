@@ -11,8 +11,8 @@ import java.util.List;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
-    @Autowired
-    private NotificationRepository notificationRepository;
+    //@Autowired
+    //private NotificationRepository notificationRepository;
 
 
     @Override

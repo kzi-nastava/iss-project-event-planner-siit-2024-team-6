@@ -10,8 +10,8 @@ import java.util.List;
 @Service
 public class OfferServiceImpl implements OfferService {
 
-    @Autowired
-    private OfferRepository offerRepository;
+    //@Autowired
+    //private OfferRepository offerRepository;
 
     @Override
     public List<Offer> findAll() {

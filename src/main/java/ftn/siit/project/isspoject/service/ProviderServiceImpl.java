@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProviderServiceImpl implements ProviderService {
 
-    @Autowired
-    private ProviderRepository providerRepository;
+    //@Autowired
+    //private ProviderRepository providerRepository;
 
     @Override
     public Provider findByOffer(Offer offer) {
