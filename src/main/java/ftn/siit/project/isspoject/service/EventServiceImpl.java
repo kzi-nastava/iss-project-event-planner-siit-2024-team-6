@@ -2,6 +2,7 @@ package ftn.siit.project.isspoject.service;
 
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.Organizer;
+import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,5 +38,10 @@ public class EventServiceImpl implements EventService{
     @Override
     public void delete(Event event) {
 
+    }
+
+    @Override
+    public List<Event> getEventsUserAttends(Integer userId) {
+        return List.of();
     }
 }

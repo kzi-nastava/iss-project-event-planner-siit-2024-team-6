@@ -2,6 +2,7 @@ package ftn.siit.project.isspoject.service;
 
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.Organizer;
+import ftn.siit.project.isspoject.entity.User;
 
 import java.util.List;
 
@@ -15,5 +16,6 @@ public interface EventService {
 
     Event save(Event event);
     void delete(Event event);
+    List<Event> getEventsUserAttends(Integer userId);
 
 }
