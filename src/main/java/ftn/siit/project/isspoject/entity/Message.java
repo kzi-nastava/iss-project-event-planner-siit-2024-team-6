@@ -13,6 +13,7 @@ public class Message {
     private ZonedDateTime time;
     private User sender;
     private User receiver;
+    public Message(){}
     public Message (MessageDTO dto, User sender, User receiver) {
         this.id = dto.getId();
         this.text = dto.getText();

@@ -13,6 +13,8 @@ public class Budget {
      private List<Double> currentPrices;
      private List<Category> categories;
 
+     public Budget() {}
+
      public Budget (BudgetDTO budgetDTO, List<Category> categories) {
           this.id = budgetDTO.getId();
           this.maxPrices = budgetDTO.getMaxPrices();

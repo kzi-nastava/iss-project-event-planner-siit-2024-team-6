@@ -11,6 +11,8 @@ public class PriceListOfferDTO {
     Double sale;
     Double salePrice;
 
+    public PriceListOfferDTO() {}
+
     public PriceListOfferDTO(Offer offer) {
         this.id = offer.getId();
         this.name = offer.getName();
