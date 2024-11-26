@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "api/reactions")
+@RequestMapping(value = "/api/reactions/")
 public class ReactionController {
 
     @Autowired
@@ -23,7 +23,7 @@ public class ReactionController {
     @Autowired
     private ProviderService providerService;
 
-    @PostMapping("/add")
+    @PostMapping("add")
     public ResponseEntity<Reaction> addReaction(@RequestBody Reaction reaction) {
         Reaction savedReaction = reactionService.save(reaction);
 

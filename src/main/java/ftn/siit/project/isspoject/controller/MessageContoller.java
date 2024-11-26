@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "api/messages")
+@RequestMapping(value = "/api/messages/")
 public class MessageContoller {
     @Autowired
     private MessageService messageService;
     @Autowired
     private UserService userService;
 
-    @PostMapping("/send/{senderId}/{recieverId}")
+    @PostMapping("{senderId}/send/{recieverId}")
     public ResponseEntity<String> sendMessage(@RequestBody MessageDTO messageDTO, @PathVariable Integer senderId, @PathVariable Integer recieverId) {
         messageService.save(new Message(messageDTO, userService.findById(senderId), userService.findById(recieverId)));
         return ResponseEntity.ok("Message sent successfully");

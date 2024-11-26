@@ -36,8 +36,7 @@ public class UserController {
         return new ResponseEntity<>("User was registered, check out the activation code", HttpStatus.CREATED);
     }
 
-
-    @PostMapping("/quick-register")
+    @PostMapping("quick-register")
     public ResponseEntity<String> quicklyRegisterUser(@RequestBody QuickRegistrationDTO requestDTO) {
         if (requestDTO.getEmail() == null) {
             return new ResponseEntity<>("Error, invalid user", HttpStatus.BAD_REQUEST);
@@ -46,7 +45,7 @@ public class UserController {
         return new ResponseEntity<>("User was quickly registered, check out the activation code", HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     public ResponseEntity<UserDTO> getProfile(@PathVariable Integer id) {
         User user = userService.findById(id);
         if (user == null) {
@@ -111,8 +110,8 @@ public class UserController {
         userService.save(user);
         return new ResponseEntity<>("Profile updated successfully", HttpStatus.OK);
     }
-
-    @PutMapping("/{id}/change-password")
+  
+    @PutMapping("{id}/change-password")
     public ResponseEntity<String> changePassword(@PathVariable Integer id, @RequestBody PasswordChangeDTO passwordChangeDTO) {
         User user = userService.findById(id);
         if (user == null) {
@@ -221,14 +220,14 @@ public class UserController {
         return new ResponseEntity<>("User deactivated", HttpStatus.OK);
     }
 
-    @PutMapping("/{id}/update-role")
+    @PutMapping("{id}/update-role")
     public ResponseEntity<String> updateRole(@PathVariable Integer id, @RequestParam String newRole) {
         userService.updateRole(id, newRole);
         return ResponseEntity.ok("User successfully updated to " + newRole);
 
     }
 
-    @GetMapping("/{id}/attends")
+    @GetMapping("{id}/attends")
     public ResponseEntity<List<Event>> getUserEvents(@PathVariable Integer id) {
         List<Event> events = eventService.getEventsUserAttends(id);
         return ResponseEntity.ok(events);

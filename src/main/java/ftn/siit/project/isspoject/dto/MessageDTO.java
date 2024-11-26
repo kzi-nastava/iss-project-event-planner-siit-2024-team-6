@@ -14,6 +14,8 @@ public class MessageDTO {
     private String text;
     private ZonedDateTime time;
 
+    public MessageDTO() {}
+
     public MessageDTO(Message message) {
         this.id = message.getId();
         this.text = message.getText();

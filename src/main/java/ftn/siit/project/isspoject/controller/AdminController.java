@@ -10,6 +10,7 @@ import ftn.siit.project.isspoject.service.PDFGeneratorService;
 import ftn.siit.project.isspoject.dto.CategorySuggestionDTO;
 import ftn.siit.project.isspoject.entity.Category;
 import ftn.siit.project.isspoject.entity.Report;
+import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.CategoryService;
 import ftn.siit.project.isspoject.service.OfferService;
 import ftn.siit.project.isspoject.service.ReportService;
@@ -54,9 +55,13 @@ public class AdminController {
         eventTypeService.save(eventType);
         return new ResponseEntity<>("Event type added successfully", HttpStatus.CREATED);
     }
+
     @GetMapping("event-types/all")
     public ResponseEntity<List<EventTypeDTO>> getAllEventTypes() {
         List<EventType> eventTypes = eventTypeService.findAll();
+        if (eventTypes == null) {
+            return ResponseEntity.noContent().build();
+        }
         List<EventTypeDTO> eventTypeDTOs = eventTypes.stream().map(eventType -> {
             EventTypeDTO dto = new EventTypeDTO();
             dto.setName(eventType.getName());
@@ -74,14 +79,15 @@ public class AdminController {
             @RequestBody EventTypeDTO eventTypeDTO) {
         EventType eventType = eventTypeService.findById(id);
         if (eventType == null) {
-            return new ResponseEntity<>("Event type not found", HttpStatus.NOT_FOUND);
+           return new ResponseEntity<>("Event type not found", HttpStatus.NOT_FOUND);
         }
-
+        System.out.println("Updating event type with ID " + id);
         eventType.setDescription(eventTypeDTO.getDescription());
         eventTypeService.save(eventType);
 
         return new ResponseEntity<>("Event type updated successfully", HttpStatus.OK);
     }
+
     @PutMapping("event-types/{id}/activate")
     public ResponseEntity<String> activateEventType(@PathVariable Integer id) {
         EventType eventType = eventTypeService.findById(id);
@@ -93,6 +99,7 @@ public class AdminController {
         eventTypeService.save(eventType);
         return new ResponseEntity<>("Event type activated", HttpStatus.OK);
     }
+
     @PutMapping("event-types/{id}/deactivate")
     public ResponseEntity<String> deactivateEventType(@PathVariable Integer id) {
         EventType eventType = eventTypeService.findById(id);
@@ -134,34 +141,43 @@ public class AdminController {
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename=event-analytics.pdf")
                 .body(pdf);
+    }
     @GetMapping("categories/all")
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = categoryService.findAll();
-        if(categories.isEmpty()) {return ResponseEntity.noContent().build();}
+        if (categories.isEmpty()) {
+          return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(categories);
     }
 
     @PostMapping("categories/add")
-    public ResponseEntity<String> createCategory(@RequestBody Category category){
+    public ResponseEntity<String> createCategory(@RequestBody Category category) {
         categoryService.save(category);
         return ResponseEntity.ok("Category created successfully");
     }
 
     @PutMapping("categories/update")
-    public ResponseEntity<Category> updateCategory(@RequestBody Category category){
+    public ResponseEntity<Category> updateCategory(@RequestBody Category category) {
         Category oldCategory = categoryService.findById(category.getId());
-        if(oldCategory == null) {return ResponseEntity.status(HttpStatus.NOT_FOUND).build();}
+        if (oldCategory == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
         oldCategory.setName(category.getName());
         oldCategory.setDescription(category.getDescription());
         Category updated = categoryService.update(oldCategory);
         return ResponseEntity.ok(updated);
     }
 
-    @PutMapping("categories/delete")
-    public ResponseEntity<String> deleteCategory(@RequestBody Category category){
+    @DeleteMapping("categories/delete")
+    public ResponseEntity<String> deleteCategory(@RequestBody Category category) {
         Category oldCategory = categoryService.findById(category.getId());
-        if(oldCategory == null) {return ResponseEntity.status(HttpStatus.NOT_FOUND).build();}
-        if(!offerService.allOffersWithCategory(oldCategory).isEmpty()){return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The category must not have any offers using it.");}
+        if (oldCategory == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        if (!offerService.allOffersWithCategory(oldCategory).isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The category must not have any offers using it.");
+        }
         categoryService.delete(oldCategory);
         return ResponseEntity.ok("Category deleted successfully");
     }
@@ -169,15 +185,26 @@ public class AdminController {
     @GetMapping("categories/suggestions")
     public ResponseEntity<List<CategorySuggestionDTO>> getAllCategoriesSuggestions() {
         List<Report> suggestions = reportService.findAllCategorySuggestions();
-        if(suggestions.isEmpty()) {return ResponseEntity.noContent().build();}
+        if (suggestions.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(suggestions.stream().map(CategorySuggestionDTO::new).collect(Collectors.toList()));
     }
 
     @PutMapping("categpries/suggestions/update")
     public ResponseEntity<String> updateCategorySuggestion(@RequestBody CategorySuggestionDTO categorySuggestionDTO) {
         Report report = reportService.findById(categorySuggestionDTO.getId());
-        if(report == null) {return ResponseEntity.status(HttpStatus.NOT_FOUND).build();}
+        if (report == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
         reportService.update(report);
         return ResponseEntity.ok("Category suggestion updated successfully");
+    }
+    @DeleteMapping("categpries/suggestions/delete")
+    public ResponseEntity<String> deleteCategorySuggestion(@RequestBody CategorySuggestionDTO categorySuggestionDTO) {
+        Report report = reportService.findById(categorySuggestionDTO.getId());
+        if (report == null) {throw new NotFoundException("Category suggestion not found");}
+        reportService.delete(report.getId());
+        return ResponseEntity.ok("Category suggestion deleted successfully");
     }
 }
