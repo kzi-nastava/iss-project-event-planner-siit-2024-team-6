@@ -4,6 +4,7 @@ import ftn.siit.project.isspoject.entity.Report;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 @Service
 public class ReportServiceImpl implements ReportService {
     @Override

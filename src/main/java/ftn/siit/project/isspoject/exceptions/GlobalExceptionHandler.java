@@ -2,8 +2,10 @@ package ftn.siit.project.isspoject.exceptions;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.time.LocalDateTime;
@@ -19,6 +21,17 @@ public class GlobalExceptionHandler {
                         "timestamp", LocalDateTime.now(),
                         "message", ex.getMessage(),
                         "status", HttpStatus.NOT_FOUND.value()
+                )
+        );
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidJson(HttpMessageNotReadableException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                Map.of(
+                        "timestamp", LocalDateTime.now(),
+                        "message", "Invalid request body: " + ex.getMessage(),
+                        "status", HttpStatus.BAD_REQUEST.value()
                 )
         );
     }
@@ -56,3 +69,4 @@ public class GlobalExceptionHandler {
         );
     }
 }
+

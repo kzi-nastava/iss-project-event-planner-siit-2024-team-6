@@ -13,7 +13,8 @@ import java.util.List;
 public class NotificationServiceImpl implements NotificationService {
     //@Autowired
     //private NotificationRepository notificationRepository;
-
+    @Override
+    public void notifyAdmin(String s) {}
 
     @Override
     public Notification findById(Integer id) {

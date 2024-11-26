@@ -1,5 +1,4 @@
 package ftn.siit.project.isspoject.service;
-
 import ftn.siit.project.isspoject.entity.Notification;
 import ftn.siit.project.isspoject.entity.User;
 
@@ -10,6 +9,7 @@ public interface NotificationService {
     Notification findById(Integer id);
 
     List<Notification> findByRecipient(User recipient);
+    void notifyAdmin(String s);
 
     void save(Notification notification);
 
