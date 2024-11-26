@@ -130,7 +130,7 @@ public class AdminController {
         return ResponseEntity.ok(updated);
     }
 
-    @PutMapping("categories/delete")
+    @DeleteMapping("categories/delete")
     public ResponseEntity<String> deleteCategory(@RequestBody Category category) {
         Category oldCategory = categoryService.findById(category.getId());
         if (oldCategory == null) {
@@ -160,5 +160,12 @@ public class AdminController {
         }
         reportService.update(report);
         return ResponseEntity.ok("Category suggestion updated successfully");
+    }
+    @DeleteMapping("categpries/suggestions/delete")
+    public ResponseEntity<String> deleteCategorySuggestion(@RequestBody CategorySuggestionDTO categorySuggestionDTO) {
+        Report report = reportService.findById(categorySuggestionDTO.getId());
+        if (report == null) {throw new NotFoundException("Category suggestion not found");}
+        reportService.delete(report.getId());
+        return ResponseEntity.ok("Category suggestion deleted successfully");
     }
 }

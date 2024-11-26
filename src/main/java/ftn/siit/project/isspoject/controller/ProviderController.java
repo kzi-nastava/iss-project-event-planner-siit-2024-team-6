@@ -55,7 +55,7 @@ public class ProviderController {
         providerService.update(provider);
         return ResponseEntity.ok().body(new OfferDTO(updated));
     }
-    @PutMapping("offers/{providerId}/delete/{offerId}")
+    @DeleteMapping("offers/{providerId}/delete/{offerId}")
     public ResponseEntity<String> deleteOffer(@PathVariable int providerId, @PathVariable int offerId) {
         Provider provider = providerService.findById(providerId);
         if(provider == null) {throw new NotFoundException("Provider not found.");}
