@@ -15,4 +15,5 @@ public interface ReactionService {
 
     Reaction save(Reaction reaction);
     void delete(Reaction reaction);
+    List<Reaction> getPendingReactions();
 }
