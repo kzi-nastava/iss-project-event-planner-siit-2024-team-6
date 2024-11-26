@@ -40,7 +40,6 @@ public class AdminController {
         EventType eventType = new EventType();
         eventType.setName(eventTypeDTO.getName());
         eventType.setDescription(eventTypeDTO.getDescription());
-        eventType.setCategories(eventTypeDTO.getCategories());
         eventType.setIsDeleted(false);
 
         eventTypeService.save(eventType);
@@ -70,7 +69,6 @@ public class AdminController {
         }
 
         eventType.setDescription(eventTypeDTO.getDescription());
-        eventType.setCategories(eventTypeDTO.getCategories());
         eventTypeService.save(eventType);
 
         return new ResponseEntity<>("Event type updated successfully", HttpStatus.OK);
