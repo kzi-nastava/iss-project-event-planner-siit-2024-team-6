@@ -26,6 +26,7 @@ public class OrganizerController {
     private OrganizerService organizerService;
     @Autowired
     private PDFGeneratorService pdfGeneratorService;
+
     @PostMapping("events/create")
     public ResponseEntity<String> createEvent(@RequestParam Integer organizerId, @RequestBody EventDTO eventDTO) {
         Organizer organizer = organizerService.findById(organizerId);

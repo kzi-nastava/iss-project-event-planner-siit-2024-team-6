@@ -41,6 +41,6 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public Reservation save(ReservationDTO reservationDTO) {
-        return null;
+        return new Reservation();
     }
 }

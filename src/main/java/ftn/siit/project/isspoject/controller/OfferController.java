@@ -32,9 +32,6 @@ public class OfferController {
     @GetMapping("all")
     public ResponseEntity<List<OfferDTO>> getAll() {
         List<Offer> offers = offerService.findAll();
-        if (offers.isEmpty()) {
-            return ResponseEntity.noContent().build();  //error 204
-        }
 
         List<OfferDTO> dtos = offers.stream()
                 .map(OfferDTO::new)
@@ -45,9 +42,6 @@ public class OfferController {
     @GetMapping("top-five")
     public ResponseEntity<List<OfferDTO>> getTopFive() {
         List<Offer> offers = offerService.findTopFive();
-        if (offers.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
 
         List<OfferDTO> dtos = offers.stream()
                 .map(OfferDTO::new)

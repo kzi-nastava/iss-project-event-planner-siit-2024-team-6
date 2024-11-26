@@ -14,4 +14,5 @@ public class Reaction {
     private Offer offer;
     private Event event;
     private User user;
+    private boolean isDeleted = false;
 }

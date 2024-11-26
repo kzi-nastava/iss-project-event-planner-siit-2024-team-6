@@ -1,6 +1,7 @@
 package ftn.siit.project.isspoject.service;
 
 import ftn.siit.project.isspoject.dto.RegistrationRequestDTO;
+import ftn.siit.project.isspoject.entity.Block;
 import ftn.siit.project.isspoject.entity.User;
 
 import java.util.List;
@@ -22,5 +23,7 @@ public interface UserService {
     // Za SRP i OCP
 
     List<User> findEventAttendees(Integer eventId);
-    public void updateRole(Integer userId, String newRole);
+    void updateRole(Integer userId, String newRole);
+    Block blockUser(Integer blockerId, Integer blockedId);
+    User suspendUser(Integer userId);
 }

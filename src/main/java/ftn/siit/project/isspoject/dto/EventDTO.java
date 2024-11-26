@@ -20,16 +20,17 @@ public class EventDTO {
 
     public EventDTO() {}
     public EventDTO(Event event) {
-        if (event != null) {
-            this.id = event.getId();
-            this.name = event.getName();
-            this.description = event.getDescription();
-            this.maxParticipants = event.getMaxParticipants();
-            this.participants = event.getParticipants();
-            this.isPublic = event.getIsPublic();
-            this.place = event.getPlace();
-            this.date = event.getDate();
-            this.eventType = event.getEventType();
+        if (event == null) {
+            throw new IllegalArgumentException("Event cannot be null");
         }
+        this.id = event.getId();
+        this.name = event.getName();
+        this.description = event.getDescription();
+        this.maxParticipants = event.getMaxParticipants();
+        this.participants = event.getParticipants();
+        this.isPublic = event.getIsPublic();
+        this.place = event.getPlace();
+        this.date = event.getDate();
+        this.eventType = event.getEventType();
     }
 }

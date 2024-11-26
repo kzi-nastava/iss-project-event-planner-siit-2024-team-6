@@ -3,6 +3,7 @@ import ftn.siit.project.isspoject.dto.ClosedEventDTO;
 import ftn.siit.project.isspoject.dto.EventDTO;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.User;
+import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.EventService;
 import ftn.siit.project.isspoject.service.PDFGeneratorService;
 import ftn.siit.project.isspoject.service.NotificationService;
@@ -15,7 +16,8 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-@RequestMapping("/api/events/")
+@RestController 
+@RequestMapping(value = "/api/events/")
 public class EventController {
 
     @Autowired
@@ -66,7 +68,6 @@ public class EventController {
         if (user == null) {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
         }
-
         Event event = eventService.findById(eventId);
         if (event == null) {
             return new ResponseEntity<>("Event not found", HttpStatus.NOT_FOUND);
@@ -101,14 +102,13 @@ public class EventController {
         userService.save(user);
 
         return new ResponseEntity<>("Event removed from favorites", HttpStatus.OK);
-
-
+    }
     @GetMapping("{id}")
     public ResponseEntity<EventDTO> getEvent(@PathVariable int id) {
         Event event = eventService.findById(id);
 
         if (event == null) {
-            return ResponseEntity.notFound().build();
+            throw new NotFoundException("Event with id " + id + " not found");
         }
 
         EventDTO dto = new EventDTO(event);
@@ -119,10 +119,6 @@ public class EventController {
     @GetMapping("all")
     public ResponseEntity<List<EventDTO>> getAll() {
         List<Event> events = eventService.findAll();
-        if (events == null) {
-            return ResponseEntity.noContent().build();
-        }
-
         List<EventDTO> dtos = eventService.findAll().stream()
                 .map(EventDTO::new)
                 .toList();
@@ -132,9 +128,6 @@ public class EventController {
     @GetMapping("top-five")
     public ResponseEntity<List<EventDTO>> getTopFive() {
         List<Event> events = eventService.findAll();
-        if (events == null) {
-            return ResponseEntity.noContent().build();
-        }
 
         List<EventDTO> dtos = eventService.findAll().stream()
                 .map(EventDTO::new)
@@ -151,7 +144,7 @@ public class EventController {
     public ResponseEntity<EventDTO>  updateEvent(@PathVariable int id, @RequestBody EventDTO dto) {
         Event existingEvent = eventService.findById(id);
         if (existingEvent == null) {
-            return ResponseEntity.notFound().build();
+            throw new NotFoundException("Event with id " + id + " not found, can't be updated");
         }
 
         existingEvent.setName(dto.getName());

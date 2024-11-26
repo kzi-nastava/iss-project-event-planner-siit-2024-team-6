@@ -27,10 +27,6 @@ public class NotificationController {
 
         List<Notification> notifications = notificationService.findByRecipient(recipient);
 
-        if (notifications.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
         List<NotificationDTO> dtos = notifications.stream()
                 .map(NotificationDTO::new)
                 .toList();

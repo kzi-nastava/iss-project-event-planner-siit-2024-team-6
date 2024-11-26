@@ -14,3 +14,4 @@ public interface ReportService {
     List<Report> findAllCategorySuggestions();
     Report findById(Integer id);
 }
+
