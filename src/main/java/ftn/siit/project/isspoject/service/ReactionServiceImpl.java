@@ -44,4 +44,8 @@ public class ReactionServiceImpl implements ReactionService {
     public void delete(Reaction reaction) {
 
     }
+    public List<Reaction> getPendingReactions() {
+        return null;
+        //return reactionRepository.findByStatus(Status.PENDING);
+    }
 }
