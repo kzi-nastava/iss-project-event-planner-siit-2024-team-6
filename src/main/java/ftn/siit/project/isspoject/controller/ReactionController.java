@@ -57,16 +57,17 @@ public class ReactionController {
 
         return ResponseEntity.ok(updatedReaction);
     }
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteReaction(@PathVariable Integer id) {
+    @PostMapping("/delete/{id}")
+    public ResponseEntity<Reaction> deleteReaction(@PathVariable Integer id) {
         Reaction reaction = reactionService.findById(id);
         if (reaction == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Reaction not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        reactionService.delete(reaction);
+        reaction.setDeleted(true);
+        Reaction updatedReaction = reactionService.save(reaction);
 
-        return ResponseEntity.ok("Reaction deleted successfully.");
+        return ResponseEntity.ok(updatedReaction);
     }
 
     @GetMapping("/pending")
