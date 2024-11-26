@@ -58,7 +58,7 @@ public class ReactionController {
 
         return ResponseEntity.ok(updatedReaction);
     }
-    @PutMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Reaction> deleteReaction(@PathVariable Integer id) {
         Reaction reaction = reactionService.findById(id);
         if (reaction == null) {
