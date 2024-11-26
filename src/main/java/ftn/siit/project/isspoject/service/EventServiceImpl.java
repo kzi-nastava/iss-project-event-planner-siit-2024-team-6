@@ -1,16 +1,27 @@
 package ftn.siit.project.isspoject.service;
 
+import ftn.siit.project.isspoject.dto.ClosedEventDTO;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.Organizer;
+import ftn.siit.project.isspoject.entity.User;
+import ftn.siit.project.isspoject.repository.EventRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class EventServiceImpl implements EventService{
-    @Override
-    public void save(Event event) {
 
+    //@Autowired
+    //private EventRepository eventRepository;
+
+    @Override
+    public List<Event> findAll() { return null;}
+
+    @Override
+    public Event findById(Integer eventId) {
+        return null;
     }
 
     @Override
@@ -19,12 +30,34 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    public Event findById(Integer eventId) {
-        return null;
-    }
+    public List<Event> findTopFive() { return null;}
+
+
+    @Override
+    public Event save(Event event) { return null;}
 
     @Override
     public void delete(Event event) {
 
     }
+
+    @Override
+    public List<Event> getEventsUserAttends(Integer userId) {
+        return List.of();
+    }
+
+    public void addClosedEvent(ClosedEventDTO eventDTO) {
+        Event event = new Event();
+        event.setIsPublic(eventDTO.getIsPublic());
+        event.setName(eventDTO.getName());
+        event.setDescription(eventDTO.getDescription());
+        event.setPlace(eventDTO.getPlace());
+        event.setDate(eventDTO.getDate());
+        event.setMaxParticipants(eventDTO.getMaxParticipants());
+
+        //Event savedEvent = eventRepository.save(event);
+
+        sendInvitations("",eventDTO.getEmails());
+    }
+    private void sendInvitations(String text,List<String> emails) {}
 }

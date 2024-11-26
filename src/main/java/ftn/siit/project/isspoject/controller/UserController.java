@@ -1,9 +1,12 @@
 package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.*;
+import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.Organizer;
 import ftn.siit.project.isspoject.entity.Provider;
 import ftn.siit.project.isspoject.entity.User;
+import ftn.siit.project.isspoject.exceptions.NotFoundException;
+import ftn.siit.project.isspoject.service.EventService;
 import ftn.siit.project.isspoject.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +24,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private EventService eventService;
 
     @PostMapping("register")
     public ResponseEntity<String> registerUser(@RequestBody RegistrationRequestDTO registrationRequestDTO) {
@@ -31,7 +36,17 @@ public class UserController {
         return new ResponseEntity<>("User was registered, check out the activation code", HttpStatus.CREATED);
     }
 
-    @GetMapping("{id}")
+
+    @PostMapping("/quick-register")
+    public ResponseEntity<String> quicklyRegisterUser(@RequestBody QuickRegistrationDTO requestDTO) {
+        if (requestDTO.getEmail() == null) {
+            return new ResponseEntity<>("Error, invalid user", HttpStatus.BAD_REQUEST);
+        }
+        userService.save(requestDTO.toUser());
+        return new ResponseEntity<>("User was quickly registered, check out the activation code", HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getProfile(@PathVariable Integer id) {
         User user = userService.findById(id);
         if (user == null) {
@@ -96,17 +111,23 @@ public class UserController {
         userService.save(user);
         return new ResponseEntity<>("Profile updated successfully", HttpStatus.OK);
     }
-    @PutMapping("{id}/change-password")
-    public ResponseEntity<String> changePassword(@PathVariable Integer id, @RequestBody String newPassword) {
+
+    @PutMapping("/{id}/change-password")
+    public ResponseEntity<String> changePassword(@PathVariable Integer id, @RequestBody PasswordChangeDTO passwordChangeDTO) {
         User user = userService.findById(id);
         if (user == null) {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
         }
-        if (user.getPassword().equals(newPassword)) {
-            return new ResponseEntity<>("New password matches the old one", HttpStatus.BAD_REQUEST);
+        if (!user.getPassword().equals(passwordChangeDTO.getOldPassword())) {
+            return new ResponseEntity<>("Wrong password", HttpStatus.FORBIDDEN);
         }
-
-        user.setPassword(newPassword);
+        if (!passwordChangeDTO.getNewPasswordFirst().equals(passwordChangeDTO.getOldPassword())) {
+            return new ResponseEntity<>("New password matches the old one!", HttpStatus.FORBIDDEN);
+        }
+        if (!passwordChangeDTO.getNewPasswordFirst().equals(passwordChangeDTO.getNewPasswordSecond())) {
+            return new ResponseEntity<>("Bad new-password confirmation", HttpStatus.FORBIDDEN);
+        }
+        user.setPassword(passwordChangeDTO.getNewPasswordFirst());
 
         userService.save(user);
         return new ResponseEntity<>("Password changed successfully", HttpStatus.OK);
@@ -198,5 +219,18 @@ public class UserController {
         }
         userService.delete(user);
         return new ResponseEntity<>("User deactivated", HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/update-role")
+    public ResponseEntity<String> updateRole(@PathVariable Integer id, @RequestParam String newRole) {
+        userService.updateRole(id, newRole);
+        return ResponseEntity.ok("User successfully updated to " + newRole);
+
+    }
+
+    @GetMapping("/{id}/attends")
+    public ResponseEntity<List<Event>> getUserEvents(@PathVariable Integer id) {
+        List<Event> events = eventService.getEventsUserAttends(id);
+        return ResponseEntity.ok(events);
     }
 }

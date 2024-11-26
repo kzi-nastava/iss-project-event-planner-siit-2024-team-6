@@ -20,4 +20,7 @@ public interface UserService {
 
     void save(User user);
     // Za SRP i OCP
+
+    List<User> findEventAttendees(Integer eventId);
+    public void updateRole(Integer userId, String newRole);
 }
