@@ -35,8 +35,7 @@ public class OfferDTO {
     private int latestReservation;
     private int latestCancelation;
 
-    public OfferDTO() {
-    }
+    public OfferDTO() {}
 
     public OfferDTO(Offer offer) {
         if (offer != null) {
@@ -68,3 +67,4 @@ public class OfferDTO {
         }
     }
 }
+

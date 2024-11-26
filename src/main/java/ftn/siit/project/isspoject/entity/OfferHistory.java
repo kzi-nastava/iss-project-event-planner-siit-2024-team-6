@@ -1,7 +1,9 @@
 package ftn.siit.project.isspoject.entity;
-
+import java.time.ZonedDateTime;
 import java.util.List;
 
 public class OfferHistory {
-    private List<Offer> offers;
+    Integer id;
+    List<Offer> offers;
+    List<ZonedDateTime> timestamps; 
 }
