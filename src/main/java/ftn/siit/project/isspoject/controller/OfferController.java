@@ -55,6 +55,13 @@ public class OfferController {
         return ResponseEntity.ok(dtos);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<OfferDTO> get(@PathVariable int id) {
+        Offer offer = offerService.findById(id);
+        if (offer == null) {return ResponseEntity.notFound().build();}
+        return ResponseEntity.ok(new OfferDTO(offer));
+    }
+
     @PutMapping("/update-price")
     public ResponseEntity<PriceListOfferDTO> updatePrice(@RequestBody PriceListOfferDTO dto) {
         Offer updatedOffer = offerService.updatePrice(dto);
