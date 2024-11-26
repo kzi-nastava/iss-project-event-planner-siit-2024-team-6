@@ -1,8 +1,10 @@
 package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.EventTypeDTO;
+import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.service.EventTypeService;
+import ftn.siit.project.isspoject.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +16,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "api/admins")
+@RequestMapping(value = "api/admins/")
 public class AdminController {
     @Autowired
     private EventTypeService eventTypeService;
+    @Autowired
+    private UserService userService;
 
     @PostMapping("event-types/add")
     public ResponseEntity<String> addEventType(@RequestBody EventTypeDTO eventTypeDTO) {
@@ -85,5 +89,11 @@ public class AdminController {
         eventType.setIsDeleted(true);
         eventTypeService.save(eventType);
         return new ResponseEntity<>("Event type deactivated", HttpStatus.OK);
+    }
+
+    @PostMapping("suspend/{id}")
+    public ResponseEntity<User> suspendUser(@PathVariable Integer id) {
+        User suspendedUser = userService.suspendUser(id);
+        return ResponseEntity.ok(suspendedUser);
     }
 }

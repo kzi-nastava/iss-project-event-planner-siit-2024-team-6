@@ -25,4 +25,5 @@ public interface UserService {
     List<User> findEventAttendees(Integer eventId);
     void updateRole(Integer userId, String newRole);
     Block blockUser(Integer blockerId, Integer blockedId);
+    User suspendUser(Integer userId);
 }
