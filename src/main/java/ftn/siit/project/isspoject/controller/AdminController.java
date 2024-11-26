@@ -1,12 +1,16 @@
 package ftn.siit.project.isspoject.controller;
 
-import ftn.siit.project.isspoject.dto.CategorySuggestionDTO;
+import ftn.siit.project.isspoject.dto.EventDTO;
 import ftn.siit.project.isspoject.dto.EventTypeDTO;
-import ftn.siit.project.isspoject.entity.Category;
+import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.EventType;
+import ftn.siit.project.isspoject.service.EventService;
+import ftn.siit.project.isspoject.service.EventTypeService;
+import ftn.siit.project.isspoject.service.PDFGeneratorService;
+import ftn.siit.project.isspoject.dto.CategorySuggestionDTO;
+import ftn.siit.project.isspoject.entity.Category;
 import ftn.siit.project.isspoject.entity.Report;
 import ftn.siit.project.isspoject.service.CategoryService;
-import ftn.siit.project.isspoject.service.EventTypeService;
 import ftn.siit.project.isspoject.service.OfferService;
 import ftn.siit.project.isspoject.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +24,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "api/admins")
+@RequestMapping(value = "/api/admins/")
 public class AdminController {
+
     @Autowired
     private EventTypeService eventTypeService;
+    @Autowired
+    private EventService eventService;
+    @Autowired
+    private PDFGeneratorService pdfGeneratorService;
     @Autowired
     private CategoryService categoryService;
     @Autowired
@@ -95,6 +104,36 @@ public class AdminController {
         eventTypeService.save(eventType);
         return new ResponseEntity<>("Event type deactivated", HttpStatus.OK);
     }
+
+    @GetMapping("{eventId}/analytics")
+    public ResponseEntity<EventDTO> getEventAnalytics(@PathVariable Integer eventId) {
+        Event event = eventService.findById(eventId);
+        if (event == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        EventDTO analytics = new EventDTO();
+//        Some logic for analysis
+//        analytics.setEventName(event.getName());
+//        analytics.setTotalAttendees(event.getGuests().size());
+//        analytics.setRatingsDistribution(eventService.getRatingsDistribution(event));
+//        analytics.setAverageRating(eventService.getAverageRating(event));
+
+        return new ResponseEntity<>(analytics, HttpStatus.OK);
+    }
+
+    @GetMapping("{eventId}/generate-analytics-pdf")
+    public ResponseEntity<byte[]> generateAnalyticsPDF(@PathVariable Integer eventId) {
+        Event event = eventService.findById(eventId);
+        if (event == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        byte[] pdf = pdfGeneratorService.generateEventAnalyticsPDF(event);
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=event-analytics.pdf")
+                .body(pdf);
     @GetMapping("categories/all")
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = categoryService.findAll();
