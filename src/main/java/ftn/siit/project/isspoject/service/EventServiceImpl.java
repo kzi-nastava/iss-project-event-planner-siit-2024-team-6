@@ -17,20 +17,18 @@ public class EventServiceImpl implements EventService{
     //private EventRepository eventRepository;
 
     @Override
-    public List<Event> findAll() { return null;}
+    public List<Event> findAll() { return List.of();}
 
     @Override
-    public Event findById(Integer eventId) {
-        return null;
-    }
+    public Event findById(Integer eventId) { return null; }
 
     @Override
     public List<Event> findByOrganizer(Organizer organizer) {
-        return null;
+        return List.of();
     }
 
     @Override
-    public List<Event> findTopFive() { return null;}
+    public List<Event> findTopFive() { return List.of();}
 
 
     @Override
@@ -47,14 +45,7 @@ public class EventServiceImpl implements EventService{
     }
 
     public void addClosedEvent(ClosedEventDTO eventDTO) {
-        Event event = new Event();
-        event.setIsPublic(eventDTO.getIsPublic());
-        event.setName(eventDTO.getName());
-        event.setDescription(eventDTO.getDescription());
-        event.setPlace(eventDTO.getPlace());
-        event.setDate(eventDTO.getDate());
-        event.setMaxParticipants(eventDTO.getMaxParticipants());
-
+        Event event = new Event(eventDTO);
         //Event savedEvent = eventRepository.save(event);
 
         sendInvitations("",eventDTO.getEmails());

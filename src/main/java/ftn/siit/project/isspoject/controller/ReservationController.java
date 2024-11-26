@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "api/reservations")
+@RequestMapping(value = "/api/reservations/")
 public class ReservationController {
     @Autowired
     private ReservationService reservationService;
 
-    @PostMapping("/add")
+    @PostMapping("add")
     public ResponseEntity<String> createReservation(@RequestBody ReservationDTO dto) {
         Reservation reservation = reservationService.save(dto);
         sendConfirmations(reservation);

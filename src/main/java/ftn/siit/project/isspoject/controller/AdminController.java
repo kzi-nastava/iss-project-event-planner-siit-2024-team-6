@@ -3,6 +3,7 @@ package ftn.siit.project.isspoject.controller;
 import ftn.siit.project.isspoject.dto.EventTypeDTO;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.entity.EventType;
+import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.EventTypeService;
 import ftn.siit.project.isspoject.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "api/admins/")
+@RequestMapping(value = "/api/admins/")
 public class AdminController {
     @Autowired
     private EventTypeService eventTypeService;
@@ -41,6 +42,9 @@ public class AdminController {
     @GetMapping("event-types/all")
     public ResponseEntity<List<EventTypeDTO>> getAllEventTypes() {
         List<EventType> eventTypes = eventTypeService.findAll();
+        if(eventTypes == null || eventTypes.size() == 0) {
+            throw new NotFoundException("No events found");
+        }
         List<EventTypeDTO> eventTypeDTOs = eventTypes.stream().map(eventType -> {
             EventTypeDTO dto = new EventTypeDTO();
             dto.setName(eventType.getName());

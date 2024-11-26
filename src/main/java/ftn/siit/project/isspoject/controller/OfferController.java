@@ -17,18 +17,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "api/offers")
+@RequestMapping(value = "/api/offers/")
 public class OfferController {
 
     @Autowired
     private OfferService offerService;
 
-    @GetMapping("/all")
+    @GetMapping("all")
     public ResponseEntity<List<OfferDTO>> getAll() {
         List<Offer> offers = offerService.findAll();
-        if (offers.isEmpty()) {
-            return ResponseEntity.noContent().build();  //error 204
-        }
 
         List<OfferDTO> dtos = offers.stream()
                 .map(OfferDTO::new)
@@ -36,12 +33,9 @@ public class OfferController {
         return ResponseEntity.ok(dtos);
     }
 
-    @GetMapping("/top-five")
+    @GetMapping("top-five")
     public ResponseEntity<List<OfferDTO>> getTopFive() {
         List<Offer> offers = offerService.findTopFive();
-        if (offers.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
 
         List<OfferDTO> dtos = offers.stream()
                 .map(OfferDTO::new)

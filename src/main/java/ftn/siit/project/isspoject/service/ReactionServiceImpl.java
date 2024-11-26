@@ -45,7 +45,7 @@ public class ReactionServiceImpl implements ReactionService {
 
     }
     public List<Reaction> getPendingReactions() {
-        return null;
+        return List.of();
         //return reactionRepository.findByStatus(Status.PENDING);
     }
 }

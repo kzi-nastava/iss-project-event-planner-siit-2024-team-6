@@ -14,22 +14,18 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "api/notifications")
+@RequestMapping(value = "/api/notifications/")
 
 public class NotificationController {
 
     @Autowired
     private NotificationService notificationService;
 
-    @GetMapping("/by-recipient/{recipientId}")
+    @GetMapping("by-recipient/{recipientId}")
     public ResponseEntity<List<NotificationDTO>> getByRecipient(@PathVariable Integer recipientId) {
         User recipient = new User();
 
         List<Notification> notifications = notificationService.findByRecipient(recipient);
-
-        if (notifications.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
 
         List<NotificationDTO> dtos = notifications.stream()
                 .map(NotificationDTO::new)

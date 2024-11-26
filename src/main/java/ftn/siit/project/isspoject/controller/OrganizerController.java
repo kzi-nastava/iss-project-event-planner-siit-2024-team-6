@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "api/organizers")
+@RequestMapping(value = "/api/organizers/")
 public class OrganizerController {
     @Autowired
     private EventService eventService;
@@ -26,6 +26,7 @@ public class OrganizerController {
     private OrganizerService organizerService;
     @Autowired
     private PDFGeneratorService pdfGeneratorService;
+
     @PostMapping("events/create")
     public ResponseEntity<String> createEvent(@RequestParam Integer organizerId, @RequestBody EventDTO eventDTO) {
         Organizer organizer = organizerService.findById(organizerId);
