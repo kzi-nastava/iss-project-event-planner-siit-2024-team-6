@@ -1,7 +1,6 @@
 package ftn.siit.project.isspoject.service;
 
 import ftn.siit.project.isspoject.entity.Category;
-
 import java.util.List;
 
 public interface CategoryService {
@@ -9,6 +8,7 @@ public interface CategoryService {
     Category findByName(String name);
     List<Category> findAll();
     List<Category> findAllByNames(List<String> names);
+    void createPendingCategory(String category);
 
     Category save(Category category);
     Category update(Category category);

@@ -2,7 +2,6 @@ package ftn.siit.project.isspoject.service;
 
 import ftn.siit.project.isspoject.entity.Category;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -38,7 +37,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public void createPendingCategory(String category) {}
+    @Override
     public void delete(Category category) {
-
     }
 }

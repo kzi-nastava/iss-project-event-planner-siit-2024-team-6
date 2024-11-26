@@ -36,6 +36,7 @@ public class OfferDTO {
     private int latestCancelation;
 
     public OfferDTO() {}
+
     public OfferDTO(Offer offer) {
         if (offer != null) {
             this.id = offer.getId();
@@ -66,3 +67,4 @@ public class OfferDTO {
         }
     }
 }
+
