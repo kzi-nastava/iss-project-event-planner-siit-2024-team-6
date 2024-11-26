@@ -18,7 +18,7 @@ public class MessageServiceImpl implements MessageService{
 
     @Override
     public List<Message> findMessagessBetween(Integer user1, Integer user2) {
-        return null;
+        return List.of();
     }
 
 }
