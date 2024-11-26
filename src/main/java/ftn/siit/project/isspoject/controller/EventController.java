@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("/api/events")
+@RequestMapping("/api/events/")
 public class EventController {
 
     @Autowired
@@ -22,7 +22,7 @@ public class EventController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/{eventId}/details")
+    @GetMapping("{eventId}/details")
     public ResponseEntity<EventDTO> getEvent(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
         if (event == null) {
@@ -39,7 +39,7 @@ public class EventController {
 
         return new ResponseEntity<>(eventDTO, HttpStatus.OK);
     }
-    @GetMapping("/{eventId}/generate-pdf")
+    @GetMapping("{eventId}/generate-pdf")
     public ResponseEntity<byte[]> generateEventPDF(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
         if (event == null) {
@@ -53,7 +53,7 @@ public class EventController {
                 .body(pdf);
     }
 
-    @PostMapping("/{userId}/{eventId}/favorite")
+    @PostMapping("{userId}/{eventId}/favorite")
     public ResponseEntity<String> addEventToFavorites(@PathVariable Integer userId, @PathVariable Integer eventId) {
         User user = userService.findById(userId);
         if (user == null) {
@@ -74,7 +74,7 @@ public class EventController {
 
         return new ResponseEntity<>("Event added to favorites", HttpStatus.OK);
     }
-    @DeleteMapping("/{userId}/{eventId}/favorite")
+    @DeleteMapping("{userId}/{eventId}/favorite")
     public ResponseEntity<String> removeEventFromFavorites(@PathVariable Integer userId, @PathVariable Integer eventId) {
         User user = userService.findById(userId);
         if (user == null) {

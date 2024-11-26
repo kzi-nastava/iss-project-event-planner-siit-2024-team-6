@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "api/admins")
+@RequestMapping(value = "/api/admins/")
 public class AdminController {
 
     @Autowired
@@ -95,7 +95,7 @@ public class AdminController {
         return new ResponseEntity<>("Event type deactivated", HttpStatus.OK);
     }
 
-    @GetMapping("/{eventId}/analytics")
+    @GetMapping("{eventId}/analytics")
     public ResponseEntity<EventDTO> getEventAnalytics(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
         if (event == null) {
@@ -112,7 +112,7 @@ public class AdminController {
         return new ResponseEntity<>(analytics, HttpStatus.OK);
     }
 
-    @GetMapping("/{eventId}/generate-analytics-pdf")
+    @GetMapping("{eventId}/generate-analytics-pdf")
     public ResponseEntity<byte[]> generateAnalyticsPDF(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
         if (event == null) {
