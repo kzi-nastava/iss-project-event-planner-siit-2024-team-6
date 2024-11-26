@@ -5,9 +5,11 @@ import ftn.siit.project.isspoject.entity.EventType;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-
+import java.util.ArrayList;
+import java.util.List;
 @Data
-public class EventDTO {
+public class ClosedEventDTO {
+
     private Integer id;
     private String name;
     private String description;
@@ -17,16 +19,19 @@ public class EventDTO {
     private String place;
     private LocalDateTime date;
     private EventType eventType;
-
-    public EventDTO() {}
-    public EventDTO(Event event) {
+    private List<String> emails = new ArrayList<>();
+    public ClosedEventDTO() {
+        super();
+        this.isPublic = false;
+    }
+    public ClosedEventDTO(Event event) {
         if (event != null) {
             this.id = event.getId();
             this.name = event.getName();
             this.description = event.getDescription();
             this.maxParticipants = event.getMaxParticipants();
             this.participants = event.getParticipants();
-            this.isPublic = event.getIsPublic();
+            this.isPublic = false;
             this.place = event.getPlace();
             this.date = event.getDate();
             this.eventType = event.getEventType();

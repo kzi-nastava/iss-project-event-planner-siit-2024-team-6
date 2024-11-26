@@ -1,0 +1,20 @@
+package ftn.siit.project.isspoject.dto;
+
+import ftn.siit.project.isspoject.entity.User;
+import lombok.Data;
+
+@Data
+public class QuickRegistrationDTO {
+    private String email;
+    private String password;
+    private String name;
+    private String lastname;
+    public User toUser(){
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setName(name);
+        user.setLastname(lastname);
+        return user;
+    }
+}

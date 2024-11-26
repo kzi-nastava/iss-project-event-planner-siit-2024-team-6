@@ -1,8 +1,10 @@
 package ftn.siit.project.isspoject.service;
 
 import ftn.siit.project.isspoject.dto.RegistrationRequestDTO;
+import ftn.siit.project.isspoject.entity.Organizer;
 import ftn.siit.project.isspoject.entity.Provider;
 import ftn.siit.project.isspoject.entity.User;
+import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService{
+
     // dependency inversion
 //    private final UserRepository userRepository;
 //    @Autowired
@@ -94,5 +97,31 @@ public class UserServiceImpl implements UserService{
     @Override
     public void save(User user) {
         System.out.println(user);
+    }
+
+
+    @Override
+    public List<User> findEventAttendees(Integer eventId) {
+        return List.of();
+    }
+    @Override
+    public void updateRole(Integer userId, String newRole){
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new NotFoundException("User with ID " + userId + " not found"));
+//
+//        // Check and update the role
+//        if ("Provider".equalsIgnoreCase(newRole)) {
+//            if (!(user instanceof Provider)) {
+//                Provider provider = new Provider(user); // Transform User into Provider
+//                userRepository.save(provider);
+//            }
+//        } else if ("Organizer".equalsIgnoreCase(newRole)) {
+//            if (!(user instanceof Organizer)) {
+//                Organizer organizer = new Organizer(user); // Transform User into Organizer
+//                userRepository.save(organizer);
+//            }
+//        } else {
+//            throw new IllegalArgumentException("Invalid role: " + newRole + ". Allowed roles are 'Provider' or 'Organizer'.");
+//        }
     }
 }
