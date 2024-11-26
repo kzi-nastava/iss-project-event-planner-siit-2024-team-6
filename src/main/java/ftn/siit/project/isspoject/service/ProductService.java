@@ -8,4 +8,6 @@ public interface ProductService {
     void save(Product product);
 
     List<Product> findByProvider(Integer providerId);
+
+    List<Product> searchByName(String name);
 }

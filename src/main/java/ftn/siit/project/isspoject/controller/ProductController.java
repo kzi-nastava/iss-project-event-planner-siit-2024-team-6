@@ -61,7 +61,6 @@ public class ProductController {
 
             OfferDTO offerDTO = new OfferDTO(product);
 
-            // Копируем данные из offerDTO в productDTO
             productDTO.setId(offerDTO.getId());
             productDTO.setStatus(offerDTO.getStatus());
             productDTO.setName(offerDTO.getName());
@@ -80,6 +79,34 @@ public class ProductController {
         }).collect(Collectors.toList());
         return new ResponseEntity<>(productDTOs, HttpStatus.OK);
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductDTO>> searchProducts(@RequestParam String name) {
+        List<Product> products = productService.searchByName(name);
+        List<ProductDTO> productDTOs = products.stream().map(product -> {
+            ProductDTO productDTO = new ProductDTO();
+
+            OfferDTO offerDTO = new OfferDTO(product);
+
+            productDTO.setId(offerDTO.getId());
+            productDTO.setStatus(offerDTO.getStatus());
+            productDTO.setName(offerDTO.getName());
+            productDTO.setDescription(offerDTO.getDescription());
+            productDTO.setPrice(offerDTO.getPrice());
+            productDTO.setSale(offerDTO.getSale());
+            productDTO.setPhotos(offerDTO.getPhotos());
+            productDTO.setIsVisible(offerDTO.getIsVisible());
+            productDTO.setIsAvailable(offerDTO.getIsAvailable());
+            productDTO.setIsDeleted(offerDTO.getIsDeleted());
+            productDTO.setLastChanged(offerDTO.getLastChanged());
+            productDTO.setCategory(offerDTO.getCategory());
+            productDTO.setType(offerDTO.getType());
+
+            return productDTO;
+        }).collect(Collectors.toList());
+        return new ResponseEntity<>(productDTOs, HttpStatus.OK);
+    }
+
 
 }
 
