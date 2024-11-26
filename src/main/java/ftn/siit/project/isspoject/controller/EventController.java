@@ -96,6 +96,5 @@ public class EventController {
 
         return ResponseEntity.ok(new EventDTO(updatedEvent));
 
-
     }
 }

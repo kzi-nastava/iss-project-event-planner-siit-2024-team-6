@@ -13,5 +13,4 @@ public class EventTypeDTO {
     private String name;
     private String description;
     private Boolean isDeleted;
-    private List<Category> categories;
 }

@@ -53,7 +53,6 @@ public class AdminController {
             EventTypeDTO dto = new EventTypeDTO();
             dto.setName(eventType.getName());
             dto.setDescription(eventType.getDescription());
-            dto.setCategories(eventType.getCategories());
             dto.setIsDeleted(eventType.getIsDeleted());
             return dto;
         }).collect(Collectors.toList());
