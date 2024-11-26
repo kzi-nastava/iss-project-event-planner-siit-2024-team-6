@@ -1,6 +1,9 @@
 package ftn.siit.project.isspoject.service;
 
+import ftn.siit.project.isspoject.dto.OfferDTO;
 import ftn.siit.project.isspoject.dto.PriceListOfferDTO;
+import ftn.siit.project.isspoject.entity.Category;
+import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.entity.Offer;
 import ftn.siit.project.isspoject.entity.Provider;
 import ftn.siit.project.isspoject.repository.OfferRepository;
@@ -13,6 +16,11 @@ public class OfferServiceImpl implements OfferService {
 
     //@Autowired
     //private OfferRepository offerRepository;
+
+    @Override
+    public List<Offer> getFilteredServices(Provider provider, String name, String category, String eventType, Double price, Boolean isAvailable) {
+        return List.of();
+    }
 
     @Override
     public List<PriceListOfferDTO> getPriceList(List<Offer> offers) {

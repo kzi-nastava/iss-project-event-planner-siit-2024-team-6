@@ -3,8 +3,7 @@ package ftn.siit.project.isspoject.controller;
 import ftn.siit.project.isspoject.dto.EventDTO;
 import ftn.siit.project.isspoject.dto.OfferDTO;
 import ftn.siit.project.isspoject.dto.PriceListOfferDTO;
-import ftn.siit.project.isspoject.entity.Offer;
-import ftn.siit.project.isspoject.entity.Provider;
+import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +24,8 @@ public class OfferController {
     private OfferHistoryService offerHistoryService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private CategoryService categoryService;
     @Autowired
     private OfferServiceImpl offerServiceImpl;
 
@@ -69,4 +70,5 @@ public class OfferController {
         if (prices.isEmpty()) {return ResponseEntity.noContent().build();}
         return ResponseEntity.ok(prices);
     }
+
 }
