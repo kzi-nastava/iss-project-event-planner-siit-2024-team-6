@@ -12,4 +12,6 @@ public interface ProductService {
     List<Product> searchByName(String name);
 
     List<Product> filterProducts(String category, String eventType, Double minPrice, Double maxPrice, Boolean available, Boolean visible);
+
+    Product findById(Integer productId);
 }

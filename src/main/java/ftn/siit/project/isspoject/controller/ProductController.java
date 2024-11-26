@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -102,6 +103,29 @@ public class ProductController {
         return new ResponseEntity<>(productDTOs, HttpStatus.OK);
     }
 
+    @PutMapping("/{productId}/update")
+    public ResponseEntity<String> updateProduct(@PathVariable Integer productId, @RequestBody ProductDTO productDTO) {
+        Product product = productService.findById(productId);
+        if (product == null) {
+            return new ResponseEntity<>("Product not found", HttpStatus.NOT_FOUND);
+        }
 
+        product.setName(productDTO.getName());
+        product.setDescription(productDTO.getDescription());
+        product.setPrice(productDTO.getPrice());
+        product.setSale(productDTO.getSale());
+        product.setPhotos(productDTO.getPhotos());
+        product.setIsVisible(productDTO.getIsVisible());
+        product.setIsAvailable(productDTO.getIsAvailable());
+        product.setLastChanged(LocalDateTime.now());
+
+
+        if (productDTO.getType() != null && productDTO.getType().equalsIgnoreCase("Service")) {
+            return new ResponseEntity<>("Product type cannot be changed to Service", HttpStatus.BAD_REQUEST);
+        }
+
+        productService.save(product);
+        return new ResponseEntity<>("Product updated successfully", HttpStatus.OK);
+    }
 }
 

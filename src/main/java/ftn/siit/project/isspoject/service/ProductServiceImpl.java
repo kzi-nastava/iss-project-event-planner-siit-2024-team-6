@@ -16,4 +16,19 @@ public class ProductServiceImpl implements ProductService{
     public List<Product> findByProvider(Integer providerId) {
         return null;
     }
+
+    @Override
+    public List<Product> searchByName(String name) {
+        return null;
+    }
+
+    @Override
+    public List<Product> filterProducts(String category, String eventType, Double minPrice, Double maxPrice, Boolean available, Boolean visible) {
+        return null;
+    }
+
+    @Override
+    public Product findById(Integer productId) {
+        return null;
+    }
 }
