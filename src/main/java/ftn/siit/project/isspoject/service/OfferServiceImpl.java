@@ -18,6 +18,11 @@ public class OfferServiceImpl implements OfferService {
     //private OfferRepository offerRepository;
 
     @Override
+    public List<Offer> allOffersWithCategory(Category category) {
+        return List.of();
+    }
+
+    @Override
     public List<Offer> getFilteredServices(Provider provider, String name, String category, String eventType, Double price, Boolean isAvailable) {
         return List.of();
     }
