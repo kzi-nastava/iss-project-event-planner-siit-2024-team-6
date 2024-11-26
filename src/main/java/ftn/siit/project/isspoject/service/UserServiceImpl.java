@@ -1,6 +1,7 @@
 package ftn.siit.project.isspoject.service;
 
 import ftn.siit.project.isspoject.dto.RegistrationRequestDTO;
+import ftn.siit.project.isspoject.entity.Block;
 import ftn.siit.project.isspoject.entity.Organizer;
 import ftn.siit.project.isspoject.entity.Provider;
 import ftn.siit.project.isspoject.entity.User;
@@ -123,5 +124,17 @@ public class UserServiceImpl implements UserService{
 //        } else {
 //            throw new IllegalArgumentException("Invalid role: " + newRole + ". Allowed roles are 'Provider' or 'Organizer'.");
 //        }
+    }
+    public Block blockUser(Integer blockerId, Integer blockedId) {
+//        if (blockRepository.existsByBlockerIdAndBlockedId(blockerId, blockedId)) {
+//            throw new IllegalArgumentException("User is already blocked.");
+//        }
+//
+//        Block block = new Block();
+//        block.setBlockerId(blockerId);
+//        block.setBlockedId(blockedId);
+//
+//        return blockRepository.save(block);
+        return null;
     }
 }

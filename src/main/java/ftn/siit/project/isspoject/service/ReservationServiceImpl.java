@@ -11,8 +11,8 @@ import java.util.List;
 @Service
 public class ReservationServiceImpl implements ReservationService {
 
-    @Autowired
-    private ReservationRepository reservationRepository;
+    //@Autowired
+    //private ReservationRepository reservationRepository;
 
     @Override
     public List<Reservation> findAll() {

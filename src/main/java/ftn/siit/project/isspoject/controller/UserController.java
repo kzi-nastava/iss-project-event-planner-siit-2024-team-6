@@ -1,10 +1,7 @@
 package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.*;
-import ftn.siit.project.isspoject.entity.Event;
-import ftn.siit.project.isspoject.entity.Organizer;
-import ftn.siit.project.isspoject.entity.Provider;
-import ftn.siit.project.isspoject.entity.User;
+import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.EventService;
 import ftn.siit.project.isspoject.service.UserService;
@@ -226,4 +223,14 @@ public class UserController {
         List<Event> events = eventService.getEventsUserAttends(id);
         return ResponseEntity.ok(events);
     }
+
+    @PostMapping("/{blockerId}/block/{blockedId}")
+    public ResponseEntity<Block> blockUser(
+            @PathVariable Integer blockerId,
+            @PathVariable Integer blockedId
+    ) {
+        Block block = userService.blockUser(blockerId, blockedId);
+        return ResponseEntity.ok(block);
+    }
+
 }
