@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "api/events")
+@RequestMapping(value = "/api/events/")
 public class EventController {
 
     @Autowired
@@ -28,7 +28,7 @@ public class EventController {
     NotificationService notificationService;
 
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     public ResponseEntity<EventDTO> getEvent(@PathVariable int id) {
         Event event = eventService.findById(id);
 
@@ -41,7 +41,7 @@ public class EventController {
     }
 
 
-    @GetMapping("/all")
+    @GetMapping("all")
     public ResponseEntity<List<EventDTO>> getAll() {
         List<Event> events = eventService.findAll();
         if (events == null) {
@@ -54,7 +54,7 @@ public class EventController {
         return ResponseEntity.ok(dtos);
     }
 
-    @GetMapping("/top-five")
+    @GetMapping("top-five")
     public ResponseEntity<List<EventDTO>> getTopFive() {
         List<Event> events = eventService.findAll();
         if (events == null) {
@@ -66,13 +66,13 @@ public class EventController {
                 .toList();
         return ResponseEntity.ok(dtos);
     }
-    @PostMapping("/add-closed")
+    @PostMapping("add-closed")
     public ResponseEntity<String> addClosed(@RequestBody ClosedEventDTO eventDTO) {
         eventService.addClosedEvent(eventDTO);
         return ResponseEntity.ok("Event created and invitations sent.");
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("update/{id}")
     public ResponseEntity<EventDTO>  updateEvent(@PathVariable int id, @RequestBody EventDTO dto) {
         Event existingEvent = eventService.findById(id);
         if (existingEvent == null) {

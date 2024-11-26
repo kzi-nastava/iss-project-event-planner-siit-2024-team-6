@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/budgets")
+@RequestMapping("/api/budgets/")
 public class BudgetController {
     @Autowired
     private BudgetService budgetService;
@@ -27,14 +27,15 @@ public class BudgetController {
         return ResponseEntity.ok(new BudgetDTO(budget));
     }
 
-    @PostMapping("/add")
+    @PostMapping("add")
     public ResponseEntity<String> createBudget(@RequestBody BudgetDTO budgetDTO) {
         Budget budget = new Budget(budgetDTO, categoryService.findAllByNames(budgetDTO.getCategories()));
+        if(budget == null){ throw new IllegalArgumentException("Budget is null"); }
         budgetService.save(budget);
         return ResponseEntity.ok("Budget created.");
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("update/{id}")
     public ResponseEntity<BudgetDTO> updateBudget(@PathVariable int id, @RequestBody BudgetDTO budgetDTO) {
         Budget existingBudget = budgetService.findById(id);
         if(existingBudget == null) return ResponseEntity.notFound().build();

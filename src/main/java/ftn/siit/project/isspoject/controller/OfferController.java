@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "api/offers")
+@RequestMapping(value = "/api/offers/")
 public class OfferController {
 
     @Autowired
@@ -29,7 +29,7 @@ public class OfferController {
     @Autowired
     private OfferServiceImpl offerServiceImpl;
 
-    @GetMapping("/all")
+    @GetMapping("all")
     public ResponseEntity<List<OfferDTO>> getAll() {
         List<Offer> offers = offerService.findAll();
         if (offers.isEmpty()) {
@@ -42,7 +42,7 @@ public class OfferController {
         return ResponseEntity.ok(dtos);
     }
 
-    @GetMapping("/top-five")
+    @GetMapping("top-five")
     public ResponseEntity<List<OfferDTO>> getTopFive() {
         List<Offer> offers = offerService.findTopFive();
         if (offers.isEmpty()) {
@@ -55,14 +55,14 @@ public class OfferController {
         return ResponseEntity.ok(dtos);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     public ResponseEntity<OfferDTO> get(@PathVariable int id) {
         Offer offer = offerService.findById(id);
         if (offer == null) {return ResponseEntity.notFound().build();}
         return ResponseEntity.ok(new OfferDTO(offer));
     }
 
-    @PutMapping("/update-price")
+    @PutMapping("update-price")
     public ResponseEntity<PriceListOfferDTO> updatePrice(@RequestBody PriceListOfferDTO dto) {
         Offer updatedOffer = offerService.updatePrice(dto);
         // add implementation of updating the offer in the list of its provider's offers
@@ -70,7 +70,7 @@ public class OfferController {
         return ResponseEntity.ok(new PriceListOfferDTO(updatedOffer));
     }
 
-    @GetMapping("/price-list/{providerId}")
+    @GetMapping("price-list/{providerId}")
     public ResponseEntity<List<PriceListOfferDTO>> getPriceList(@PathVariable Integer providerId) {
         Provider provider = (Provider) userService.findById(providerId);
         List<PriceListOfferDTO> prices = offerService.getPriceList(provider.getMyOffers());

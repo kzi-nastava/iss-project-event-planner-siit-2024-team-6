@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "api/users")
+@RequestMapping(value = "/api/users/")
 public class UserController {
 
     @Autowired
@@ -27,7 +27,7 @@ public class UserController {
     @Autowired
     private EventService eventService;
 
-    @PostMapping("/register")
+    @PostMapping("register")
     public ResponseEntity<String> registerUser(@RequestBody RegistrationRequestDTO registrationRequestDTO) {
         if (registrationRequestDTO.getEmail() == null) {
             return new ResponseEntity<>("Error, invalid user", HttpStatus.BAD_REQUEST);
@@ -36,7 +36,7 @@ public class UserController {
         return new ResponseEntity<>("User was registered, check out the activation code", HttpStatus.CREATED);
     }
 
-    @PostMapping("/quick-register")
+    @PostMapping("quick-register")
     public ResponseEntity<String> quicklyRegisterUser(@RequestBody QuickRegistrationDTO requestDTO) {
         if (requestDTO.getEmail() == null) {
             return new ResponseEntity<>("Error, invalid user", HttpStatus.BAD_REQUEST);
@@ -45,7 +45,7 @@ public class UserController {
         return new ResponseEntity<>("User was quickly registered, check out the activation code", HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     public ResponseEntity<UserDTO> getProfile(@PathVariable Integer id) {
         User user = userService.findById(id);
         if (user == null) {
@@ -79,7 +79,7 @@ public class UserController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("{id}")
     public ResponseEntity<String> updateProfile(@PathVariable Integer id, @RequestBody UserDTO updatedUser) {
         User user = userService.findById(id);
         if (user == null) {
@@ -110,7 +110,7 @@ public class UserController {
         userService.save(user);
         return new ResponseEntity<>("Profile updated successfully", HttpStatus.OK);
     }
-    @PutMapping("/{id}/change-password")
+    @PutMapping("{id}/change-password")
     public ResponseEntity<String> changePassword(@PathVariable Integer id, @RequestBody PasswordChangeDTO passwordChangeDTO) {
         User user = userService.findById(id);
         if (user == null) {
@@ -132,7 +132,7 @@ public class UserController {
     }
 
 
-    @GetMapping("/activate/{token}")
+    @GetMapping("activate/{token}")
     public ResponseEntity<String> activateUser(@PathVariable String token) {
         boolean activated = true;
 //        activated =userService.activateUserByToken(token);
@@ -142,7 +142,7 @@ public class UserController {
         return new ResponseEntity<>("User was activated", HttpStatus.OK);
     }
 
-    @PostMapping("/login")
+    @PostMapping("login")
     public ResponseEntity<String> loginUser(@RequestBody LoginRequestDTO loginRequest) {
         User user = userService.findByEmail(loginRequest.getEmail());
 
@@ -157,7 +157,7 @@ public class UserController {
     }
 
 
-    @GetMapping("/all")
+    @GetMapping("all")
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<User> users = userService.findAll();
         List<UserDTO> userDTOs = users.stream().map(user -> {
@@ -198,7 +198,7 @@ public class UserController {
         return new ResponseEntity<>(userDTOs, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Integer id) {
         User user = userService.findById(id);
         if (user == null) {
@@ -219,14 +219,14 @@ public class UserController {
         return new ResponseEntity<>("User deactivated", HttpStatus.OK);
     }
 
-    @PutMapping("/{id}/update-role")
+    @PutMapping("{id}/update-role")
     public ResponseEntity<String> updateRole(@PathVariable Integer id, @RequestParam String newRole) {
         userService.updateRole(id, newRole);
         return ResponseEntity.ok("User successfully updated to " + newRole);
 
     }
 
-    @GetMapping("/{id}/attends")
+    @GetMapping("{id}/attends")
     public ResponseEntity<List<Event>> getUserEvents(@PathVariable Integer id) {
         List<Event> events = eventService.getEventsUserAttends(id);
         return ResponseEntity.ok(events);
