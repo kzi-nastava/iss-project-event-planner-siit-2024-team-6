@@ -24,5 +24,7 @@ public class Offer {
     private Boolean isDeleted;
     private LocalDateTime lastChanged;
     private Category category;
+    private Provider provider;
+    private List<EventType> eventTypes;
 }
 

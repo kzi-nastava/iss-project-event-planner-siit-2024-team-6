@@ -10,7 +10,7 @@ public interface ProductService {
     List<Product> findByProvider(Integer providerId);
 
     List<Product> searchByName(String name);
-
+    List<Product> findAll();
     List<Product> filterProducts(String category, String eventType, Double minPrice, Double maxPrice, Boolean available, Boolean visible);
 
     Product findById(Integer productId);
