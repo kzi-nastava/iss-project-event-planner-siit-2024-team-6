@@ -56,33 +56,28 @@ public class ProductController {
     @GetMapping("/{providerId}/list")
     public ResponseEntity<List<ProductDTO>> getProductsByProvider(@PathVariable Integer providerId) {
         List<Product> products = productService.findByProvider(providerId);
-        List<ProductDTO> productDTOs = products.stream().map(product -> {
-            ProductDTO productDTO = new ProductDTO();
-
-            OfferDTO offerDTO = new OfferDTO(product);
-
-            productDTO.setId(offerDTO.getId());
-            productDTO.setStatus(offerDTO.getStatus());
-            productDTO.setName(offerDTO.getName());
-            productDTO.setDescription(offerDTO.getDescription());
-            productDTO.setPrice(offerDTO.getPrice());
-            productDTO.setSale(offerDTO.getSale());
-            productDTO.setPhotos(offerDTO.getPhotos());
-            productDTO.setIsVisible(offerDTO.getIsVisible());
-            productDTO.setIsAvailable(offerDTO.getIsAvailable());
-            productDTO.setIsDeleted(offerDTO.getIsDeleted());
-            productDTO.setLastChanged(offerDTO.getLastChanged());
-            productDTO.setCategory(offerDTO.getCategory());
-            productDTO.setType(offerDTO.getType());
-
-            return productDTO;
-        }).collect(Collectors.toList());
-        return new ResponseEntity<>(productDTOs, HttpStatus.OK);
+        return getListResponseEntity(products);
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<ProductDTO>> searchProducts(@RequestParam String name) {
         List<Product> products = productService.searchByName(name);
+        return getListResponseEntity(products);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<ProductDTO>> filterProducts(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String eventType,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Boolean available,
+            @RequestParam(required = false) Boolean visible) {
+        List<Product> products = productService.filterProducts(category, eventType, minPrice, maxPrice, available, visible);
+        return getListResponseEntity(products);
+    }
+
+    private ResponseEntity<List<ProductDTO>> getListResponseEntity(List<Product> products) {
         List<ProductDTO> productDTOs = products.stream().map(product -> {
             ProductDTO productDTO = new ProductDTO();
 
