@@ -16,4 +16,14 @@ public class ProviderServiceImpl implements ProviderService {
     public Provider findByOffer(Offer offer) {
         return null;
     }
+
+    @Override
+    public Provider findById(Integer id) {
+        return null;
+    }
+
+    @Override
+    public Provider update(Provider provider) {
+        return null;
+    }
 }
