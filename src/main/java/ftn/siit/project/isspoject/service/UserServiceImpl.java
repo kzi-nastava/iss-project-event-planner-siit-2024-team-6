@@ -137,4 +137,13 @@ public class UserServiceImpl implements UserService{
 //        return blockRepository.save(block);
         return null;
     }
+    public User suspendUser(Integer userId) {
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+//
+//        user.setSuspendedSince(LocalDateTime.now());
+//
+//        return userRepository.save(user);
+        return null;
+    }
 }

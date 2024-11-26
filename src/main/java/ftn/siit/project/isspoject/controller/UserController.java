@@ -4,6 +4,8 @@ import ftn.siit.project.isspoject.dto.*;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.EventService;
+import ftn.siit.project.isspoject.service.ReactionService;
+import ftn.siit.project.isspoject.service.ReportService;
 import ftn.siit.project.isspoject.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +25,8 @@ public class UserController {
     private UserService userService;
     @Autowired
     private EventService eventService;
+    @Autowired
+    private ReportService reportService;
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody RegistrationRequestDTO registrationRequestDTO) {
@@ -231,6 +235,13 @@ public class UserController {
     ) {
         Block block = userService.blockUser(blockerId, blockedId);
         return ResponseEntity.ok(block);
+    }
+
+    @PostMapping("/report")
+    public ResponseEntity<Report> reportUser(@RequestBody UserReportDTO userReportDTO) {
+        Report report = new Report(userReportDTO);
+        Report savedReport = reportService.save(report);
+        return ResponseEntity.ok(savedReport);
     }
 
 }
