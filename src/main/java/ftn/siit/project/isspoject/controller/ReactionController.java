@@ -77,5 +77,17 @@ public class ReactionController {
 
         return ResponseEntity.ok(pendingReactions);
     }
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Reaction> updateReaction(@PathVariable Integer id, @RequestBody Reaction updatedReaction) {
+        Reaction existingReaction = reactionService.findById(id);
+        if (existingReaction == null) {
+            throw new NotFoundException("Reaction not found");
+        }
 
+        updatedReaction.setId(id);
+
+        Reaction savedReaction = reactionService.save(updatedReaction);
+
+        return ResponseEntity.ok(savedReaction);
+    }
 }

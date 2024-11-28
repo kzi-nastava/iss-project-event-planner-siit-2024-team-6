@@ -2,15 +2,14 @@ package ftn.siit.project.isspoject.service;
 
 import ftn.siit.project.isspoject.dto.OfferDTO;
 import ftn.siit.project.isspoject.dto.PriceListOfferDTO;
-import ftn.siit.project.isspoject.entity.Category;
-import ftn.siit.project.isspoject.entity.EventType;
-import ftn.siit.project.isspoject.entity.Offer;
-import ftn.siit.project.isspoject.entity.Provider;
+import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.repository.OfferRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.time.LocalDateTime;
+
 @Service
 public class OfferServiceImpl implements OfferService {
 
@@ -42,7 +41,16 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public List<Offer> findAll() {
-        return List.of();
+
+        return List.of(
+                new Offer(1, Status.ACCEPTED, "Offer 1", "Description 1", 100.0, 10.0, List.of("photo1.jpg", "photo2.jpg"), true, true, false, LocalDateTime.now(), new Category(), new Provider(), List.of(new EventType())),
+                new Offer(2, Status.ACCEPTED, "Offer 2", "Description 2", 200.0, 20.0, List.of("photo3.jpg", "photo4.jpg"), true, false, false, LocalDateTime.now().plusDays(1), new Category(), new Provider(), List.of(new EventType())),
+                new Offer(3, Status.ACCEPTED, "Offer 3", "Description 3", 300.0, 30.0, List.of("photo5.jpg", "photo6.jpg"), true, true, false, LocalDateTime.now().plusDays(2), new Category(), new Provider(), List.of(new EventType())),
+                new Offer(4, Status.ACCEPTED, "Offer 4", "Description 4", 400.0, 40.0, List.of("photo7.jpg", "photo8.jpg"), false, false, false, LocalDateTime.now().plusDays(3), new Category(), new Provider(), List.of(new EventType())),
+                new Offer(5, Status.ACCEPTED, "Offer 5", "Description 5", 500.0, 50.0, List.of("photo9.jpg", "photo10.jpg"), true, true, false, LocalDateTime.now().plusDays(4), new Category(), new Provider(), List.of(new EventType())),
+                new Offer(6, Status.PENDING, "Offer 6", "Description 6", 600.0, 60.0, List.of("photo11.jpg", "photo12.jpg"), true, false, false, LocalDateTime.now().plusDays(5), new Category(), new Provider(), List.of(new EventType())),
+                new Offer(7, Status.ACCEPTED, "Offer 7", "Description 7", 700.0, 70.0, List.of("photo13.jpg", "photo14.jpg"), true, true, false, LocalDateTime.now().plusDays(6), new Category(), new Provider(), List.of(new EventType()))
+        );
     }
     @Override
     public Offer findById(Integer offerId) {
@@ -55,7 +63,14 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public List<Offer> findTopFive() {
-        return List.of();
+
+        return List.of(
+                new Offer(1, Status.ACCEPTED, "Offer 1", "Description 1", 100.0, 10.0, List.of("photo1.jpg", "photo2.jpg"), true, true, false, LocalDateTime.now(), new Category(), new Provider(), List.of(new EventType())),
+                new Offer(2, Status.ACCEPTED, "Offer 2", "Description 2", 200.0, 20.0, List.of("photo3.jpg", "photo4.jpg"), true, false, false, LocalDateTime.now().plusDays(1), new Category(), new Provider(), List.of(new EventType())),
+                new Offer(3, Status.ACCEPTED, "Offer 3", "Description 3", 300.0, 30.0, List.of("photo5.jpg", "photo6.jpg"), true, true, false, LocalDateTime.now().plusDays(2), new Category(), new Provider(), List.of(new EventType())),
+                new Offer(4, Status.ACCEPTED, "Offer 4", "Description 4", 400.0, 40.0, List.of("photo7.jpg", "photo8.jpg"), false, false, false, LocalDateTime.now().plusDays(3), new Category(), new Provider(), List.of(new EventType())),
+                new Offer(5, Status.ACCEPTED, "Offer 5", "Description 5", 500.0, 50.0, List.of("photo9.jpg", "photo10.jpg"), true, true, false, LocalDateTime.now().plusDays(4), new Category(), new Provider(), List.of(new EventType()))
+        );
     }
 
 
@@ -72,5 +87,10 @@ public class OfferServiceImpl implements OfferService {
     @Override
     public void delete(Offer offer) {
 
+    }
+
+    @Override
+    public List<Offer> searchItems(String name, String description, Double minPrice, Double maxPrice, LocalDateTime startDate, LocalDateTime endDate, String category, Boolean isService) {
+        return List.of();
     }
 }
