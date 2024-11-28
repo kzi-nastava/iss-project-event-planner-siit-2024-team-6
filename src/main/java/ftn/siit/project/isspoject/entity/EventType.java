@@ -10,6 +10,11 @@ public class EventType {
     private String name;
     private String description;
     private Boolean isDeleted;
-
-    public EventType(){}
+    public EventType (){}
+    public EventType(int i, String corporate, String professionalCorporateEvents, boolean b) {
+        this.id = i;
+        this.name = corporate;
+        this.description = professionalCorporateEvents;
+        this.isDeleted = b;
+    }
 }

@@ -21,4 +21,10 @@ public class Budget {
           this.currentPrices = budgetDTO.getCurrentPrices();
           this.categories = categories;
      }
+     public Budget (Integer id, List<Double> maxPrices, List<Double> currentPrices, List<Category> categories) {
+          this.id = id;
+          this.maxPrices = maxPrices;
+          this.currentPrices = currentPrices;
+          this.categories = categories;
+     }
 }
