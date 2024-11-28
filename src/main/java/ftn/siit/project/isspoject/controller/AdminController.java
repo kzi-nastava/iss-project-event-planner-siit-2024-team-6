@@ -105,6 +105,23 @@ public class AdminController {
         eventTypeService.save(eventType);
         return new ResponseEntity<>("Event type activated", HttpStatus.OK);
     }
+//    @GetMapping
+//    public ResponseEntity<PagedResponse<EventTypeDTO>> getEventTypesPage(Pageable pageable) {
+//        Page<EventType> eventTypePage = eventTypeService.findAll(pageable);
+//
+//        List<EventTypeDTO> eventTypeDTOs = eventTypePage.stream()
+//        List<EventTypeDTO> eventTypeDTOs = eventTypePage.stream()
+//                .map(EventTypeDTO::new)
+//                .toList();
+//
+//        PagedResponse<EventTypeDTO> response = new PagedResponse<>(
+//                eventTypeDTOs,
+//                eventTypePage.getTotalPages(),
+//                eventTypePage.getTotalElements()
+//        );
+//
+//        return ResponseEntity.ok(response);
+//    }
 
     @PutMapping("event-types/{id}/deactivate")
     public ResponseEntity<String> deactivateEventType(@PathVariable Integer id) {
