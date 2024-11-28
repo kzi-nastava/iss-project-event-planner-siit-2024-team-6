@@ -53,7 +53,22 @@ public class ProductController {
         productService.save(product);
         return new ResponseEntity<>("Product created successfully", HttpStatus.CREATED);
     }
-
+//    @GetMapping
+//    public ResponseEntity<PagedResponse<ProductDTO>> getProductsPage(Pageable pageable) {
+//        Page<Product> productPage = productService.findAll(pageable);
+//
+//        List<ProductDTO> productDTOs = productPage.stream()
+//                .map(ProductDTO::new)
+//                .toList();
+//
+//        PagedResponse<ProductDTO> response = new PagedResponse<>(
+//                productDTOs,
+//                productPage.getTotalPages(),
+//                productPage.getTotalElements()
+//        );
+//
+//        return ResponseEntity.ok(response);
+//    }
     @GetMapping("/{providerId}/list")
     public ResponseEntity<List<ProductDTO>> getProductsByProvider(@PathVariable Integer providerId) {
         List<Product> products = productService.findByProvider(providerId);
