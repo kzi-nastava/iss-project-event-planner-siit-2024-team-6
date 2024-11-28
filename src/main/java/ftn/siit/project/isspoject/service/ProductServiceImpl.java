@@ -3,8 +3,10 @@ package ftn.siit.project.isspoject.service;
 import ftn.siit.project.isspoject.entity.Category;
 import ftn.siit.project.isspoject.entity.Product;
 import ftn.siit.project.isspoject.entity.Provider;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +29,10 @@ public class ProductServiceImpl implements ProductService{
                 .filter(product -> product.getProvider() != null && product.getProvider().getId().equals(providerId))
                 .collect(Collectors.toList());
     }
+//    @Override
+//    public Page<Product> findAll(Pageable pageable) {
+//        return productRepository.findAll(pageable); // Используем метод JPA для пагинации
+//    }
 
     @Override
     public List<Product> searchByName(String name) {
