@@ -10,4 +10,6 @@ public class EventType {
     private String name;
     private String description;
     private Boolean isDeleted;
+
+    public EventType(){}
 }

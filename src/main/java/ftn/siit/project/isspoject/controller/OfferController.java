@@ -2,14 +2,18 @@ package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.EventDTO;
 import ftn.siit.project.isspoject.dto.OfferDTO;
+import ftn.siit.project.isspoject.dto.PagedResponse;
 import ftn.siit.project.isspoject.dto.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.print.Pageable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +42,37 @@ public class OfferController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
+
+//    @GetMapping
+//    public ResponseEntity<List<OfferDTO>> getOffersPage(Pageable page) {
+//
+//        Page<Offer> offers = offerService.findAll(page);
+//
+//        List<OfferDTO> offerDTOs = offers.stream()
+//                .map(OfferDTO::new)
+//                .toList();
+//
+//        return ResponseEntity.ok(offerDTOs);
+//    }
+
+//    @GetMapping(value = "/all_elements")
+//    public ResponseEntity<PagedResponse<OfferDTO>> getOffersPageAllElements(Pageable page) {
+//
+//        Page<Offer> offersPage = offerService.findAll(page);
+//
+//        List<OfferDTO> offerDTOs = offersPage.stream()
+//                .map(OfferDTO::new)
+//                .toList();
+//
+//        PagedResponse<OfferDTO> response = new PagedResponse<>(
+//                offerDTOs,
+//                offersPage.getTotalPages(),
+//                offersPage.getTotalElements()
+//        );
+//
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
+
 
     @GetMapping("top-five")
     public ResponseEntity<List<OfferDTO>> getTopFive() {
@@ -71,5 +106,18 @@ public class OfferController {
         if (prices.isEmpty()) {return ResponseEntity.noContent().build();}
         return ResponseEntity.ok(prices);
     }
+    @GetMapping("/search")
+    public ResponseEntity<List<Offer>> searchOffers(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) LocalDateTime startDate,
+            @RequestParam(required = false) LocalDateTime endDate,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Boolean isService) {
 
+        List<Offer> filteredItems = offerService.searchItems(name, description, minPrice, maxPrice, startDate, endDate, category, isService);
+        return ResponseEntity.ok(filteredItems);
+    }
 }

@@ -3,6 +3,7 @@ package ftn.siit.project.isspoject.service;
 import ftn.siit.project.isspoject.dto.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface OfferService {
@@ -18,4 +19,5 @@ public interface OfferService {
     void save(Offer offer);
     Offer update(Offer offer);
     void delete(Offer offer);
+    List<Offer> searchItems(String name, String description, Double minPrice, Double maxPrice, LocalDateTime startDate, LocalDateTime endDate, String category, Boolean isService);
 }

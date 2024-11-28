@@ -110,15 +110,14 @@ public class UserServiceImpl implements UserService{
 //        User user = userRepository.findById(userId)
 //                .orElseThrow(() -> new NotFoundException("User with ID " + userId + " not found"));
 //
-//        // Check and update the role
 //        if ("Provider".equalsIgnoreCase(newRole)) {
 //            if (!(user instanceof Provider)) {
-//                Provider provider = new Provider(user); // Transform User into Provider
+//                Provider provider = new Provider(user);
 //                userRepository.save(provider);
 //            }
 //        } else if ("Organizer".equalsIgnoreCase(newRole)) {
 //            if (!(user instanceof Organizer)) {
-//                Organizer organizer = new Organizer(user); // Transform User into Organizer
+//                Organizer organizer = new Organizer(user);
 //                userRepository.save(organizer);
 //            }
 //        } else {

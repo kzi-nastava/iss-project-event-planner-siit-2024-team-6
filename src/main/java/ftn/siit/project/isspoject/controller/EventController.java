@@ -1,7 +1,9 @@
 package ftn.siit.project.isspoject.controller;
 import ftn.siit.project.isspoject.dto.ClosedEventDTO;
 import ftn.siit.project.isspoject.dto.EventDTO;
+import ftn.siit.project.isspoject.dto.PagedResponse;
 import ftn.siit.project.isspoject.entity.Event;
+import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.EventService;
@@ -9,10 +11,14 @@ import ftn.siit.project.isspoject.service.PDFGeneratorService;
 import ftn.siit.project.isspoject.service.NotificationService;
 import ftn.siit.project.isspoject.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.awt.print.Pageable;
 import java.lang.reflect.Array;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -119,17 +125,51 @@ public class EventController {
     @GetMapping("all")
     public ResponseEntity<List<EventDTO>> getAll() {
         List<Event> events = eventService.findAll();
-        List<EventDTO> dtos = eventService.findAll().stream()
+        List<EventDTO> dtos = events.stream()
                 .map(EventDTO::new)
                 .toList();
         return ResponseEntity.ok(dtos);
     }
 
+//    @GetMapping
+//    public ResponseEntity<List<EventDTO>> getEventsPage(Pageable page) {
+//
+//        // Fetch paginated data from the service
+//        Page<Event> events = eventService.findAll(page);
+//
+//        // Convert Event entities to EventDTOs
+//        List<EventDTO> eventDTOs = events.stream()
+//                .map(EventDTO::new) // Assuming EventDTO has a constructor that accepts Event
+//                .toList();
+//
+//        return ResponseEntity.ok(eventDTOs);
+//    }
+
+
+//    @GetMapping(value = "/all_elements")
+//    public ResponseEntity<PagedResponse<EventDTO>> getEventsPageAllElements(Pageable page) {
+//
+//        Page<Event> eventsPage = eventService.findAll(page);
+//
+//        List<EventDTO> eventDTOs = eventsPage.stream()
+//                .map(EventDTO::new)
+//                .toList();
+//
+//        PagedResponse<EventDTO> response = new PagedResponse<>(
+//                eventDTOs,
+//                eventsPage.getTotalPages(),
+//                eventsPage.getTotalElements()
+//        );
+//
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
+
+
     @GetMapping("top-five")
     public ResponseEntity<List<EventDTO>> getTopFive() {
-        List<Event> events = eventService.findAll();
+        List<Event> events = eventService.findTopFive();
 
-        List<EventDTO> dtos = eventService.findAll().stream()
+        List<EventDTO> dtos = events.stream()
                 .map(EventDTO::new)
                 .toList();
         return ResponseEntity.ok(dtos);
@@ -164,5 +204,19 @@ public class EventController {
 
         return ResponseEntity.ok(new EventDTO(updatedEvent));
 
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Event>> searchEvents(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String place,
+            @RequestParam(required = false) EventType eventType,
+            @RequestParam(required = false) Boolean isPublic,
+            @RequestParam(required = false) LocalDateTime startDate,
+            @RequestParam(required = false) LocalDateTime endDate) {
+
+        List<Event> filteredEvents = eventService.searchEvents(name, description, place, eventType, isPublic, startDate, endDate);
+        return ResponseEntity.ok(filteredEvents);
     }
 }

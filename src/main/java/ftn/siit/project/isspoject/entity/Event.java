@@ -26,6 +26,21 @@ public class Event {
     private Budget budget;
 
     public Event() {}
+    public Event(Integer id, String name, String description, Integer maxParticipants, Integer participants, Boolean isPublic, String place, LocalDateTime date, EventType eventType, Organizer organizer, List<Activity> activities, Budget budget) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.maxParticipants = maxParticipants;
+        this.participants = participants;
+        this.isPublic = isPublic;
+        this.place = place;
+        this.date = date;
+        this.eventType = eventType;
+        this.organizer = organizer;
+        this.activities = activities;
+        this.budget = budget;
+    }
+
     public Event(EventDTO eventDTO) {
         if (eventDTO != null) {
             this.id = eventDTO.getId();

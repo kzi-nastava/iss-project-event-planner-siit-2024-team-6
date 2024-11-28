@@ -245,6 +245,9 @@ public class UserController {
 
     @PostMapping("/report")
     public ResponseEntity<Report> reportUser(@RequestBody UserReportDTO userReportDTO) {
+        if (userReportDTO == null || userReportDTO.getReporter() == null || userReportDTO.getReported() == null) {
+            throw new IllegalArgumentException("Not all arguments were given while reporting user");
+        }
         Report report = new Report(userReportDTO);
         Report savedReport = reportService.save(report);
         return ResponseEntity.ok(savedReport);
