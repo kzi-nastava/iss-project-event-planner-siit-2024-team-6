@@ -5,6 +5,7 @@ import ftn.siit.project.isspoject.dto.OfferDTO;
 import ftn.siit.project.isspoject.dto.PagedResponse;
 import ftn.siit.project.isspoject.dto.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.*;
+import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -87,7 +88,7 @@ public class OfferController {
     @GetMapping("{id}")
     public ResponseEntity<OfferDTO> get(@PathVariable int id) {
         Offer offer = offerService.findById(id);
-        if (offer == null) {return ResponseEntity.notFound().build();}
+        if (offer == null) {throw new NotFoundException("Offer not found");}
         return ResponseEntity.ok(new OfferDTO(offer));
     }
 
@@ -102,6 +103,7 @@ public class OfferController {
     @GetMapping("price-list/{providerId}")
     public ResponseEntity<List<PriceListOfferDTO>> getPriceList(@PathVariable Integer providerId) {
         Provider provider = (Provider) userService.findById(providerId);
+        if (provider == null) {throw new NotFoundException("Provider not found");}
         List<PriceListOfferDTO> prices = offerService.getPriceList(provider.getMyOffers());
         if (prices.isEmpty()) {return ResponseEntity.noContent().build();}
         return ResponseEntity.ok(prices);
