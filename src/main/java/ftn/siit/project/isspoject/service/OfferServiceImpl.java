@@ -8,22 +8,113 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.time.LocalDateTime;
 
 @Service
 public class OfferServiceImpl implements OfferService {
+    private final List<Offer> offers = new ArrayList<>();
+
+    public OfferServiceImpl() {
+        // Hardcoded categories
+        Category photography = new Category(1, "Photography", "Capture moments that last forever");
+        Category catering = new Category(2, "Catering", "Food and beverage services");
+        Category entertainment = new Category(3, "Entertainment", "Music, shows, and activities");
+
+        // Hardcoded event types
+        EventType wedding = new EventType(10, "Wedding", "Special occasions and ceremonies", true);
+        EventType corporate = new EventType(12, "Corporate", "Professional corporate events", true);
+        EventType birthday = new EventType(15, "Birthday", "Celebration events for birthdays", true);
+
+        // Hardcoded services
+        Offer o = new Offer();
+        offers.add(o.toOffer("Service",
+                1,
+                Status.ACCEPTED,
+                "Wedding Photography",
+                "Professional photography services for weddings.",
+                1500.0,
+                10.0,
+                List.of("photo1.jpg", "photo2.jpg"),
+                true,
+                true,
+                false,
+                LocalDateTime.now().minusDays(1),
+                photography,
+                List.of(wedding, corporate),
+                "Includes post-editing and two photographers",
+                2,
+                8,
+                6,
+                48,
+                24
+        ));
+
+        offers.add(o.toOffer("Service",
+                2,
+                Status.ACCEPTED,
+                "Event Catering",
+                "Delicious catering services for all events.",
+                2500.0,
+                15.0,
+                List.of("menu1.jpg", "menu2.jpg"),
+                true,
+                true,
+                false,
+                LocalDateTime.now().minusDays(2),
+                catering,
+                List.of(wedding, birthday),
+                "Customized menus and staff included",
+                4,
+                12,
+                10,
+                72,
+                48
+        ));
+
+        offers.add(o.toOffer("Service",
+                3,
+                Status.ACCEPTED,
+                "DJ and Music Service",
+                "Top-notch music and DJ services for your events.",
+                1000.0,
+                0.0,
+                List.of("dj1.jpg", "dj2.jpg"),
+                true,
+                true,
+                false,
+                LocalDateTime.now().minusDays(3),
+                entertainment,
+                List.of(corporate, birthday),
+                "Professional DJ and sound setup included",
+                2,
+                6,
+                4,
+                48,
+                24
+        ));
+    }
 
     //@Autowired
     //private OfferRepository offerRepository;
 
     @Override
     public List<Offer> allOffersWithCategory(Category category) {
-        return List.of();
+        return offers.stream()
+                .filter(offer -> offer.getCategory().getId().equals(category.getId()))
+                .toList();
     }
 
     @Override
     public List<Offer> getFilteredServices(Provider provider, String name, String category, String eventType, Double price, Boolean isAvailable) {
-        return List.of();
+        return offers.stream()
+                .filter(offer -> (provider == null || offer.getProvider().equals(provider)) &&
+                        (name == null || offer.getName().toLowerCase().contains(name.toLowerCase())) &&
+                        (category == null || offer.getCategory().getName().equalsIgnoreCase(category)) &&
+                        (eventType == null || offer.getEventTypes().stream().anyMatch(event -> event.getName().equalsIgnoreCase(eventType))) &&
+                        (price == null || offer.getPrice() <= price) &&
+                        (isAvailable == null || offer.getIsAvailable().equals(isAvailable)))
+                .toList();
     }
 
     @Override
@@ -52,10 +143,12 @@ public class OfferServiceImpl implements OfferService {
                 new Offer(7, Status.ACCEPTED, "Offer 7", "Description 7", 700.0, 70.0, List.of("photo13.jpg", "photo14.jpg"), true, true, false, LocalDateTime.now().plusDays(6), new Category(), new Provider(), List.of(new EventType()))
         );
     }
+
     @Override
     public Offer findById(Integer offerId) {
         return null;
     }
+
     @Override
     public List<Offer> findByProvider(Provider provider) {
         return List.of();

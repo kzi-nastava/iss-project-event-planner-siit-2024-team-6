@@ -67,5 +67,32 @@ public class Offer {
             return new Service(dto, category);
         }
     }
+    public Offer toOffer(String type, Integer id, Status status, String name, String description, Double price, Double sale,
+                   List<String> photos, Boolean isVisible, Boolean isAvailable, Boolean isDeleted,
+                   LocalDateTime lastChanged, Category category, List<EventType> eventTypes,
+                   String specifics, int minDuration, int maxDuration, int preciseDuration,
+                   int latestReservation, int latestCancelation) {
+        if (type.equals("Product")){
+            return null;
+        }else{
+            return new Service(id, status, name, description,price,sale, photos, isVisible,isAvailable,isDeleted,lastChanged,category,eventTypes,specifics, minDuration, maxDuration, preciseDuration, latestReservation, latestCancelation);
+        }
+    }
+    public Offer(int i, Status status, String name, String s, double v, double v1, List<String> p, boolean b, boolean b1, boolean b2, LocalDateTime localDateTime, Category c, List<EventType> e){
+        this.id = i;
+        this.status = status;
+        this.name = name;
+        this.description = s;
+        this.price = v;
+        this.sale = v1;
+        this.photos = p;
+        this.isVisible = b;
+        this.isAvailable = b1;
+        this.isDeleted = b2;
+        this.lastChanged = localDateTime;
+        this.category = c;
+        this.eventTypes = e;
+        this.provider = null;
+    }
 }
 

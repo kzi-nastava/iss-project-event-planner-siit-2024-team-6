@@ -68,5 +68,16 @@ public class GlobalExceptionHandler {
                 )
         );
     }
+
+    @ExceptionHandler(UnsupportedOperationException.class)
+    public ResponseEntity<Map<String, Object>> handleUnsupportedOperationException(UnsupportedOperationException ex) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(
+                Map.of(
+                        "timestamp", LocalDateTime.now(),
+                        "message", ex.getMessage(),
+                        "status", HttpStatus.METHOD_NOT_ALLOWED.value()
+                )
+        );
+    }
 }
 

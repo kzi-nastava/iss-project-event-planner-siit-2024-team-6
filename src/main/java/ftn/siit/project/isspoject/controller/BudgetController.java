@@ -23,6 +23,7 @@ public class BudgetController {
     @GetMapping("{id}")
     public ResponseEntity<BudgetDTO> getBudget(@PathVariable int id) {
         Budget budget = budgetService.findById(id);
+        System.out.println(budget);
         if(budget == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(new BudgetDTO(budget));
     }
@@ -47,4 +48,21 @@ public class BudgetController {
 
         return ResponseEntity.ok(new BudgetDTO(updatedBudget));
     }
+    //    @GetMapping(value = "/all_elements")
+//    public ResponseEntity<PagedResponse<BudgetDTO>> getBudgetPageAllElements(Pageable page) {
+//
+//        Page<Budget> budgetsPage = budgetService.findAll(page);
+//
+//        List<BudgetDTO> budgetDTOs = budgetsPage.stream()
+//                .map(BudgetDTO::new)
+//                .toList();
+//
+//        PagedResponse<BudgetDTO> response = new PagedResponse<>(
+//                budgetDTOs,
+//                budgetsPage.getTotalPages(),
+//                budgetsPage.getTotalElements()
+//        );
+//
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
 }

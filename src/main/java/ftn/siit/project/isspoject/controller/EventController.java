@@ -134,12 +134,10 @@ public class EventController {
 //    @GetMapping
 //    public ResponseEntity<List<EventDTO>> getEventsPage(Pageable page) {
 //
-//        // Fetch paginated data from the service
 //        Page<Event> events = eventService.findAll(page);
 //
-//        // Convert Event entities to EventDTOs
 //        List<EventDTO> eventDTOs = events.stream()
-//                .map(EventDTO::new) // Assuming EventDTO has a constructor that accepts Event
+//                .map(EventDTO::new)
 //                .toList();
 //
 //        return ResponseEntity.ok(eventDTOs);

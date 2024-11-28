@@ -23,7 +23,7 @@ public class MessageContoller {
 
     @PostMapping("{senderId}/send/{recieverId}")
     public ResponseEntity<String> sendMessage(@RequestBody MessageDTO messageDTO, @PathVariable Integer senderId, @PathVariable Integer recieverId) {
-        messageService.save(new Message(messageDTO, userService.findById(senderId), userService.findById(recieverId)));
+        messageService.save(new Message(messageDTO, senderId, recieverId));
         return ResponseEntity.ok("Message sent successfully");
     }
 
@@ -38,5 +38,21 @@ public class MessageContoller {
                 .toList();
         return ResponseEntity.ok(dtos);
     }
-
+    //    @GetMapping(value = "/all_elements")
+//    public ResponseEntity<PagedResponse<MessageDTO>> getMessagePageAllElements(Pageable page) {
+//
+//        Page<Message> messagesPage = messageService.findAll(page);
+//
+//        List<MessageDTO> messageDTOs = messagesPage.stream()
+//                .map(MessageDTO::new)
+//                .toList();
+//
+//        PagedResponse<MessageDTO> response = new PagedResponse<>(
+//                messageDTOs,
+//                messagesPage.getTotalPages(),
+//                messagesPage.getTotalElements()
+//        );
+//
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
 }
