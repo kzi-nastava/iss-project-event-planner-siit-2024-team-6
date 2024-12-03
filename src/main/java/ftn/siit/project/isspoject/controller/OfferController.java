@@ -1,21 +1,19 @@
 package ftn.siit.project.isspoject.controller;
 
-import ftn.siit.project.isspoject.dto.EventDTO;
 import ftn.siit.project.isspoject.dto.OfferDTO;
-import ftn.siit.project.isspoject.dto.PagedResponse;
 import ftn.siit.project.isspoject.dto.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
-import ftn.siit.project.isspoject.service.*;
+import ftn.siit.project.isspoject.service.implementations.OfferServiceImpl;
+import ftn.siit.project.isspoject.service.interfaces.CategoryService;
+import ftn.siit.project.isspoject.service.interfaces.OfferHistoryService;
+import ftn.siit.project.isspoject.service.interfaces.OfferService;
+import ftn.siit.project.isspoject.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.print.Pageable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

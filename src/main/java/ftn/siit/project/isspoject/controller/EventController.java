@@ -1,25 +1,20 @@
 package ftn.siit.project.isspoject.controller;
 import ftn.siit.project.isspoject.dto.ClosedEventDTO;
 import ftn.siit.project.isspoject.dto.EventDTO;
-import ftn.siit.project.isspoject.dto.PagedResponse;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
-import ftn.siit.project.isspoject.service.EventService;
-import ftn.siit.project.isspoject.service.PDFGeneratorService;
-import ftn.siit.project.isspoject.service.NotificationService;
-import ftn.siit.project.isspoject.service.UserService;
+import ftn.siit.project.isspoject.service.interfaces.EventService;
+import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
+import ftn.siit.project.isspoject.service.interfaces.NotificationService;
+import ftn.siit.project.isspoject.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.print.Pageable;
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController 

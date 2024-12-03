@@ -1,16 +1,12 @@
 package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.BudgetDTO;
-import ftn.siit.project.isspoject.dto.EventDTO;
 import ftn.siit.project.isspoject.entity.Budget;
-import ftn.siit.project.isspoject.entity.Category;
-import ftn.siit.project.isspoject.service.BudgetService;
-import ftn.siit.project.isspoject.service.CategoryService;
+import ftn.siit.project.isspoject.service.interfaces.BudgetService;
+import ftn.siit.project.isspoject.service.interfaces.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/budgets/")

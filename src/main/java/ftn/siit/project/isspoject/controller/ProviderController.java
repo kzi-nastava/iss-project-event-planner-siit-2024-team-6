@@ -3,11 +3,10 @@ package ftn.siit.project.isspoject.controller;
 import ftn.siit.project.isspoject.dto.OfferDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
-import ftn.siit.project.isspoject.service.CategoryService;
-import ftn.siit.project.isspoject.service.OfferService;
-import ftn.siit.project.isspoject.service.ProviderService;
+import ftn.siit.project.isspoject.service.interfaces.CategoryService;
+import ftn.siit.project.isspoject.service.interfaces.OfferService;
+import ftn.siit.project.isspoject.service.interfaces.ProviderService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

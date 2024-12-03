@@ -2,7 +2,7 @@ package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.ReservationDTO;
 import ftn.siit.project.isspoject.entity.Reservation;
-import ftn.siit.project.isspoject.service.ReservationService;
+import ftn.siit.project.isspoject.service.interfaces.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

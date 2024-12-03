@@ -3,7 +3,7 @@ package ftn.siit.project.isspoject.controller;
 import ftn.siit.project.isspoject.dto.NotificationDTO;
 import ftn.siit.project.isspoject.entity.Notification;
 import ftn.siit.project.isspoject.entity.User;
-import ftn.siit.project.isspoject.service.NotificationService;
+import ftn.siit.project.isspoject.service.interfaces.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

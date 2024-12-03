@@ -2,18 +2,14 @@ package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.*;
 import ftn.siit.project.isspoject.entity.*;
-import ftn.siit.project.isspoject.exceptions.NotFoundException;
-import ftn.siit.project.isspoject.service.EventService;
-import ftn.siit.project.isspoject.service.ReactionService;
-import ftn.siit.project.isspoject.service.ReportService;
-import ftn.siit.project.isspoject.service.UserService;
+import ftn.siit.project.isspoject.service.interfaces.EventService;
+import ftn.siit.project.isspoject.service.interfaces.ReportService;
+import ftn.siit.project.isspoject.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
