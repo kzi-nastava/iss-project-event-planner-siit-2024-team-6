@@ -1,6 +1,6 @@
 package ftn.siit.project.isspoject.entity;
 
-import ftn.siit.project.isspoject.dto.BudgetDTO;
+import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
 import lombok.Data;
 
 import java.util.ArrayList;

@@ -1,7 +1,7 @@
 package ftn.siit.project.isspoject.controller;
 
-import ftn.siit.project.isspoject.dto.ActivityDTO;
-import ftn.siit.project.isspoject.dto.EventDTO;
+import ftn.siit.project.isspoject.dto.activity.ActivityDTO;
+import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.entity.Activity;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.Organizer;

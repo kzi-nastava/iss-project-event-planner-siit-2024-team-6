@@ -1,6 +1,6 @@
 package ftn.siit.project.isspoject.service.interfaces;
 
-import ftn.siit.project.isspoject.dto.PriceListOfferDTO;
+import ftn.siit.project.isspoject.dto.offer.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.*;
 
 import java.time.LocalDateTime;

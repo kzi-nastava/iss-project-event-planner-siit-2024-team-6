@@ -1,6 +1,6 @@
 package ftn.siit.project.isspoject.service.interfaces;
 
-import ftn.siit.project.isspoject.dto.RegistrationRequestDTO;
+import ftn.siit.project.isspoject.dto.user.RegistrationRequestDTO;
 import ftn.siit.project.isspoject.entity.Block;
 import ftn.siit.project.isspoject.entity.User;
 

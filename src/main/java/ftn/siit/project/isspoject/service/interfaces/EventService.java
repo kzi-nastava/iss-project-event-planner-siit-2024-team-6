@@ -1,6 +1,6 @@
 package ftn.siit.project.isspoject.service.interfaces;
 
-import ftn.siit.project.isspoject.dto.ClosedEventDTO;
+import ftn.siit.project.isspoject.dto.event.ClosedEventDTO;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.entity.Organizer;

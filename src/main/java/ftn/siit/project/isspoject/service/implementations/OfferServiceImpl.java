@@ -1,6 +1,6 @@
 package ftn.siit.project.isspoject.service.implementations;
 
-import ftn.siit.project.isspoject.dto.PriceListOfferDTO;
+import ftn.siit.project.isspoject.dto.offer.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.service.interfaces.OfferService;
 import org.springframework.stereotype.Service;

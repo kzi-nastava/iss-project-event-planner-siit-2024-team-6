@@ -1,6 +1,6 @@
 package ftn.siit.project.isspoject.entity;
 
-import ftn.siit.project.isspoject.dto.OfferDTO;
+import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;

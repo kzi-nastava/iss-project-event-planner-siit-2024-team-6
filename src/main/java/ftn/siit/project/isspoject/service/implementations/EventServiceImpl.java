@@ -1,6 +1,6 @@
 package ftn.siit.project.isspoject.service.implementations;
 
-import ftn.siit.project.isspoject.dto.ClosedEventDTO;
+import ftn.siit.project.isspoject.dto.event.ClosedEventDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.service.interfaces.EventService;
 import org.springframework.stereotype.Service;

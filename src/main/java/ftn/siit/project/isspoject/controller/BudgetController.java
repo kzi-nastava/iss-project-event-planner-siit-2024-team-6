@@ -1,6 +1,6 @@
 package ftn.siit.project.isspoject.controller;
 
-import ftn.siit.project.isspoject.dto.BudgetDTO;
+import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
 import ftn.siit.project.isspoject.entity.Budget;
 import ftn.siit.project.isspoject.service.interfaces.BudgetService;
 import ftn.siit.project.isspoject.service.interfaces.CategoryService;

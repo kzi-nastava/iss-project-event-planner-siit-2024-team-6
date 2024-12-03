@@ -1,6 +1,6 @@
 package ftn.siit.project.isspoject.service.interfaces;
 
-import ftn.siit.project.isspoject.dto.ReservationDTO;
+import ftn.siit.project.isspoject.dto.offer.ReservationDTO;
 import ftn.siit.project.isspoject.entity.Reservation;
 
 import java.util.List;

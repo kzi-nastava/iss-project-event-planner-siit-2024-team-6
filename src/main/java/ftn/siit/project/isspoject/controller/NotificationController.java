@@ -1,6 +1,6 @@
 package ftn.siit.project.isspoject.controller;
 
-import ftn.siit.project.isspoject.dto.NotificationDTO;
+import ftn.siit.project.isspoject.dto.notification.NotificationDTO;
 import ftn.siit.project.isspoject.entity.Notification;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.service.interfaces.NotificationService;

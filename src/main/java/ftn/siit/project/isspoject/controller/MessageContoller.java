@@ -1,6 +1,6 @@
 package ftn.siit.project.isspoject.controller;
 
-import ftn.siit.project.isspoject.dto.MessageDTO;
+import ftn.siit.project.isspoject.dto.message.MessageDTO;
 import ftn.siit.project.isspoject.entity.Message;
 import ftn.siit.project.isspoject.service.interfaces.MessageService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;

@@ -1,7 +1,7 @@
 package ftn.siit.project.isspoject.controller;
 
-import ftn.siit.project.isspoject.dto.EventDTO;
-import ftn.siit.project.isspoject.dto.EventTypeDTO;
+import ftn.siit.project.isspoject.dto.event.EventDTO;
+import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.interfaces.EventTypeService;
@@ -10,7 +10,7 @@ import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.service.interfaces.EventService;
 import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
-import ftn.siit.project.isspoject.dto.CategorySuggestionDTO;
+import ftn.siit.project.isspoject.dto.category.CategorySuggestionDTO;
 import ftn.siit.project.isspoject.entity.Category;
 import ftn.siit.project.isspoject.entity.Report;
 import ftn.siit.project.isspoject.service.interfaces.CategoryService;
