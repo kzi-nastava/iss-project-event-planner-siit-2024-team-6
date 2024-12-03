@@ -9,5 +9,4 @@ public class Activity {
     private String description;
     private String location;
     private TimeSlot time;
-    private Event event;
 }

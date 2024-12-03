@@ -27,7 +27,7 @@ public class OrganizerController {
     @Autowired
     private PDFGeneratorService pdfGeneratorService;
 
-    @PostMapping("events/create")
+    @PostMapping("events")
     public ResponseEntity<String> createEvent(@RequestParam Integer organizerId, @RequestBody EventDTO eventDTO) {
         Organizer organizer = organizerService.findById(organizerId);
         if (organizer == null) {
@@ -49,7 +49,7 @@ public class OrganizerController {
         eventService.save(event);
         return new ResponseEntity<>("Event created successfully", HttpStatus.CREATED);
     }
-    @GetMapping("events/{organizerId}/all")
+    @GetMapping("events/{organizerId}")
     public ResponseEntity<List<EventDTO>> getOrganizerEvents(@PathVariable Integer organizerId) {
         Organizer organizer = organizerService.findById(organizerId);
         if (organizer == null) {
@@ -73,7 +73,7 @@ public class OrganizerController {
         return new ResponseEntity<>(eventDTOs, HttpStatus.OK);
     }
 
-    @PutMapping("events/{organizerId}/update/{eventId}")
+    @PutMapping("events/{organizerId}/{eventId}")
     public ResponseEntity<String> updateEvent(
             @PathVariable Integer organizerId,
             @PathVariable Integer eventId,
@@ -98,7 +98,7 @@ public class OrganizerController {
 
         return new ResponseEntity<>("Event updated successfully", HttpStatus.OK);
     }
-    @DeleteMapping("events/{organizerId}/delete/{eventId}")
+    @DeleteMapping("events/{organizerId}/{eventId}")
     public ResponseEntity<String> deleteEvent(@PathVariable Integer organizerId, @PathVariable Integer eventId) {
         Organizer organizer = organizerService.findById(organizerId);
         if (organizer == null) {

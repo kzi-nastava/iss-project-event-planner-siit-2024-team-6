@@ -23,5 +23,5 @@ public class User {
     private List<Offer> favouriteOffers;
     private List<Event> favouriteEvents;
     private List<Event> attends;
-    private List<Notification> notifications;
+//    private List<Notification> notifications;
 }

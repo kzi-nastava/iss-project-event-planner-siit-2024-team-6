@@ -24,7 +24,7 @@ public class UserController {
     @Autowired
     private ReportService reportService;
 
-    @PostMapping("register")
+    @PostMapping()
     public ResponseEntity<String> registerUser(@RequestBody RegistrationRequestDTO registrationRequestDTO) {
         if (registrationRequestDTO.getEmail() == null) {
             return new ResponseEntity<>("Error, invalid user", HttpStatus.BAD_REQUEST);
@@ -108,7 +108,7 @@ public class UserController {
         return new ResponseEntity<>("Profile updated successfully", HttpStatus.OK);
     }
   
-    @PutMapping("{id}/change-password")
+    @PutMapping("{id}/password")
     public ResponseEntity<String> changePassword(@PathVariable Integer id, @RequestBody PasswordChangeDTO passwordChangeDTO) {
         User user = userService.findById(id);
         if (user == null) {
@@ -155,7 +155,7 @@ public class UserController {
     }
 
 
-    @GetMapping("all")
+    @GetMapping()
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<User> users = userService.findAll();
         List<UserDTO> userDTOs = users.stream().map(user -> {
@@ -230,7 +230,7 @@ public class UserController {
         return ResponseEntity.ok(events);
     }
 
-    @PostMapping("/{blockerId}/block/{blockedId}")
+    @PostMapping("{blockerId}/block/{blockedId}")
     public ResponseEntity<Block> blockUser(
             @PathVariable Integer blockerId,
             @PathVariable Integer blockedId
@@ -239,7 +239,7 @@ public class UserController {
         return ResponseEntity.ok(block);
     }
 
-    @PostMapping("/report")
+    @PostMapping("report")
     public ResponseEntity<Report> reportUser(@RequestBody UserReportDTO userReportDTO) {
         if (userReportDTO == null || userReportDTO.getReporter() == null || userReportDTO.getReported() == null) {
             throw new IllegalArgumentException("Not all arguments were given while reporting user");

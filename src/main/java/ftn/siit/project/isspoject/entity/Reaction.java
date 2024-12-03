@@ -9,7 +9,7 @@ public class Reaction {
     //@Id
     private Integer id;
     private String text;
-    private int rating;
+    private Integer rating;
     private Status status;
     private Offer offer;
     private Event event;

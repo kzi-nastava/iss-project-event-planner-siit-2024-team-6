@@ -45,7 +45,7 @@ public class AdminController {
     @Autowired
     private ReportService reportService;
 
-    @PostMapping("event-types/add")
+    @PostMapping("event-types")
     public ResponseEntity<String> addEventType(@RequestBody EventTypeDTO eventTypeDTO) {
         if (eventTypeDTO == null || eventTypeDTO.getName() == null || eventTypeDTO.getDescription() == null) {
             return new ResponseEntity<>("Invalid event type data", HttpStatus.BAD_REQUEST);
@@ -60,7 +60,7 @@ public class AdminController {
         return new ResponseEntity<>("Event type added successfully", HttpStatus.CREATED);
     }
 
-    @GetMapping("event-types/all")
+    @GetMapping("event-types")
     public ResponseEntity<List<EventTypeDTO>> getAllEventTypes() {
         List<EventType> eventTypes = eventTypeService.findAll();
         if(eventTypes == null || eventTypes.size() == 0) {
@@ -77,7 +77,7 @@ public class AdminController {
         return new ResponseEntity<>(eventTypeDTOs, HttpStatus.OK);
     }
 
-    @PutMapping("event-types/{id}/update")
+    @PutMapping("event-types/{id}")
     public ResponseEntity<String> updateEventType(
             @PathVariable Integer id,
             @RequestBody EventTypeDTO eventTypeDTO) {
