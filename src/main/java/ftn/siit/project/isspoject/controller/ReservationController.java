@@ -16,7 +16,7 @@ public class ReservationController {
     @Autowired
     private ReservationService reservationService;
 
-    @PostMapping("add")
+    @PostMapping("")
     public ResponseEntity<String> createReservation(@RequestBody ReservationDTO dto) {
         Reservation reservation = reservationService.save(dto);
         sendConfirmations(reservation);

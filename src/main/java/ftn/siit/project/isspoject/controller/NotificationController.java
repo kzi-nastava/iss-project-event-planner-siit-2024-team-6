@@ -21,7 +21,7 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
 
-    @GetMapping("by-recipient/{recipientId}")
+    @GetMapping("recipient/{recipientId}")
     public ResponseEntity<List<NotificationDTO>> getByRecipient(@PathVariable Integer recipientId) {
         User recipient = new User();
 
