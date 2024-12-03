@@ -1,11 +1,11 @@
 package ftn.siit.project.isspoject.controller;
-import ftn.siit.project.isspoject.dto.OfferDTO;
-import ftn.siit.project.isspoject.dto.ProductDTO;
+import ftn.siit.project.isspoject.dto.offer.OfferDTO;
+import ftn.siit.project.isspoject.dto.offer.ProductDTO;
 import ftn.siit.project.isspoject.entity.Category;
 import ftn.siit.project.isspoject.entity.Product;
-import ftn.siit.project.isspoject.service.CategoryService;
-import ftn.siit.project.isspoject.service.NotificationService;
-import ftn.siit.project.isspoject.service.ProductService;
+import ftn.siit.project.isspoject.service.interfaces.CategoryService;
+import ftn.siit.project.isspoject.service.interfaces.NotificationService;
+import ftn.siit.project.isspoject.service.interfaces.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

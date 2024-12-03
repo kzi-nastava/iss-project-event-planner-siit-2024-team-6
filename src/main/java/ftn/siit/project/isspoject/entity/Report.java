@@ -1,6 +1,6 @@
 package ftn.siit.project.isspoject.entity;
 
-import ftn.siit.project.isspoject.dto.UserReportDTO;
+import ftn.siit.project.isspoject.dto.user.UserReportDTO;
 import lombok.Data;
 
 @Data

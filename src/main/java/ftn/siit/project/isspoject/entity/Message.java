@@ -1,6 +1,6 @@
 package ftn.siit.project.isspoject.entity;
 
-import ftn.siit.project.isspoject.dto.MessageDTO;
+import ftn.siit.project.isspoject.dto.message.MessageDTO;
 import lombok.Data;
 
 import java.time.Instant;

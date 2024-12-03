@@ -1,13 +1,13 @@
 package ftn.siit.project.isspoject.controller;
 
-import ftn.siit.project.isspoject.dto.ActivityDTO;
-import ftn.siit.project.isspoject.dto.EventDTO;
+import ftn.siit.project.isspoject.dto.activity.ActivityDTO;
+import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.entity.Activity;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.Organizer;
-import ftn.siit.project.isspoject.service.EventService;
-import ftn.siit.project.isspoject.service.OrganizerService;
-import ftn.siit.project.isspoject.service.PDFGeneratorService;
+import ftn.siit.project.isspoject.service.interfaces.EventService;
+import ftn.siit.project.isspoject.service.interfaces.OrganizerService;
+import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

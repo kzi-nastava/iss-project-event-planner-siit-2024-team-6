@@ -1,7 +1,7 @@
 package ftn.siit.project.isspoject.entity;
 
-import ftn.siit.project.isspoject.dto.ClosedEventDTO;
-import ftn.siit.project.isspoject.dto.EventDTO;
+import ftn.siit.project.isspoject.dto.event.ClosedEventDTO;
+import ftn.siit.project.isspoject.dto.event.EventDTO;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;

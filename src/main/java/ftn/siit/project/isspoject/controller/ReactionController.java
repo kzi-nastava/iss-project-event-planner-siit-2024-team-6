@@ -2,13 +2,11 @@ package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.entity.Reaction;
 import ftn.siit.project.isspoject.entity.Status;
-import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
-import ftn.siit.project.isspoject.service.ProviderService;
-import ftn.siit.project.isspoject.service.ReactionService;
-import ftn.siit.project.isspoject.service.NotificationService;
+import ftn.siit.project.isspoject.service.interfaces.ProviderService;
+import ftn.siit.project.isspoject.service.interfaces.ReactionService;
+import ftn.siit.project.isspoject.service.interfaces.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
