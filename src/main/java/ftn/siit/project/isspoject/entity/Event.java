@@ -21,25 +21,12 @@ public class Event {
     private String place;
     private LocalDateTime date;
     private EventType eventType;
-    private Organizer organizer;
     private List<Activity> activities;
     private Budget budget;
+    private List<Reservation> reservations;
+    private List<Product> products;
 
     public Event() {}
-    public Event(Integer id, String name, String description, Integer maxParticipants, Integer participants, Boolean isPublic, String place, LocalDateTime date, EventType eventType, Organizer organizer, List<Activity> activities, Budget budget) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.maxParticipants = maxParticipants;
-        this.participants = participants;
-        this.isPublic = isPublic;
-        this.place = place;
-        this.date = date;
-        this.eventType = eventType;
-        this.organizer = organizer;
-        this.activities = activities;
-        this.budget = budget;
-    }
 
     public Event(EventDTO eventDTO) {
         if (eventDTO != null) {
@@ -52,7 +39,8 @@ public class Event {
             this.place = eventDTO.getPlace();
             this.date = eventDTO.getDate();
             this.eventType = eventDTO.getEventType();
-            this.organizer = new Organizer();
+            this.products = new ArrayList<>();
+            this.reservations = new ArrayList<>();
             this.activities = new ArrayList<>();
         }
     }
@@ -70,7 +58,8 @@ public class Event {
         this.place = eventDTO.getPlace();
         this.date = eventDTO.getDate();
         this.eventType = eventDTO.getEventType();
-        this.organizer = new Organizer();
+        this.products = new ArrayList<>();
+        this.reservations = new ArrayList<>();
         this.activities = new ArrayList<>();
     }
 }

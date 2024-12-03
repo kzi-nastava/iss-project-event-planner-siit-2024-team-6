@@ -1,17 +1,12 @@
 package ftn.siit.project.isspoject.dto.user;
 
-import ftn.siit.project.isspoject.entity.Event;
-import ftn.siit.project.isspoject.entity.Notification;
-import ftn.siit.project.isspoject.entity.Offer;
 import ftn.siit.project.isspoject.entity.User;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
-public class UserDTO {
-    private Integer id;
+public class NewUserDTO {
     private String email;
     private String name;
     private String lastname;

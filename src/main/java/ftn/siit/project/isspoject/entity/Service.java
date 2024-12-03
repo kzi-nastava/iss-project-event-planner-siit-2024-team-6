@@ -13,11 +13,11 @@ import java.util.List;
 public class Service extends Offer{
 
     private String specifics;
-    private int minDuration;
-    private int maxDuration;
-    private int preciseDuration;
-    private int latestReservation;
-    private int latestCancelation;
+    private Integer minDuration;
+    private Integer maxDuration;
+    private Integer preciseDuration;
+    private Integer latestReservation;
+    private Integer latestCancelation;
     public Service(){}
     public Service(OfferDTO dto, Category category){
         super(dto, category);

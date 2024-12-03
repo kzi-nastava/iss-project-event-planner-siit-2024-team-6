@@ -11,10 +11,10 @@ public class Message {
     private Integer id;
     private String text;
     private ZonedDateTime time;
-    private Integer sender;
-    private Integer receiver;
+    private User sender;
+    private User receiver;
     public Message(){}
-    public Message (MessageDTO dto, int sender, int receiver) {
+    public Message (MessageDTO dto, User sender, User receiver) {
         this.id = dto.getId();
         this.text = dto.getText();
         this.time = dto.getTime();
@@ -26,7 +26,7 @@ public class Message {
         this.id = integer;
         this.text = s;
         this.time = zonedDateTime;
-        this.sender = i;
-        this.receiver = j;
+//        this.sender = i;
+//        this.receiver = j;
     }
 }

@@ -10,5 +10,5 @@ public class TimeSlot {
     private Integer id;
     private LocalDateTime start;
     private Integer duration;
-    private List<Activity> activities;
+//    private List<Activity> activities;
 }

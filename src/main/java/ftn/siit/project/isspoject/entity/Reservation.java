@@ -4,9 +4,9 @@ import lombok.Data;
 
 @Data
 public class Reservation {
-    Integer id;
-    Integer eventId;
-    Integer serviceId;
-    boolean isCanceled;
-    TimeSlot time;
+    private Integer id;
+//    Integer eventId;
+    private Service service;
+    private boolean isCanceled;
+    private TimeSlot time;
 }

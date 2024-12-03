@@ -32,7 +32,7 @@ public class EventController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("{eventId}/details")
+    @GetMapping("{eventId}")
     public ResponseEntity<EventDTO> getEvent(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
         if (event == null) {
@@ -117,7 +117,7 @@ public class EventController {
     }
 
 
-    @GetMapping("all")
+    @GetMapping()
     public ResponseEntity<List<EventDTO>> getAll() {
         List<Event> events = eventService.findAll();
         List<EventDTO> dtos = events.stream()

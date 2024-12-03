@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/products/")
 public class ProductController {
 
     @Autowired
@@ -28,7 +28,7 @@ public class ProductController {
     @Autowired
     private NotificationService notificationService;
 
-    @PostMapping("/create")
+    @PostMapping()
     public ResponseEntity<String> createProduct(@RequestBody ProductDTO productDTO) {
 
         Category category = categoryService.findByName(productDTO.getCategory());
@@ -69,19 +69,19 @@ public class ProductController {
 //
 //        return ResponseEntity.ok(response);
 //    }
-    @GetMapping("/{providerId}/list")
+    @GetMapping("{providerId}/list")
     public ResponseEntity<List<ProductDTO>> getProductsByProvider(@PathVariable Integer providerId) {
         List<Product> products = productService.findByProvider(providerId);
         return getListResponseEntity(products);
     }
 
-    @GetMapping("/search")
+    @GetMapping("search")
     public ResponseEntity<List<ProductDTO>> searchProducts(@RequestParam String name) {
         List<Product> products = productService.searchByName(name);
         return getListResponseEntity(products);
     }
 
-    @GetMapping("/filter")
+    @GetMapping("filter")
     public ResponseEntity<List<ProductDTO>> filterProducts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String eventType,
@@ -118,7 +118,7 @@ public class ProductController {
         return new ResponseEntity<>(productDTOs, HttpStatus.OK);
     }
 
-    @PutMapping("/{productId}/update")
+    @PutMapping("{productId}")
     public ResponseEntity<String> updateProduct(@PathVariable Integer productId, @RequestBody ProductDTO productDTO) {
         Product product = productService.findById(productId);
         if (product == null) {
@@ -142,7 +142,7 @@ public class ProductController {
         productService.save(product);
         return new ResponseEntity<>("Product updated successfully", HttpStatus.OK);
     }
-    @DeleteMapping("/{productId}/delete")
+    @DeleteMapping("{productId}")
     public ResponseEntity<String> deleteProduct(@PathVariable Integer productId) {
         Product product = productService.findById(productId);
         if (product == null) {

@@ -20,7 +20,7 @@ public class MessageContoller {
 
     @PostMapping("{senderId}/send/{recieverId}")
     public ResponseEntity<String> sendMessage(@RequestBody MessageDTO messageDTO, @PathVariable Integer senderId, @PathVariable Integer recieverId) {
-        messageService.save(new Message(messageDTO, senderId, recieverId));
+//        messageService.save(new Message(messageDTO, senderId, recieverId));
         return ResponseEntity.ok("Message sent successfully");
     }
 

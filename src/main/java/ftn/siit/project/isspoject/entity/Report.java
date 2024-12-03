@@ -5,12 +5,12 @@ import lombok.Data;
 
 @Data
 public class Report {
-    Integer id;
-    String reason;
-    User reported;
-    User reporter;
-    Status status;
-    Reaction reactions;
+    private Integer id;
+    private String reason;
+    private User reported;
+    private User reporter;
+    private Status status;
+    private Reaction reactions;
 
     public Report(){}
     public Report(UserReportDTO userReportDTO) {
