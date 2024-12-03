@@ -44,7 +44,7 @@ public class OrganizerController {
         event.setEventType(eventDTO.getEventType());
         event.setParticipants(0);
 
-        event.setOrganizer(organizer);
+        //event.setOrganizer(organizer);
 
         eventService.save(event);
         return new ResponseEntity<>("Event created successfully", HttpStatus.CREATED);
@@ -84,9 +84,9 @@ public class OrganizerController {
         }
 
         Event event = eventService.findById(eventId);
-        if (event == null || !event.getOrganizer().equals(organizer)) {
-            return new ResponseEntity<>("Event not found or not owned by this organizer", HttpStatus.NOT_FOUND);
-        }
+//        if (event == null || !event.getOrganizer().equals(organizer)) {
+//            return new ResponseEntity<>("Event not found or not owned by this organizer", HttpStatus.NOT_FOUND);
+//        }
 
         event.setName(eventDTO.getName());
         event.setDescription(eventDTO.getDescription());
@@ -106,9 +106,9 @@ public class OrganizerController {
         }
 
         Event event = eventService.findById(eventId);
-        if (event == null || !event.getOrganizer().equals(organizer)) {
-            return new ResponseEntity<>("Event not found or not owned by this organizer", HttpStatus.NOT_FOUND);
-        }
+//        if (event == null || !event.getOrganizer().equals(organizer)) {
+//            return new ResponseEntity<>("Event not found or not owned by this organizer", HttpStatus.NOT_FOUND);
+//        }
 
         eventService.delete(event);
         return new ResponseEntity<>("Event deleted successfully", HttpStatus.OK);
@@ -124,9 +124,9 @@ public class OrganizerController {
         }
 
         Event event = eventService.findById(eventId);
-        if (event == null || !event.getOrganizer().equals(organizer)) {
-            return new ResponseEntity<>("Event not found or not owned by this organizer", HttpStatus.NOT_FOUND);
-        }
+//        if (event == null || !event.getOrganizer().equals(organizer)) {
+//            return new ResponseEntity<>("Event not found or not owned by this organizer", HttpStatus.NOT_FOUND);
+//        }
 
         List<Activity> agenda = activities.stream().map(activityDTO -> {
             Activity activity = new Activity();
@@ -153,9 +153,9 @@ public class OrganizerController {
         }
 
         Event event = eventService.findById(eventId);
-        if (event == null || !event.getOrganizer().equals(organizer)) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+//        if (event == null || !event.getOrganizer().equals(organizer)) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
 
         List<ActivityDTO> agenda = event.getActivities().stream().map(activity -> {
             ActivityDTO dto = new ActivityDTO();
@@ -179,9 +179,9 @@ public class OrganizerController {
         }
 
         Event event = eventService.findById(eventId);
-        if (event == null || !event.getOrganizer().equals(organizer)) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+//        if (event == null || !event.getOrganizer().equals(organizer)) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
 
         byte[] pdf = pdfGeneratorService.generateGuestListPDF(event);
 

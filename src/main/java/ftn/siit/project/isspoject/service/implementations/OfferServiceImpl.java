@@ -105,14 +105,15 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public List<Offer> getFilteredServices(Provider provider, String name, String category, String eventType, Double price, Boolean isAvailable) {
-        return offers.stream()
-                .filter(offer -> (provider == null || offer.getProvider().equals(provider)) &&
-                        (name == null || offer.getName().toLowerCase().contains(name.toLowerCase())) &&
-                        (category == null || offer.getCategory().getName().equalsIgnoreCase(category)) &&
-                        (eventType == null || offer.getEventTypes().stream().anyMatch(event -> event.getName().equalsIgnoreCase(eventType))) &&
-                        (price == null || offer.getPrice() <= price) &&
-                        (isAvailable == null || offer.getIsAvailable().equals(isAvailable)))
-                .toList();
+//        return offers.stream()
+//                .filter(offer -> (provider == null || offer.getProvider().equals(provider)) &&
+//                        (name == null || offer.getName().toLowerCase().contains(name.toLowerCase())) &&
+//                        (category == null || offer.getCategory().getName().equalsIgnoreCase(category)) &&
+//                        (eventType == null || offer.getEventTypes().stream().anyMatch(event -> event.getName().equalsIgnoreCase(eventType))) &&
+//                        (price == null || offer.getPrice() <= price) &&
+//                        (isAvailable == null || offer.getIsAvailable().equals(isAvailable)))
+//                .toList();
+        return List.of();
     }
 
     @Override
@@ -132,13 +133,27 @@ public class OfferServiceImpl implements OfferService {
     public List<Offer> findAll() {
 
         return List.of(
-                new Offer(1, Status.ACCEPTED, "Offer 1", "Description 1", 100.0, 10.0, List.of("photo1.jpg", "photo2.jpg"), true, true, false, LocalDateTime.now(), new Category(), new Provider(), List.of(new EventType())),
-                new Offer(2, Status.ACCEPTED, "Offer 2", "Description 2", 200.0, 20.0, List.of("photo3.jpg", "photo4.jpg"), true, false, false, LocalDateTime.now().plusDays(1), new Category(), new Provider(), List.of(new EventType())),
-                new Offer(3, Status.ACCEPTED, "Offer 3", "Description 3", 300.0, 30.0, List.of("photo5.jpg", "photo6.jpg"), true, true, false, LocalDateTime.now().plusDays(2), new Category(), new Provider(), List.of(new EventType())),
-                new Offer(4, Status.ACCEPTED, "Offer 4", "Description 4", 400.0, 40.0, List.of("photo7.jpg", "photo8.jpg"), false, false, false, LocalDateTime.now().plusDays(3), new Category(), new Provider(), List.of(new EventType())),
-                new Offer(5, Status.ACCEPTED, "Offer 5", "Description 5", 500.0, 50.0, List.of("photo9.jpg", "photo10.jpg"), true, true, false, LocalDateTime.now().plusDays(4), new Category(), new Provider(), List.of(new EventType())),
-                new Offer(6, Status.PENDING, "Offer 6", "Description 6", 600.0, 60.0, List.of("photo11.jpg", "photo12.jpg"), true, false, false, LocalDateTime.now().plusDays(5), new Category(), new Provider(), List.of(new EventType())),
-                new Offer(7, Status.ACCEPTED, "Offer 7", "Description 7", 700.0, 70.0, List.of("photo13.jpg", "photo14.jpg"), true, true, false, LocalDateTime.now().plusDays(6), new Category(), new Provider(), List.of(new EventType()))
+                new Offer(1, Status.ACCEPTED, "Offer 1", "Description 1", 100.0, 10.0,
+                        List.of("photo1.jpg", "photo2.jpg"), true, true, false,
+                        LocalDateTime.now(), new Category(), List.of(new EventType())),
+                new Offer(2, Status.ACCEPTED, "Offer 2", "Description 2", 200.0, 20.0,
+                        List.of("photo3.jpg", "photo4.jpg"), true, false, false,
+                        LocalDateTime.now().plusDays(1), new Category(), List.of(new EventType())),
+                new Offer(3, Status.ACCEPTED, "Offer 3", "Description 3", 300.0, 30.0,
+                        List.of("photo5.jpg", "photo6.jpg"), true, true, false,
+                        LocalDateTime.now().plusDays(2), new Category(), List.of(new EventType())),
+                new Offer(4, Status.ACCEPTED, "Offer 4", "Description 4", 400.0, 40.0,
+                        List.of("photo7.jpg", "photo8.jpg"), false, false, false,
+                        LocalDateTime.now().plusDays(3), new Category(), List.of(new EventType())),
+                new Offer(5, Status.ACCEPTED, "Offer 5", "Description 5", 500.0, 50.0,
+                        List.of("photo9.jpg", "photo10.jpg"), true, true, false,
+                        LocalDateTime.now().plusDays(4), new Category(), List.of(new EventType())),
+                new Offer(6, Status.PENDING, "Offer 6", "Description 6", 600.0, 60.0,
+                        List.of("photo11.jpg", "photo12.jpg"), true, false, false,
+                        LocalDateTime.now().plusDays(5), new Category(), List.of(new EventType())),
+                new Offer(7, Status.ACCEPTED, "Offer 7", "Description 7", 700.0, 70.0,
+                        List.of("photo13.jpg", "photo14.jpg"), true, true, false,
+                        LocalDateTime.now().plusDays(6), new Category(), List.of(new EventType()))
         );
     }
 
@@ -156,11 +171,21 @@ public class OfferServiceImpl implements OfferService {
     public List<Offer> findTopFive() {
 
         return List.of(
-                new Offer(1, Status.ACCEPTED, "Offer 1", "Description 1", 100.0, 10.0, List.of("photo1.jpg", "photo2.jpg"), true, true, false, LocalDateTime.now(), new Category(), new Provider(), List.of(new EventType())),
-                new Offer(2, Status.ACCEPTED, "Offer 2", "Description 2", 200.0, 20.0, List.of("photo3.jpg", "photo4.jpg"), true, false, false, LocalDateTime.now().plusDays(1), new Category(), new Provider(), List.of(new EventType())),
-                new Offer(3, Status.ACCEPTED, "Offer 3", "Description 3", 300.0, 30.0, List.of("photo5.jpg", "photo6.jpg"), true, true, false, LocalDateTime.now().plusDays(2), new Category(), new Provider(), List.of(new EventType())),
-                new Offer(4, Status.ACCEPTED, "Offer 4", "Description 4", 400.0, 40.0, List.of("photo7.jpg", "photo8.jpg"), false, false, false, LocalDateTime.now().plusDays(3), new Category(), new Provider(), List.of(new EventType())),
-                new Offer(5, Status.ACCEPTED, "Offer 5", "Description 5", 500.0, 50.0, List.of("photo9.jpg", "photo10.jpg"), true, true, false, LocalDateTime.now().plusDays(4), new Category(), new Provider(), List.of(new EventType()))
+                new Offer(1, Status.ACCEPTED, "Offer 1", "Description 1", 100.0, 10.0,
+                        List.of("photo1.jpg", "photo2.jpg"), true, true, false,
+                        LocalDateTime.now(), new Category(), List.of(new EventType())),
+                new Offer(2, Status.ACCEPTED, "Offer 2", "Description 2", 200.0, 20.0,
+                        List.of("photo3.jpg", "photo4.jpg"), true, false, false,
+                        LocalDateTime.now().plusDays(1), new Category(), List.of(new EventType())),
+                new Offer(3, Status.ACCEPTED, "Offer 3", "Description 3", 300.0, 30.0,
+                        List.of("photo5.jpg", "photo6.jpg"), true, true, false,
+                        LocalDateTime.now().plusDays(2), new Category(), List.of(new EventType())),
+                new Offer(4, Status.ACCEPTED, "Offer 4", "Description 4", 400.0, 40.0,
+                        List.of("photo7.jpg", "photo8.jpg"), false, false, false,
+                        LocalDateTime.now().plusDays(3), new Category(), List.of(new EventType())),
+                new Offer(5, Status.ACCEPTED, "Offer 5", "Description 5", 500.0, 50.0,
+                        List.of("photo9.jpg", "photo10.jpg"), true, true, false,
+                        LocalDateTime.now().plusDays(4), new Category(), List.of(new EventType()))
         );
     }
 

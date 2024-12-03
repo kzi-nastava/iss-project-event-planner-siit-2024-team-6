@@ -28,6 +28,34 @@ public class Event {
 
     public Event() {}
 
+    public Event(
+            Integer id,
+            String name,
+            String description,
+            Integer maxParticipants,
+            Integer participants,
+            Boolean isPublic,
+            String place,
+            LocalDateTime date,
+            EventType eventType,
+            List<Activity> activities,
+            Budget budget,
+            List<Reservation> reservations,
+            List<Product> products) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.maxParticipants = maxParticipants;
+        this.participants = participants;
+        this.isPublic = isPublic;
+        this.place = place;
+        this.date = date;
+        this.eventType = eventType;
+        this.activities = activities;
+        this.budget = budget;
+        this.reservations = reservations;
+        this.products = products;
+    }
     public Event(EventDTO eventDTO) {
         if (eventDTO != null) {
             this.id = eventDTO.getId();

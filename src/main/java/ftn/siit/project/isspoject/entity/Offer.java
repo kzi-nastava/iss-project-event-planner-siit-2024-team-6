@@ -29,22 +29,34 @@ public class Offer {
     private List<EventType> eventTypes;
 
     public Offer() {}
-//    public Offer(Integer id, Status status, String name, String description, Double price, Double sale, List<String> photos, Boolean isVisible, Boolean isAvailable, Boolean isDeleted, LocalDateTime lastChanged, Category category, Provider provider, List<EventType> eventTypes) {
-//        this.id = id;
-//        this.status = status;
-//        this.name = name;
-//        this.description = description;
-//        this.price = price;
-//        this.sale = sale;
-//        this.photos = photos;
-//        this.isVisible = isVisible;
-//        this.isAvailable = isAvailable;
-//        this.isDeleted = isDeleted;
-//        this.lastChanged = lastChanged;
-//        this.category = category;
-//        this.provider = provider;
-//        this.eventTypes = eventTypes;
-//    }
+    public Offer(
+            Integer id,
+            Status status,
+            String name,
+            String description,
+            Double price,
+            Double sale,
+            List<String> photos,
+            Boolean isVisible,
+            Boolean isAvailable,
+            Boolean isDeleted,
+            LocalDateTime lastChanged,
+            Category category,
+            List<EventType> eventTypes) {
+        this.id = id;
+        this.status = status;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.sale = sale;
+        this.photos = photos;
+        this.isVisible = isVisible;
+        this.isAvailable = isAvailable;
+        this.isDeleted = isDeleted;
+        this.lastChanged = lastChanged;
+        this.category = category;
+        this.eventTypes = eventTypes;
+    }
 
     public Offer(OfferDTO dto, Category category) {
         this.id = dto.getId();
