@@ -1,4 +1,4 @@
-package ftn.siit.project.isspoject.dto;
+package ftn.siit.project.isspoject.dto.category;
 
 import ftn.siit.project.isspoject.entity.Report;
 import ftn.siit.project.isspoject.entity.Status;

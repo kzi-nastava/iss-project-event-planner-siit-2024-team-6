@@ -1,4 +1,4 @@
-package ftn.siit.project.isspoject.dto;
+package ftn.siit.project.isspoject.dto.pagination;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package ftn.siit.project.isspoject.dto;
+package ftn.siit.project.isspoject.dto.user;
 
 import ftn.siit.project.isspoject.entity.Offer;
 import lombok.Data;

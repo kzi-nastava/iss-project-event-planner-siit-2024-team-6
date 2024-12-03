@@ -1,4 +1,4 @@
-package ftn.siit.project.isspoject.dto;
+package ftn.siit.project.isspoject.dto.event;
 
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.EventType;

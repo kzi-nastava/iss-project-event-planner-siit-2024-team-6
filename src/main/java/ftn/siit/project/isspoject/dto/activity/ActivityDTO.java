@@ -1,4 +1,4 @@
-package ftn.siit.project.isspoject.dto;
+package ftn.siit.project.isspoject.dto.activity;
 
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.TimeSlot;

@@ -1,4 +1,4 @@
-package ftn.siit.project.isspoject.dto;
+package ftn.siit.project.isspoject.dto.message;
 
 import ftn.siit.project.isspoject.entity.Message;
 import ftn.siit.project.isspoject.entity.User;

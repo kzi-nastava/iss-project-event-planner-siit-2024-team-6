@@ -1,4 +1,4 @@
-package ftn.siit.project.isspoject.dto;
+package ftn.siit.project.isspoject.dto.notification;
 
 import ftn.siit.project.isspoject.entity.Notification;
 import ftn.siit.project.isspoject.entity.User;

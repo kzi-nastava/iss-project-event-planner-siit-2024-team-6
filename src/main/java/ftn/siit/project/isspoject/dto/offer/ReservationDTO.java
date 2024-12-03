@@ -1,4 +1,4 @@
-package ftn.siit.project.isspoject.dto;
+package ftn.siit.project.isspoject.dto.offer;
 
 import ftn.siit.project.isspoject.entity.Reservation;
 import ftn.siit.project.isspoject.entity.TimeSlot;

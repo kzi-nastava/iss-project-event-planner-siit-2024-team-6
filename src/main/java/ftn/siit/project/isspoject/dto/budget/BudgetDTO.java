@@ -1,4 +1,4 @@
-package ftn.siit.project.isspoject.dto;
+package ftn.siit.project.isspoject.dto.budget;
 
 import ftn.siit.project.isspoject.entity.Budget;
 import ftn.siit.project.isspoject.entity.Category;
