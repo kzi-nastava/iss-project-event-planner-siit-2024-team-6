@@ -19,7 +19,7 @@ public interface UserService {
 
     User findById(Integer id);
 
-    void save(User user);
+    User save(User user);
     // Za SRP i OCP
 
     List<User> findEventAttendees(Integer eventId);

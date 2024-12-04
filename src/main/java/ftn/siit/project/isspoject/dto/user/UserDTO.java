@@ -1,5 +1,8 @@
 package ftn.siit.project.isspoject.dto.user;
 
+import ftn.siit.project.isspoject.dto.event.EventDTO;
+import ftn.siit.project.isspoject.dto.notification.NotificationDTO;
+import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.Notification;
 import ftn.siit.project.isspoject.entity.Offer;
@@ -7,6 +10,7 @@ import ftn.siit.project.isspoject.entity.User;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -21,6 +25,10 @@ public class UserDTO {
     private boolean isActive;
 
     private LocalDateTime suspendedSince;
+    private List<OfferDTO> favouriteOffers;
+    private List<EventDTO> favouriteEvents;
+    private List<EventDTO> attends;
+    private List<NotificationDTO> notifications;
 
     public UserDTO(User savedUser) {
     }
