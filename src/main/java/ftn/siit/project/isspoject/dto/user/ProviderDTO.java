@@ -1,10 +1,8 @@
 package ftn.siit.project.isspoject.dto.user;
 
-import ftn.siit.project.isspoject.entity.Offer;
+import ftn.siit.project.isspoject.entity.Provider;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -16,4 +14,7 @@ public class ProviderDTO extends UserDTO{
     private String[] companyPhotos;
     private String openingTime;
     private String closingTime;
+
+    public ProviderDTO(Provider savedUser) {
+    }
 }

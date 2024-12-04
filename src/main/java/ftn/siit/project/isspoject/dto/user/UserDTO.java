@@ -22,6 +22,13 @@ public class UserDTO {
 
     private LocalDateTime suspendedSince;
 
+    public UserDTO(User savedUser) {
+    }
+
+    public UserDTO() {
+
+    }
+
     public User toUser() {
         User user = new User();
         user.setEmail(this.email);

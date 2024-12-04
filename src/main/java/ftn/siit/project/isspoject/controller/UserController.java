@@ -25,12 +25,24 @@ public class UserController {
     private ReportService reportService;
 
     @PostMapping()
-    public ResponseEntity<String> registerUser(@RequestBody RegistrationRequestDTO registrationRequestDTO) {
-        if (registrationRequestDTO.getEmail() == null) {
-            return new ResponseEntity<>("Error, invalid user", HttpStatus.BAD_REQUEST);
+    public ResponseEntity<UserDTO> registerUser(@RequestBody RegistrationRequestDTO registrationRequestDTO) {
+        if (registrationRequestDTO.getEmail() == null || registrationRequestDTO.getRole() == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
-        userService.save(registrationRequestDTO);
-        return new ResponseEntity<>("User was registered, check out the activation code", HttpStatus.CREATED);
+
+        User savedUser = userService.save(registrationRequestDTO);
+
+        // Преобразуем сохранённого пользователя в соответствующий DTO
+        UserDTO responseDto;
+        if (savedUser instanceof Provider) {
+            responseDto = new ProviderDTO((Provider) savedUser);
+        } else if (savedUser instanceof Organizer) {
+            responseDto = new OrganizerDTO((Organizer) savedUser);
+        } else {
+            responseDto = new UserDTO(savedUser);
+        }
+
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
     @PostMapping("quick-register")
@@ -50,14 +62,13 @@ public class UserController {
         }
         UserDTO dto = null;
         if(user instanceof Organizer){
-             dto = new OrganizerDTO();
+             dto = new OrganizerDTO((Organizer) user);
         }else{
             if(user instanceof Provider){
-                dto = new ProviderDTO();
+                dto = new ProviderDTO((Provider) user);
                 ((ProviderDTO) dto).setCompanyEmail(((Provider) user).getCompanyEmail());
                 ((ProviderDTO) dto).setCompanyName(((Provider) user).getCompanyName());
                 ((ProviderDTO) dto).setDescription(((Provider) user).getDescription());
-                ((ProviderDTO) dto).setCompanyPhotos(((Provider) user).getCompanyPhotos());
                 ((ProviderDTO) dto).setOpeningTime(((Provider) user).getOpeningTime());
                 ((ProviderDTO) dto).setClosingTime(((Provider) user).getClosingTime());
             }else {
@@ -77,10 +88,10 @@ public class UserController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<String> updateProfile(@PathVariable Integer id, @RequestBody UserDTO updatedUser) {
+    public ResponseEntity<UserDTO> updateProfile(@PathVariable Integer id, @RequestBody UserDTO updatedUser) {
         User user = userService.findById(id);
         if (user == null) {
-            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
 
         user.setName(updatedUser.getName());
@@ -98,14 +109,13 @@ public class UserController {
             if (updatedUser instanceof ProviderDTO) {
                 ProviderDTO providerDTO = (ProviderDTO) updatedUser;
                 ((Provider) user).setDescription(providerDTO.getDescription());
-                ((Provider) user).setCompanyPhotos(providerDTO.getCompanyPhotos());
                 ((Provider) user).setOpeningTime(providerDTO.getOpeningTime());
                 ((Provider) user).setClosingTime(providerDTO.getClosingTime());
             }
         }
 
         userService.save(user);
-        return new ResponseEntity<>("Profile updated successfully", HttpStatus.OK);
+        return ResponseEntity.ok(updatedUser);
     }
   
     @PutMapping("{id}/password")
@@ -141,18 +151,22 @@ public class UserController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<String> loginUser(@RequestBody LoginRequestDTO loginRequest) {
+    public ResponseEntity<UserDTO> loginUser(@RequestBody LoginRequestDTO loginRequest) {
         User user = userService.findByEmail(loginRequest.getEmail());
 
-        if (user == null || !user.getEmail().equals(loginRequest.getEmail()) || !user.getPassword().equals(loginRequest.getPassword())) {
-            return new ResponseEntity<>("Wrong email or password", HttpStatus.UNAUTHORIZED);
-        }
-        if (!user.getIsActive()) {
-            return new ResponseEntity<>("Account is not active", HttpStatus.FORBIDDEN);
+        if (user == null || !user.getPassword().equals(loginRequest.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // Неверные данные для входа
         }
 
-        return new ResponseEntity<>("Successfully logged in", HttpStatus.OK);
+        if (!user.getIsActive()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Аккаунт неактивен
+        }
+
+        // Успешный вход, преобразуем в DTO
+        UserDTO userDTO = toDTO(user);
+        return ResponseEntity.ok(userDTO);
     }
+
 
 
     @GetMapping()
@@ -161,7 +175,7 @@ public class UserController {
         List<UserDTO> userDTOs = users.stream().map(user -> {
             if (user instanceof Provider) {
                 Provider provider = (Provider) user;
-                ProviderDTO providerDTO = new ProviderDTO();
+                ProviderDTO providerDTO = new ProviderDTO((Provider) user);
                 providerDTO.setEmail(provider.getEmail());
                 providerDTO.setName(provider.getName());
                 providerDTO.setLastname(provider.getLastname());
@@ -175,7 +189,6 @@ public class UserController {
                 providerDTO.setCompanyName(provider.getCompanyName());
                 providerDTO.setCompanyAddress(provider.getCompanyAddress());
                 providerDTO.setDescription(provider.getDescription());
-                providerDTO.setCompanyPhotos(provider.getCompanyPhotos());
                 providerDTO.setOpeningTime(provider.getOpeningTime());
                 providerDTO.setClosingTime(provider.getClosingTime());
                 return providerDTO;
@@ -197,25 +210,29 @@ public class UserController {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Integer id) {
+    public ResponseEntity<UserDTO> deleteUser(@PathVariable Integer id) {
         User user = userService.findById(id);
+
         if (user == null) {
-            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
-        }
-        if (user instanceof Organizer organizer) {
-            if (organizer.hasFutureEvents()) {
-                return new ResponseEntity<>("Cannot deactivate organizer with future events", HttpStatus.BAD_REQUEST);
-            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Пользователь не найден
         }
 
-        if (user instanceof Provider provider) {
-            if (provider.hasActiveServices()) {
-                return new ResponseEntity<>("Cannot deactivate provider with active services", HttpStatus.BAD_REQUEST);
-            }
+        if (user instanceof Organizer organizer && organizer.hasFutureEvents()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(null); // Организатор с будущими событиями
         }
+
+        if (user instanceof Provider provider && provider.hasActiveServices()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(null); // Провайдер с активными услугами
+        }
+
         userService.delete(user);
-        return new ResponseEntity<>("User deactivated", HttpStatus.OK);
+        UserDTO userDTO = toDTO(user);
+
+        return ResponseEntity.ok(userDTO); // Возвращаем удалённого пользователя
     }
+
 
     @PutMapping("{id}/role")
     public ResponseEntity<String> updateRole(@PathVariable Integer id, @RequestParam String newRole) {
@@ -247,6 +264,14 @@ public class UserController {
         Report report = new Report(userReportDTO);
         Report savedReport = reportService.save(report);
         return ResponseEntity.ok(savedReport);
+    }
+    private UserDTO toDTO(User user) {
+        if (user instanceof Provider) {
+            return new ProviderDTO((Provider) user);
+        } else if (user instanceof Organizer) {
+            return new OrganizerDTO((Organizer) user);
+        }
+        return new UserDTO(user);
     }
 
 }

@@ -13,7 +13,7 @@ public interface UserService {
 
     List<User> findAll();
 
-    void save(RegistrationRequestDTO registrationRequestDTO);
+    User save(RegistrationRequestDTO registrationRequestDTO);
 
     void delete(User user);
 

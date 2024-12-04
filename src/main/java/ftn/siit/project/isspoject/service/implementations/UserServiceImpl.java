@@ -72,8 +72,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void save(RegistrationRequestDTO registrationRequestDTO) {
+    public User save(RegistrationRequestDTO registrationRequestDTO) {
 
+        return null;
     }
 
     @Override
