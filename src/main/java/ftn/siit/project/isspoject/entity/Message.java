@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 @Data
@@ -14,7 +15,7 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String text;
-    private ZonedDateTime time;
+    private LocalDateTime time;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "sender_id", nullable = false)
@@ -33,10 +34,10 @@ public class Message {
         this.receiver = receiver;
     }
 
-    public Message(Integer integer, String s, ZonedDateTime zonedDateTime, int i, int j) {
+    public Message(Integer integer, String s, LocalDateTime localDateTime, int i, int j) {
         this.id = integer;
         this.text = s;
-        this.time = zonedDateTime;
+        this.time = localDateTime;
 //        this.sender = i;
 //        this.receiver = j;
     }
