@@ -1,10 +1,13 @@
 package ftn.siit.project.isspoject.controller;
 
+import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
 import ftn.siit.project.isspoject.dto.message.MessageDTO;
+import ftn.siit.project.isspoject.dto.message.NewMessageDTO;
 import ftn.siit.project.isspoject.entity.Message;
 import ftn.siit.project.isspoject.service.interfaces.MessageService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +21,10 @@ public class MessageContoller {
     @Autowired
     private UserService userService;
 
-    @PostMapping("{senderId}/send/{recieverId}")
-    public ResponseEntity<String> sendMessage(@RequestBody MessageDTO messageDTO, @PathVariable Integer senderId, @PathVariable Integer recieverId) {
-//        messageService.save(new Message(messageDTO, senderId, recieverId));
-        return ResponseEntity.ok("Message sent successfully");
+    @PostMapping("{senderId}/{recieverId}")
+    public ResponseEntity<MessageDTO> sendMessage(@RequestBody NewMessageDTO dto, @PathVariable Integer senderId, @PathVariable Integer recieverId) {
+        Message created = messageService.save(dto, senderId, recieverId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDTO(created));
     }
 
     @GetMapping("{userId1}/chat/{userId2}")

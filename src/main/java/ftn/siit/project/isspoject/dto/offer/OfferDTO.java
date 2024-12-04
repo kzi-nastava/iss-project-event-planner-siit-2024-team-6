@@ -18,10 +18,10 @@ public class OfferDTO {
     private Double price;
     private Double sale;
     private List<String> photos;
-//    private Boolean isVisible;
-//    private Boolean isAvailable;
-//    private Boolean isDeleted;
-//    private LocalDateTime lastChanged;
+    private Boolean isVisible;
+    private Boolean isAvailable;
+    private Boolean isDeleted;
+    private LocalDateTime lastChanged;
     private String category;
 
     private String type; // product or service
