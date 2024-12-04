@@ -1,6 +1,6 @@
 package ftn.siit.project.isspoject.entity;
 
-import ftn.siit.project.isspoject.dto.user.UserReportDTO;
+import ftn.siit.project.isspoject.dto.user.NewUserReportDTO;
 import lombok.Data;
 
 @Data
@@ -13,7 +13,7 @@ public class Report {
     private Reaction reactions;
 
     public Report(){}
-    public Report(UserReportDTO userReportDTO) {
+    public Report(NewUserReportDTO userReportDTO) {
         if (userReportDTO == null) {
             throw new IllegalArgumentException("UserReportDTO cannot be null");
         }
