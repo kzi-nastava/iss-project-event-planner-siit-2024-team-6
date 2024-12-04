@@ -2,30 +2,41 @@ package ftn.siit.project.isspoject.entity;
 
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import jakarta.persistence.*;
+import jakarta.persistence.InheritanceType;
 import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-//@Entity
-//Inheritance(strategy = InheritanceType.JOINED)
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "offer_type", discriminatorType = DiscriminatorType.STRING)
 public class Offer {
-//    @Id
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private Status status;
     private String name;
     private String description;
     private Double price;
     private Double sale;
-//    @ElementCollection
-    //@CollectionTable(name = "offer_photos", joinColumns = @JoinColumn(name = "offer_id"))
-    //@Column(name = "photo_url")
+    @ElementCollection
+    @CollectionTable(name = "offer_photos", joinColumns = @JoinColumn(name = "offer_id"))
+    @Column(name = "photo_url")
     private List<String> photos;
     private Boolean isVisible;
     private Boolean isAvailable;
     private Boolean isDeleted;
     private LocalDateTime lastChanged;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+    @ManyToMany
+    @JoinTable(
+            name = "offer_event_types",
+            joinColumns = @JoinColumn(name = "offer_id"),
+            inverseJoinColumns = @JoinColumn(name = "event_type_id")
+    )
     private List<EventType> eventTypes;
 
     public Offer() {}
@@ -75,35 +86,8 @@ public class Offer {
         if (dto.getType().equals("Product")){
             return new Product(dto, category);
         }else{
-            return new Service(dto, category);
+            return new OfferService(dto, category);
         }
-    }
-    public Offer toOffer(String type, Integer id, Status status, String name, String description, Double price, Double sale,
-                   List<String> photos, Boolean isVisible, Boolean isAvailable, Boolean isDeleted,
-                   LocalDateTime lastChanged, Category category, List<EventType> eventTypes,
-                   String specifics, int minDuration, int maxDuration, int preciseDuration,
-                   int latestReservation, int latestCancelation) {
-        if (type.equals("Product")){
-            return null;
-        }else{
-            return new Service(id, status, name, description,price,sale, photos, isVisible,isAvailable,isDeleted,lastChanged,category,eventTypes,specifics, minDuration, maxDuration, preciseDuration, latestReservation, latestCancelation);
-        }
-    }
-    public Offer(int i, Status status, String name, String s, double v, double v1, List<String> p, boolean b, boolean b1, boolean b2, LocalDateTime localDateTime, Category c, List<EventType> e){
-        this.id = i;
-        this.status = status;
-        this.name = name;
-        this.description = s;
-        this.price = v;
-        this.sale = v1;
-        this.photos = p;
-        this.isVisible = b;
-        this.isAvailable = b1;
-        this.isDeleted = b2;
-        this.lastChanged = localDateTime;
-        this.category = c;
-        this.eventTypes = e;
-//        this.provider = null;
     }
 }
 

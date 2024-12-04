@@ -1,10 +1,13 @@
 package ftn.siit.project.isspoject.service.interfaces;
 
+import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
 import ftn.siit.project.isspoject.entity.Budget;
 
 public interface BudgetService {
     Budget findById(Integer id);
     Budget save(Budget budget);
+    Budget save(NewBudgetDTO budgetDTO);
     Budget update(Budget budget);
-    void delete(Budget budget);
+    Budget update(int id, NewBudgetDTO budgetDTO);
+    void delete(int id);
 }

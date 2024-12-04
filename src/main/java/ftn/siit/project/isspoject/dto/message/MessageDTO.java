@@ -12,7 +12,7 @@ import java.time.ZonedDateTime;
 public class MessageDTO {
     private Integer id;
     private String text;
-    private ZonedDateTime time;
+    private LocalDateTime time;
 
     public MessageDTO() {}
 

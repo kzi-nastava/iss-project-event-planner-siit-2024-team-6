@@ -2,6 +2,9 @@ package ftn.siit.project.isspoject.dto.offer;
 
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.entity.*;
+import ftn.siit.project.isspoject.entity.Offer;
+import ftn.siit.project.isspoject.entity.Product;
+import ftn.siit.project.isspoject.entity.OfferService;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -46,17 +49,17 @@ public class OfferDTO {
             this.price = offer.getPrice();
             this.sale = offer.getSale();
             this.photos = offer.getPhotos();
-            this.isVisible = offer.getIsVisible();
-            this.isAvailable = offer.getIsAvailable();
-            this.isDeleted = offer.getIsDeleted();
-            this.lastChanged = offer.getLastChanged();
-            this.category = offer.getCategory() != null ? offer.getCategory() : null;
 
+//            this.isVisible = offer.getIsVisible();
+//            this.isAvailable = offer.getIsAvailable();
+//            this.isDeleted = offer.getIsDeleted();
+//            this.lastChanged = offer.getLastChanged();
+            this.category = offer.getCategory() != null ? offer.getCategory().getName() : null;
             if (offer instanceof Product) {
                 this.type = "Product";
-            } else if (offer instanceof Service) {
+            } else if (offer instanceof OfferService) {
                 this.type = "Service";
-                Service service = (Service) offer;
+                OfferService service = (OfferService) offer;
                 this.specifics = service.getSpecifics();
                 this.minDuration = service.getMinDuration();
                 this.maxDuration = service.getMaxDuration();

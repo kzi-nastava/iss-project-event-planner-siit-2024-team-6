@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.entity;
 
+import ftn.siit.project.isspoject.dto.notification.NewNotificationDTO;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,4 +17,10 @@ public class Notification {
     @JoinColumn(name = "receiver_id", nullable = false)
     private User receiver;
     private LocalDateTime timestamp;
+
+    public Notification() {}
+    public Notification(NewNotificationDTO dto){
+        this.text = dto.getText();
+        this.timestamp = dto.getTimestamp();
+    }
 }

@@ -11,5 +11,4 @@ import java.util.List;
 public class NewEventTypeDTO {
     private String name;
     private String description;
-    private Boolean isDeleted;
 }

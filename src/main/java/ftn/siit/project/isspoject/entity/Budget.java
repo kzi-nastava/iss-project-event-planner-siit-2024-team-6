@@ -1,30 +1,23 @@
 package ftn.siit.project.isspoject.entity;
 
 import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@Entity
 public class Budget {
+     @Id
+     @GeneratedValue(strategy = GenerationType.IDENTITY)
      private Integer id;
-     private List<Double> maxPrices;
-     private List<Double> currentPrices;
-     private List<Category> categories;
+     private double total;
+     private double left;
+     @OneToMany(cascade = CascadeType.ALL)
+     @JoinColumn(name = "budget_item_id", nullable = false)
+     private List<BudgetItem> budgetItems;
 
      public Budget() {}
-
-     public Budget (BudgetDTO budgetDTO, List<Category> categories) {
-          this.id = budgetDTO.getId();
-          this.maxPrices = budgetDTO.getMaxPrices();
-          this.currentPrices = budgetDTO.getCurrentPrices();
-          this.categories = categories;
-     }
-     public Budget (Integer id, List<Double> maxPrices, List<Double> currentPrices, List<Category> categories) {
-          this.id = id;
-          this.maxPrices = maxPrices;
-          this.currentPrices = currentPrices;
-          this.categories = categories;
-     }
 }

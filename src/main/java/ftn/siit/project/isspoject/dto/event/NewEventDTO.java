@@ -3,7 +3,6 @@ package ftn.siit.project.isspoject.dto.event;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.EventType;
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
 @Data
@@ -15,7 +14,7 @@ public class NewEventDTO {
     private Boolean isPublic;
     private String place;
     private LocalDateTime date;
-    private EventType eventType;
+    private Integer eventTypeId;
 
     public NewEventDTO() {}
     public NewEventDTO(Event event) {
@@ -29,6 +28,5 @@ public class NewEventDTO {
         this.isPublic = event.getIsPublic();
         this.place = event.getPlace();
         this.date = event.getDate();
-        this.eventType = event.getEventType();
     }
 }

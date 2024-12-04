@@ -1,13 +1,16 @@
 package ftn.siit.project.isspoject.controller;
-import ftn.siit.project.isspoject.dto.event.ClosedEventDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.user.UserDTO;
+import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
+import ftn.siit.project.isspoject.dto.event.NewEventDTO;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
+import ftn.siit.project.isspoject.service.implementations.EventTypeServiceImpl;
 import ftn.siit.project.isspoject.service.interfaces.EventService;
 import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
+import ftn.siit.project.isspoject.service.interfaces.EventTypeService;
 import ftn.siit.project.isspoject.service.interfaces.NotificationService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +37,10 @@ public class EventController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("{eventId}/details")
+    @Autowired
+    private EventTypeService eventTypeService;
+
+    @GetMapping("{eventId}")
     public ResponseEntity<EventDTO> getEvent(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
         if (event == null) {
@@ -219,14 +225,24 @@ public class EventController {
                 .toList();
         return ResponseEntity.ok(dtos);
     }
+    @PostMapping
+    public ResponseEntity<EventDTO> addEvent(@RequestBody NewEventDTO dto) {
+        Event event = new Event();
+        EventType type = eventTypeService.findById(dto.getEventTypeId());
+        event.setEventType(type);
+        Event savedEvent = eventService.save(event);
+        EventDTO responseDto = new EventDTO(savedEvent);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    }
+
     @PostMapping("closed")
-    public ResponseEntity<String> addClosed(@RequestBody ClosedEventDTO eventDTO) {
-        eventService.addClosedEvent(eventDTO);
-        return ResponseEntity.ok("Event created and invitations sent.");
+    public ResponseEntity<EventDTO> addClosed(@RequestBody NewClosedEventDTO eventDTO) {
+        Event event = eventService.addClosedEvent(eventDTO);
+        return ResponseEntity.ok(new EventDTO(event));
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<EventDTO>  updateEvent(@PathVariable int id, @RequestBody EventDTO dto) {
+    public ResponseEntity<EventDTO>  updateEvent(@PathVariable int id, @RequestBody NewEventDTO dto) {
         Event existingEvent = eventService.findById(id);
         if (existingEvent == null) {
             throw new NotFoundException("Event with id " + id + " not found, can't be updated");
@@ -239,7 +255,6 @@ public class EventController {
         existingEvent.setIsPublic(dto.getIsPublic());
         existingEvent.setPlace(dto.getPlace());
         existingEvent.setDate(dto.getDate());
-        existingEvent.setEventType(dto.getEventType());
 
         Event updatedEvent = eventService.save(existingEvent);
 

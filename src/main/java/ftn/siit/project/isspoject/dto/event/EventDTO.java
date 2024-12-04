@@ -16,7 +16,7 @@ public class EventDTO {
     private Boolean isPublic;
     private String place;
     private LocalDateTime date;
-    private EventType eventType;
+    private Integer eventTypeId;
 
     public EventDTO() {}
     public EventDTO(Event event) {
@@ -31,6 +31,5 @@ public class EventDTO {
         this.isPublic = event.getIsPublic();
         this.place = event.getPlace();
         this.date = event.getDate();
-        this.eventType = event.getEventType();
     }
 }

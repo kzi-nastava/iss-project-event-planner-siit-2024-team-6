@@ -21,7 +21,6 @@ public class NewOfferDTO {
     private LocalDateTime lastChanged;
     private Category category;
     private List<EventTypeDTO> eventTypes;
-
     private String type; // product or service
 
 

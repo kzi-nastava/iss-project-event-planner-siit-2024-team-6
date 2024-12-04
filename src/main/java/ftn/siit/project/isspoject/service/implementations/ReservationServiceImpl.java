@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.service.implementations;
 
+import ftn.siit.project.isspoject.dto.offer.NewReservationDTO;
 import ftn.siit.project.isspoject.dto.offer.ReservationDTO;
 import ftn.siit.project.isspoject.entity.Reservation;
 import ftn.siit.project.isspoject.service.interfaces.ReservationService;
@@ -38,7 +39,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public Reservation save(ReservationDTO reservationDTO) {
+    public Reservation save(NewReservationDTO reservationDTO) {
         return new Reservation();
     }
 }

@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.controller;
 
+import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.user.*;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.service.interfaces.EventService;
@@ -242,11 +243,14 @@ public class UserController {
     }
 
     @GetMapping("{id}/attends")
-    public ResponseEntity<List<Event>> getUserEvents(@PathVariable Integer id) {
+    public ResponseEntity<List<EventDTO>> getUserEvents(@PathVariable Integer id) {
         List<Event> events = eventService.getEventsUserAttends(id);
-        return ResponseEntity.ok(events);
-    }
+        List<EventDTO> eventDTOs = events.stream()
+                .map(EventDTO::new)
+                .toList();
 
+        return ResponseEntity.ok(eventDTOs);
+    }
     @PostMapping("{blockerId}/block/{blockedId}")
     public ResponseEntity<Block> blockUser(
             @PathVariable Integer blockerId,
@@ -257,13 +261,13 @@ public class UserController {
     }
 
     @PostMapping("report")
-    public ResponseEntity<Report> reportUser(@RequestBody UserReportDTO userReportDTO) {
-        if (userReportDTO == null || userReportDTO.getReporter() == null || userReportDTO.getReported() == null) {
+    public ResponseEntity<UserReportDTO> reportUser(@RequestBody NewUserReportDTO userReportDTO) {
+        if (userReportDTO == null || userReportDTO.getReporterId() == null || userReportDTO.getReportedId() == null) {
             throw new IllegalArgumentException("Not all arguments were given while reporting user");
         }
         Report report = new Report(userReportDTO);
         Report savedReport = reportService.save(report);
-        return ResponseEntity.ok(savedReport);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new UserReportDTO(savedReport));
     }
     private UserDTO toDTO(User user) {
         if (user instanceof Provider) {

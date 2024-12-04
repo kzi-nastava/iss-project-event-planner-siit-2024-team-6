@@ -30,11 +30,20 @@ public class UserDTO {
     private List<EventDTO> attends;
     private List<NotificationDTO> notifications;
 
-    public UserDTO(User savedUser) {
-    }
 
-    public UserDTO() {
-
+    public UserDTO() {}
+    public UserDTO(User user) {
+        if (user != null) {
+            this.id = user.getId();
+            this.email = user.getEmail();
+            this.name = user.getName();
+            this.lastname = user.getLastname();
+            this.address = user.getAddress();
+            this.phoneNumber = user.getPhoneNumber();
+            this.photoUrl = user.getPhotoUrl();
+            this.isActive = user.getIsActive();
+            this.suspendedSince = user.getSuspendedSince();
+        }
     }
 
     public User toUser() {
