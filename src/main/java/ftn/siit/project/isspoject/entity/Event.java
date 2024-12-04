@@ -9,9 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-//@Entity
+@Entity
 public class Event {
-//    @Id
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
     private String description;
@@ -20,10 +21,22 @@ public class Event {
     private Boolean isPublic;
     private String place;
     private LocalDateTime date;
+    @ManyToOne
+    @JoinColumn(name = "event_type_id", nullable = false)
     private EventType eventType;
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<Activity> activities;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "budget_id", referencedColumnName = "id")
     private Budget budget;
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<Reservation> reservations;
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "event_products",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id")
+    )
     private List<Product> products;
 
     public Event() {}

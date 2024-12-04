@@ -217,7 +217,7 @@ public class UserController {
         return new ResponseEntity<>("User deactivated", HttpStatus.OK);
     }
 
-    @PutMapping("{id}/update-role")
+    @PutMapping("{id}/role")
     public ResponseEntity<String> updateRole(@PathVariable Integer id, @RequestParam String newRole) {
         userService.updateRole(id, newRole);
         return ResponseEntity.ok("User successfully updated to " + newRole);

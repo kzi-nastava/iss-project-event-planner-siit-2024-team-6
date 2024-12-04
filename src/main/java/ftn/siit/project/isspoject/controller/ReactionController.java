@@ -23,7 +23,7 @@ public class ReactionController {
     @Autowired
     private ProviderService providerService;
 
-    @PostMapping("add")
+    @PostMapping("")
     public ResponseEntity<Reaction> addReaction(@RequestBody Reaction reaction) {
         //comment is by default pending
         if(reaction.getText()!=null && reaction.getText().length()>0) {
@@ -44,7 +44,7 @@ public class ReactionController {
         return ResponseEntity.ok(savedReaction);
     }
 
-    @PutMapping("/accept/{id}")
+    @PutMapping("/{id}/accept")
     public ResponseEntity<Reaction> acceptReaction(@PathVariable Integer id) {
         Reaction reaction = reactionService.findById(id);
         if (reaction == null) {
@@ -56,7 +56,7 @@ public class ReactionController {
 
         return ResponseEntity.ok(updatedReaction);
     }
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Reaction> deleteReaction(@PathVariable Integer id) {
         Reaction reaction = reactionService.findById(id);
         if (reaction == null) {
@@ -75,7 +75,7 @@ public class ReactionController {
 
         return ResponseEntity.ok(pendingReactions);
     }
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Reaction> updateReaction(@PathVariable Integer id, @RequestBody Reaction updatedReaction) {
         Reaction existingReaction = reactionService.findById(id);
         if (existingReaction == null) {

@@ -32,7 +32,7 @@ public class EventController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("{eventId}")
+    @GetMapping("{eventId}/details")
     public ResponseEntity<EventDTO> getEvent(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
         if (event == null) {
@@ -167,13 +167,13 @@ public class EventController {
                 .toList();
         return ResponseEntity.ok(dtos);
     }
-    @PostMapping("add-closed")
+    @PostMapping("closed")
     public ResponseEntity<String> addClosed(@RequestBody ClosedEventDTO eventDTO) {
         eventService.addClosedEvent(eventDTO);
         return ResponseEntity.ok("Event created and invitations sent.");
     }
 
-    @PutMapping("update/{id}")
+    @PutMapping("{id}")
     public ResponseEntity<EventDTO>  updateEvent(@PathVariable int id, @RequestBody EventDTO dto) {
         Event existingEvent = eventService.findById(id);
         if (existingEvent == null) {

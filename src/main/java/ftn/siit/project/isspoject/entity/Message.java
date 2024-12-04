@@ -1,18 +1,29 @@
 package ftn.siit.project.isspoject.entity;
 
 import ftn.siit.project.isspoject.dto.message.MessageDTO;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
 
 @Data
+@Entity
 public class Message {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String text;
     private ZonedDateTime time;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "receiver_id", nullable = false)
     private User receiver;
+
     public Message(){}
     public Message (MessageDTO dto, User sender, User receiver) {
         this.id = dto.getId();
