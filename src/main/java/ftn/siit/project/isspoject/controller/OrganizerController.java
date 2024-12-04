@@ -41,7 +41,7 @@ public class OrganizerController {
         event.setIsPublic(eventDTO.getIsPublic());
         event.setPlace(eventDTO.getPlace());
         event.setDate(eventDTO.getDate());
-        event.setEventType(eventDTO.getEventType());
+        //event.setEventType(eventDTO.getEventType());
         event.setParticipants(0);
 
         //event.setOrganizer(organizer);
@@ -66,7 +66,7 @@ public class OrganizerController {
             dto.setIsPublic(event.getIsPublic());
             dto.setPlace(event.getPlace());
             dto.setDate(event.getDate());
-            dto.setEventType(event.getEventType());
+            //dto.setEventType(event.getEventType());
             return dto;
         }).collect(Collectors.toList());
 
@@ -132,7 +132,8 @@ public class OrganizerController {
             Activity activity = new Activity();
             activity.setName(activityDTO.getName());
             activity.setDescription(activityDTO.getDescription());
-            activity.setTime(activityDTO.getTime());
+            activity.setStart(activityDTO.getStart());
+            activity.setEnd(activityDTO.getEnd());
             activity.setLocation(activityDTO.getLocation());
             return activity;
         }).collect(Collectors.toList());
@@ -161,7 +162,8 @@ public class OrganizerController {
             ActivityDTO dto = new ActivityDTO();
             dto.setName(activity.getName());
             dto.setDescription(activity.getDescription());
-            dto.setTime(activity.getTime());
+            dto.setStart(activity.getStart());
+            dto.setEnd(activity.getEnd());
             dto.setLocation(activity.getLocation());
             return dto;
         }).collect(Collectors.toList());
