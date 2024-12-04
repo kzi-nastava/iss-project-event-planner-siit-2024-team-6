@@ -2,6 +2,7 @@ package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
+import ftn.siit.project.isspoject.dto.user.UserDTO;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.interfaces.EventTypeService;
@@ -133,10 +134,10 @@ public class AdminController {
         return new ResponseEntity<>("Event type deactivated", HttpStatus.OK);
     }
 
-    @PostMapping("suspend/{id}")
-    public ResponseEntity<User> suspendUser(@PathVariable Integer id) {
+    @PutMapping("suspend/{id}")
+    public ResponseEntity<UserDTO> suspendUser(@PathVariable Integer id) {
         User suspendedUser = userService.suspendUser(id);
-        return ResponseEntity.ok(suspendedUser);
+        return ResponseEntity.ok(new UserDTO(suspendedUser));
     }
     @GetMapping("{eventId}/analytics")
     public ResponseEntity<EventDTO> getEventAnalytics(@PathVariable Integer eventId) {
