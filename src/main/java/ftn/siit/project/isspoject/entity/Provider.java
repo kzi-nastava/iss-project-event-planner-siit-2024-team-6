@@ -1,37 +1,40 @@
 package ftn.siit.project.isspoject.entity;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
+import jakarta.persistence.*;
 import java.util.List;
 
+@Entity
+@DiscriminatorValue("Provider")
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class Provider extends User{
+public class Provider extends User {
+
+    @Column(nullable = false)
     private String companyEmail;
+
+    @Column(nullable = false)
     private String companyName;
+
     private String companyAddress;
     private String description;
-    private String[] companyPhotos;
+
+    @ElementCollection
+    @CollectionTable(name = "provider_company_photos", joinColumns = @JoinColumn(name = "provider_id"))
+    @Column(name = "photo_url")
+    private List<String> companyPhotos;
+
     private String openingTime;
     private String closingTime;
+
+    @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL)
     private List<Offer> myOffers;
 
-    public Provider() {}
-    public Provider(User user) {
-        if (user != null) {
-            this.setId(user.getId());
-            this.setEmail(user.getEmail());
-            this.setName(user.getName());
-            this.setLastname(user.getLastname());
-            this.setAddress(user.getAddress());
-            this.setPhoneNumber(user.getPhoneNumber());
-            this.setPhotoUrl(user.getPhotoUrl());
-            this.setIsActive(user.getIsActive());
-            this.setSuspendedSince(user.getSuspendedSince());
-        }
-    }
     public boolean hasActiveServices() {
         return false;
     }
 }
+
