@@ -6,8 +6,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class ActivityDTO {
-    private Integer id;
+public class NewActivityDTO {
     private String name;
     private String description;
     private String location;

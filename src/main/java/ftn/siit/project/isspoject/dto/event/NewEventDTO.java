@@ -1,9 +1,10 @@
 package ftn.siit.project.isspoject.dto.event;
 
 import ftn.siit.project.isspoject.entity.Event;
+import ftn.siit.project.isspoject.entity.EventType;
 import lombok.Data;
-
 import java.time.LocalDateTime;
+
 @Data
 public class NewEventDTO {
     private String name;

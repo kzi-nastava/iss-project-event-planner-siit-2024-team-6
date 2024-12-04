@@ -1,5 +1,7 @@
 package ftn.siit.project.isspoject.dto.offer;
 
+import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
+import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.entity.Offer;
 import ftn.siit.project.isspoject.entity.Product;
 import ftn.siit.project.isspoject.entity.OfferService;
@@ -12,7 +14,7 @@ import java.util.List;
 public class OfferDTO {
 
     private Integer id;
-    private String status;
+    private Status status;
     private String name;
     private String description;
     private Double price;
@@ -22,7 +24,8 @@ public class OfferDTO {
     private Boolean isAvailable;
     private Boolean isDeleted;
     private LocalDateTime lastChanged;
-    private String category;
+    private Category category;
+    private List<EventTypeDTO> eventTypes;
 
     private String type; // product or service
 
@@ -40,18 +43,18 @@ public class OfferDTO {
     public OfferDTO(Offer offer) {
         if (offer != null) {
             this.id = offer.getId();
-            this.status = offer.getStatus() != null ? offer.getStatus().toString() : null;
+            this.status = offer.getStatus() != null ? Status.valueOf(offer.getStatus().toString()) : null;
             this.name = offer.getName();
             this.description = offer.getDescription();
             this.price = offer.getPrice();
             this.sale = offer.getSale();
             this.photos = offer.getPhotos();
+
 //            this.isVisible = offer.getIsVisible();
 //            this.isAvailable = offer.getIsAvailable();
 //            this.isDeleted = offer.getIsDeleted();
 //            this.lastChanged = offer.getLastChanged();
             this.category = offer.getCategory() != null ? offer.getCategory().getName() : null;
-
             if (offer instanceof Product) {
                 this.type = "Product";
             } else if (offer instanceof OfferService) {

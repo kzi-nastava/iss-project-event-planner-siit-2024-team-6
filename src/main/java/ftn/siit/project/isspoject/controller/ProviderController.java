@@ -43,10 +43,12 @@ public class ProviderController {
     public ResponseEntity<OfferDTO> createOffer(@PathVariable int providerId, @RequestBody NewOfferDTO dto) {
         Provider provider = providerService.findById(providerId);
         if (provider == null) { throw new NotFoundException("Provider not found."); }
-        Offer created = offerService.save(dto);
-        provider.getMyOffers().add(created);
+        Offer created = new Offer();
+        created.toOffer(dto, categoryService.findByName(dto.getCategory().getName()));
+        Offer saved = offerService.save(dto);
+        provider.getMyOffers().add(saved);
         providerService.update(provider);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new OfferDTO(created));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new OfferDTO(saved));
     }
 
     @PutMapping("{providerId}")
