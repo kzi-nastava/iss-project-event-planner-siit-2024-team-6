@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.service.interfaces;
 
+import ftn.siit.project.isspoject.dto.offer.NewReservationDTO;
 import ftn.siit.project.isspoject.dto.offer.ReservationDTO;
 import ftn.siit.project.isspoject.entity.Reservation;
 
@@ -11,5 +12,5 @@ public interface ReservationService {
     List<Reservation> findByEventId(Integer eventId);
     List<Reservation> findByServiceId(Integer serviceId);
     Reservation save(Reservation reservation);
-    Reservation save(ReservationDTO reservationDTO);
+    Reservation save(NewReservationDTO reservationDTO);
 }

@@ -1,12 +1,13 @@
 package ftn.siit.project.isspoject.controller;
 
-import ftn.siit.project.isspoject.entity.Reaction;
-import ftn.siit.project.isspoject.entity.Status;
+import ftn.siit.project.isspoject.dto.reaction.NewReactionDTO;
+import ftn.siit.project.isspoject.dto.reaction.ReactionDTO;
+import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
-import ftn.siit.project.isspoject.service.interfaces.ProviderService;
-import ftn.siit.project.isspoject.service.interfaces.ReactionService;
-import ftn.siit.project.isspoject.service.interfaces.NotificationService;
+import ftn.siit.project.isspoject.service.interfaces.*;
+import ftn.siit.project.isspoject.service.interfaces.OfferService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,14 +23,28 @@ public class ReactionController {
     private NotificationService notificationService;
     @Autowired
     private ProviderService providerService;
+    @Autowired
+    private OfferService offerService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private EventService eventService;
 
-    @PostMapping("add")
-    public ResponseEntity<Reaction> addReaction(@RequestBody Reaction reaction) {
+    @PostMapping()
+    public ResponseEntity<ReactionDTO> addReaction(@RequestBody NewReactionDTO dto) {
+        Reaction reaction = new Reaction(dto);
+        Offer offer = offerService.findById(dto.getOfferId());
+        Event event = eventService.findById(dto.getEventId());
+        User user = userService.findById(dto.getUserId());
+        reaction.setUser(user);
+        reaction.setOffer(offer);
+        reaction.setEvent(event);
+
         //comment is by default pending
         if(reaction.getText()!=null && reaction.getText().length()>0) {
             reaction.setStatus(Status.PENDING);
         }
-        Reaction savedReaction = reactionService.save(reaction);
+        Reaction saved = reactionService.save(reaction);
 
 //        if (reaction.getEvent() != null) {
 //            User organizer = reaction.getEvent().getOrganizer();
@@ -41,51 +56,72 @@ public class ReactionController {
 //            notificationService.notifyUser(provider, message);
 //        }
 
-        return ResponseEntity.ok(savedReaction);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ReactionDTO(saved));
     }
 
-    @PutMapping("/accept/{id}")
-    public ResponseEntity<Reaction> acceptReaction(@PathVariable Integer id) {
+    @PutMapping("{id}/accept")
+    public ResponseEntity<ReactionDTO> acceptReaction(@PathVariable Integer id) {
         Reaction reaction = reactionService.findById(id);
         if (reaction == null) {
             throw new NotFoundException("Reaction not found");
         }
 
         reaction.setStatus(Status.ACCEPTED);
-        Reaction updatedReaction = reactionService.save(reaction);
+        Reaction updated = reactionService.save(reaction);
 
-        return ResponseEntity.ok(updatedReaction);
+        return ResponseEntity.ok(new ReactionDTO(updated));
     }
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Reaction> deleteReaction(@PathVariable Integer id) {
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> deleteReaction(@PathVariable Integer id) {
         Reaction reaction = reactionService.findById(id);
         if (reaction == null) {
             throw new NotFoundException("Reaction not found");
         }
 
         reaction.setDeleted(true);
-        Reaction updatedReaction = reactionService.save(reaction);
+        reactionService.save(reaction);
 
-        return ResponseEntity.ok(updatedReaction);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("pending")
-    public ResponseEntity<List<Reaction>> getPendingReactions() {
-        List<Reaction> pendingReactions = reactionService.getPendingReactions();
+    public ResponseEntity<List<ReactionDTO>> getPendingReactions() {
+        List<Reaction> pending = reactionService.getPendingReactions();
 
-        return ResponseEntity.ok(pendingReactions);
+        List<ReactionDTO> reactionDTOs = pending.stream()
+                .map(ReactionDTO::new)
+                .toList();
+        return ResponseEntity.ok(reactionDTOs);
     }
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Reaction> updateReaction(@PathVariable Integer id, @RequestBody Reaction updatedReaction) {
+    @PutMapping("{id}")
+    public ResponseEntity<ReactionDTO> updateReaction(@PathVariable Integer id, @RequestBody NewReactionDTO dto) {
         Reaction existingReaction = reactionService.findById(id);
         if (existingReaction == null) {
             throw new NotFoundException("Reaction not found");
         }
 
-        updatedReaction.setId(id);
+        if (dto.getText() != null) {
+            existingReaction.setText(dto.getText());
+        }
+        if (dto.getRating() != null) {
+            existingReaction.setRating(dto.getRating());
+        }
+        if (dto.getOfferId() != null) {
+            Offer offer = offerService.findById(dto.getOfferId());
+            existingReaction.setOffer(offer);
+        }
+        if (dto.getEventId() != null) {
+            Event event = eventService.findById(dto.getEventId());
+            existingReaction.setEvent(event);
+        }
+        if (dto.getUserId() != null) {
+            User user = userService.findById(dto.getUserId());
+            existingReaction.setUser(user);
+        }
 
-        Reaction savedReaction = reactionService.save(updatedReaction);
+        Reaction updated = reactionService.save(existingReaction);
+        ReactionDTO responseDto = new ReactionDTO(updated);
 
-        return ResponseEntity.ok(savedReaction);
+        return ResponseEntity.ok(responseDto);
     }
 }

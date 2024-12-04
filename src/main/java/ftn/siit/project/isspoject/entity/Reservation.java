@@ -1,12 +1,20 @@
 package ftn.siit.project.isspoject.entity;
 
+import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
+@Entity
 public class Reservation {
-    Integer id;
-    Integer eventId;
-    Integer serviceId;
-    boolean isCanceled;
-    TimeSlot time;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "offer_service_id", nullable = false)
+    private OfferService service;
+    private boolean isCanceled;
+    private LocalDateTime start;
+    private LocalDateTime end;
 }

@@ -9,8 +9,9 @@ import java.util.List;
 @Service
 public class EventTypeServiceImpl implements EventTypeService {
     @Override
-    public void save(EventType eventType) {
+    public EventType save(EventType eventType) {
 
+        return eventType;
     }
 
     @Override

@@ -18,6 +18,6 @@ public class PriceListOfferDTO {
         this.name = offer.getName();
         this.price = offer.getPrice();
         this.sale = offer.getSale();
-        this.salePrice = this.price * (100 - this.sale);
+        this.salePrice = this.price * (100 - this.sale)/100;
     }
 }

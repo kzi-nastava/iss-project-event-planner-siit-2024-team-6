@@ -1,12 +1,16 @@
 package ftn.siit.project.isspoject.controller;
-import ftn.siit.project.isspoject.dto.event.ClosedEventDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
+import ftn.siit.project.isspoject.dto.user.UserDTO;
+import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
+import ftn.siit.project.isspoject.dto.event.NewEventDTO;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
+import ftn.siit.project.isspoject.service.implementations.EventTypeServiceImpl;
 import ftn.siit.project.isspoject.service.interfaces.EventService;
 import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
+import ftn.siit.project.isspoject.service.interfaces.EventTypeService;
 import ftn.siit.project.isspoject.service.interfaces.NotificationService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController 
 @RequestMapping(value = "/api/events/")
@@ -32,7 +37,10 @@ public class EventController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("{eventId}/details")
+    @Autowired
+    private EventTypeService eventTypeService;
+
+    @GetMapping("{eventId}")
     public ResponseEntity<EventDTO> getEvent(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
         if (event == null) {
@@ -64,46 +72,96 @@ public class EventController {
     }
 
     @PostMapping("{userId}/{eventId}/favorite")
-    public ResponseEntity<String> addEventToFavorites(@PathVariable Integer userId, @PathVariable Integer eventId) {
+    public ResponseEntity<UserDTO> addEventToFavorites(@PathVariable Integer userId, @PathVariable Integer eventId) {
+        // Проверка существования пользователя
         User user = userService.findById(userId);
         if (user == null) {
-            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
-        }
-        Event event = eventService.findById(eventId);
-        if (event == null) {
-            return new ResponseEntity<>("Event not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Пользователь не найден
         }
 
+        // Проверка существования события
+        Event event = eventService.findById(eventId);
+        if (event == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Событие не найдено
+        }
+
+        // Проверка, что событие уже добавлено в избранное
         if (user.getFavouriteEvents().contains(event)) {
-            return new ResponseEntity<>("Event is already in favorites", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Событие уже в избранном
         }
 
+        // Добавление события в избранное
         user.getFavouriteEvents().add(event);
-        userService.save(user);
+        User updatedUser = userService.save(user);
 
-        return new ResponseEntity<>("Event added to favorites", HttpStatus.OK);
+        // Преобразование в DTO
+        UserDTO updatedUserDTO = toUserDTO(updatedUser);
+
+        return ResponseEntity.ok(updatedUserDTO); // Возвращаем обновлённого пользователя
     }
+    private UserDTO toUserDTO(User user) {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setName(user.getName());
+        userDTO.setLastname(user.getLastname());
+        userDTO.setAddress(user.getAddress());
+        userDTO.setPhoneNumber(user.getPhoneNumber());
+        userDTO.setPhotoUrl(user.getPhotoUrl());
+        userDTO.setActive(user.getIsActive());
+        userDTO.setSuspendedSince(user.getSuspendedSince());
+
+        // Преобразование избранных событий
+        List<EventDTO> favouriteEvents = user.getFavouriteEvents().stream().map(this::toEventDTO).collect(Collectors.toList());
+        userDTO.setFavouriteEvents(favouriteEvents);
+
+        return userDTO;
+    }
+
+
+    private EventDTO toEventDTO(Event event) {
+        EventDTO eventDTO = new EventDTO();
+        eventDTO.setId(event.getId());
+        eventDTO.setName(event.getName());
+        eventDTO.setDescription(event.getDescription());
+        eventDTO.setMaxParticipants(event.getMaxParticipants());
+        eventDTO.setIsPublic(event.getIsPublic());
+        eventDTO.setPlace(event.getPlace());
+        eventDTO.setDate(event.getDate());
+        eventDTO.setEventTypeId(event.getEventType().getId());
+        eventDTO.setParticipants(event.getParticipants());
+        return eventDTO;
+    }
+
     @DeleteMapping("{userId}/{eventId}/favorite")
-    public ResponseEntity<String> removeEventFromFavorites(@PathVariable Integer userId, @PathVariable Integer eventId) {
+    public ResponseEntity<UserDTO> removeEventFromFavorites(@PathVariable Integer userId, @PathVariable Integer eventId) {
+        // Проверка существования пользователя
         User user = userService.findById(userId);
         if (user == null) {
-            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Пользователь не найден
         }
 
+        // Проверка существования события
         Event event = eventService.findById(eventId);
         if (event == null) {
-            return new ResponseEntity<>("Event not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Событие не найдено
         }
 
+        // Проверка, что событие есть в избранном
         if (!user.getFavouriteEvents().contains(event)) {
-            return new ResponseEntity<>("Event is not in favorites", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Событие отсутствует в избранном
         }
 
+        // Удаление события из избранного
         user.getFavouriteEvents().remove(event);
-        userService.save(user);
+        User updatedUser = userService.save(user);
 
-        return new ResponseEntity<>("Event removed from favorites", HttpStatus.OK);
+        // Преобразование в DTO
+        UserDTO updatedUserDTO = toUserDTO(updatedUser);
+
+        return ResponseEntity.ok(updatedUserDTO); // Возвращаем обновлённого пользователя
     }
+
     @GetMapping("{id}")
     public ResponseEntity<EventDTO> getEvent(@PathVariable int id) {
         Event event = eventService.findById(id);
@@ -117,7 +175,7 @@ public class EventController {
     }
 
 
-    @GetMapping("all")
+    @GetMapping()
     public ResponseEntity<List<EventDTO>> getAll() {
         List<Event> events = eventService.findAll();
         List<EventDTO> dtos = events.stream()
@@ -167,14 +225,24 @@ public class EventController {
                 .toList();
         return ResponseEntity.ok(dtos);
     }
-    @PostMapping("add-closed")
-    public ResponseEntity<String> addClosed(@RequestBody ClosedEventDTO eventDTO) {
-        eventService.addClosedEvent(eventDTO);
-        return ResponseEntity.ok("Event created and invitations sent.");
+    @PostMapping
+    public ResponseEntity<EventDTO> addEvent(@RequestBody NewEventDTO dto) {
+        Event event = new Event();
+        EventType type = eventTypeService.findById(dto.getEventTypeId());
+        event.setEventType(type);
+        Event savedEvent = eventService.save(event);
+        EventDTO responseDto = new EventDTO(savedEvent);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
-    @PutMapping("update/{id}")
-    public ResponseEntity<EventDTO>  updateEvent(@PathVariable int id, @RequestBody EventDTO dto) {
+    @PostMapping("closed")
+    public ResponseEntity<EventDTO> addClosed(@RequestBody NewClosedEventDTO eventDTO) {
+        Event event = eventService.addClosedEvent(eventDTO);
+        return ResponseEntity.ok(new EventDTO(event));
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<EventDTO>  updateEvent(@PathVariable int id, @RequestBody NewEventDTO dto) {
         Event existingEvent = eventService.findById(id);
         if (existingEvent == null) {
             throw new NotFoundException("Event with id " + id + " not found, can't be updated");
@@ -187,7 +255,6 @@ public class EventController {
         existingEvent.setIsPublic(dto.getIsPublic());
         existingEvent.setPlace(dto.getPlace());
         existingEvent.setDate(dto.getDate());
-        existingEvent.setEventType(dto.getEventType());
 
         Event updatedEvent = eventService.save(existingEvent);
 

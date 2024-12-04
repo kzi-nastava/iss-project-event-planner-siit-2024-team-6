@@ -6,13 +6,15 @@ import ftn.siit.project.isspoject.entity.User;
 import java.time.LocalDateTime;
 
 public class NotificationDTO {
-    private User receiver;
-    private LocalDateTime timestamp;
+    private Integer id;
+    private String text;
+    private Integer receiverId;
 
     public NotificationDTO() {}
 
     public NotificationDTO(Notification notification) {
-        this.timestamp = notification.getTimestamp();
-        this.receiver = notification.getReceiver();
+        this.id = notification.getId();
+        this.text = notification.getText();
+        this.receiverId = notification.getReceiver().getId();
     }
 }

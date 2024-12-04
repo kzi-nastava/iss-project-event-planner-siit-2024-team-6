@@ -1,7 +1,8 @@
 package ftn.siit.project.isspoject.service.implementations;
 
-import ftn.siit.project.isspoject.dto.event.ClosedEventDTO;
+import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
 import ftn.siit.project.isspoject.entity.*;
+import ftn.siit.project.isspoject.repository.EventTypeRepository;
 import ftn.siit.project.isspoject.service.interfaces.EventService;
 import org.springframework.stereotype.Service;
 
@@ -13,24 +14,28 @@ public class EventServiceImpl implements EventService {
 
     //@Autowired
     //private EventRepository eventRepository;
+    private EventTypeRepository eventTypeRepository;
 
     @Override
     public List<Event> findAll() { return List.of(
-            new Event(1, "Event 1", "Description 1", 100, 50, true, "Place 1", LocalDateTime.now(), new EventType(), new Organizer(), List.of(), new Budget()),
-            new Event(2, "Event 2", "Description 2", 200, 150, false, "Place 2", LocalDateTime.now().plusDays(1), new EventType(), new Organizer(), List.of(), new Budget()),
-            new Event(3, "Event 3", "Description 3", 50, 25, true, "Place 3", LocalDateTime.now().plusDays(2), new EventType(), new Organizer(), List.of(), new Budget()),
-            new Event(4, "Event 4", "Description 4", 500, 300, false, "Place 4", LocalDateTime.now().plusDays(3), new EventType(), new Organizer(), List.of(), new Budget()),
-            new Event(5, "Event 5", "Description 5", 300, 100, true, "Place 5", LocalDateTime.now().plusDays(4), new EventType(), new Organizer(), List.of(), new Budget()),
-            new Event(6, "Event 6", "Description 6", 400, 200, false, "Place 6", LocalDateTime.now().plusDays(5), new EventType(), new Organizer(), List.of(), new Budget()),
-            new Event(7, "Event 7", "Description 7", 250, 120, true, "Place 7", LocalDateTime.now().plusDays(6), new EventType(), new Organizer(), List.of(), new Budget())
+            new Event(1, "Event 1", "Description 1", 100, 50, true, "Place 1", LocalDateTime.now(), new EventType(), List.of(), new Budget(), List.of(), List.of()),
+            new Event(2, "Event 2", "Description 2", 200, 150, false, "Place 2", LocalDateTime.now().plusDays(1), new EventType(), List.of(), new Budget(), List.of(), List.of()),
+            new Event(3, "Event 3", "Description 3", 50, 25, true, "Place 3", LocalDateTime.now().plusDays(2), new EventType(), List.of(), new Budget(), List.of(), List.of()),
+            new Event(4, "Event 4", "Description 4", 500, 300, false, "Place 4", LocalDateTime.now().plusDays(3), new EventType(), List.of(), new Budget(), List.of(), List.of()),
+            new Event(5, "Event 5", "Description 5", 300, 100, true, "Place 5", LocalDateTime.now().plusDays(4), new EventType(), List.of(), new Budget(), List.of(), List.of()),
+            new Event(6, "Event 6", "Description 6", 400, 200, false, "Place 6", LocalDateTime.now().plusDays(5), new EventType(), List.of(), new Budget(), List.of(), List.of()),
+            new Event(7, "Event 7", "Description 7", 250, 120, true, "Place 7", LocalDateTime.now().plusDays(6), new EventType(), List.of(), new Budget(), List.of(), List.of())
+
     );}
 
     @Override
     public Event findById(Integer eventId) {
         if(eventId == 1){
-            return new Event(1, "Event 1", "Description 1", 100, 50, true, "Place 1", LocalDateTime.now(), new EventType(), new Organizer(), List.of(), new Budget());
+            return new Event(1, "Event 1", "Description 1", 100, 50, true, "Place 1", LocalDateTime.now(), new EventType(), List.of(), new Budget(), List.of(), List.of());
+
         } else if (eventId == 2) {
-            return new Event(2, "Event 2", "Description 2", 200, 150, false, "Place 2", LocalDateTime.now().plusDays(1), new EventType(), new Organizer(), List.of(), new Budget());
+            return new Event(2, "Event 2", "Description 2", 200, 150, false, "Place 2", LocalDateTime.now().plusDays(1), new EventType(), List.of(), new Budget(), List.of(), List.of());
+
         }
         return null;
     }
@@ -43,12 +48,12 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<Event> findTopFive() {
         return List.of(
-                new Event(1, "Event 1", "Description 1", 100, 50, true, "Place 1", LocalDateTime.now(), new EventType(), new Organizer(), List.of(), new Budget()),
-                new Event(2, "Event 2", "Description 2", 200, 150, false, "Place 2", LocalDateTime.now().plusDays(1), new EventType(), new Organizer(), List.of(), new Budget()),
-                new Event(3, "Event 3", "Description 3", 50, 25, true, "Place 3", LocalDateTime.now().plusDays(2), new EventType(), new Organizer(), List.of(), new Budget()),
-                new Event(4, "Event 4", "Description 4", 500, 300, false, "Place 4", LocalDateTime.now().plusDays(3), new EventType(), new Organizer(), List.of(), new Budget()),
-                new Event(5, "Event 5", "Description 5", 300, 100, true, "Place 5", LocalDateTime.now().plusDays(4), new EventType(), new Organizer(), List.of(), new Budget())
-        );
+                new Event(1, "Event 1", "Description 1", 100, 50, true, "Place 1", LocalDateTime.now(), new EventType(), List.of(), new Budget(), List.of(), List.of()),
+                new Event(2, "Event 2", "Description 2", 200, 150, false, "Place 2", LocalDateTime.now().plusDays(1), new EventType(), List.of(), new Budget(), List.of(), List.of()),
+                new Event(3, "Event 3", "Description 3", 50, 25, true, "Place 3", LocalDateTime.now().plusDays(2), new EventType(), List.of(), new Budget(), List.of(), List.of()),
+                new Event(4, "Event 4", "Description 4", 500, 300, false, "Place 4", LocalDateTime.now().plusDays(3), new EventType(), List.of(), new Budget(), List.of(), List.of()),
+                new Event(5, "Event 5", "Description 5", 300, 100, true, "Place 5", LocalDateTime.now().plusDays(4), new EventType(), List.of(), new Budget(), List.of(), List.of())
+                );
     }
 
 
@@ -63,15 +68,18 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<Event> getEventsUserAttends(Integer userId) {
         return List.of(
-                new Event(1, "Event 1", "Description 1", 100, 50, true, "Place 1", LocalDateTime.now(), new EventType(), new Organizer(), List.of(), new Budget())
+                new Event(1, "Event 1", "Description 1", 100, 50, true, "Place 1", LocalDateTime.now(), new EventType(), List.of(), new Budget(), List.of(), List.of())
                 );
     }
 
-    public void addClosedEvent(ClosedEventDTO eventDTO) {
+    public Event addClosedEvent(NewClosedEventDTO eventDTO) {
+        //EventType type = eventTypeRepository.findById(eventDTO.getEventTypeId());
         Event event = new Event(eventDTO);
+        //event.setEventType(type);
         //Event savedEvent = eventRepository.save(event);
 
         sendInvitations("",eventDTO.getEmails());
+        return event;
     }
     private void sendInvitations(String text,List<String> emails) {}
 

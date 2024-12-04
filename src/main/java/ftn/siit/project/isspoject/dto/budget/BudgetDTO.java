@@ -1,6 +1,7 @@
 package ftn.siit.project.isspoject.dto.budget;
 
 import ftn.siit.project.isspoject.entity.Budget;
+import ftn.siit.project.isspoject.entity.BudgetItem;
 import ftn.siit.project.isspoject.entity.Category;
 import lombok.Data;
 
@@ -9,19 +10,19 @@ import java.util.List;
 @Data
 public class BudgetDTO {
     private Integer id;
-    private List<Double> maxPrices;
-    private List<Double> currentPrices;
-    private List<String> categories;
+    private double total;
+    private double left;
+    private List<BudgetItemDTO> budgetItems;
 
     public BudgetDTO() {}
 
-    public BudgetDTO(Budget budget){
+    public BudgetDTO(Budget budget) {
         this.id = budget.getId();
-        this.maxPrices = budget.getMaxPrices();
-        this.currentPrices = budget.getCurrentPrices();
-        this.categories = new ArrayList<>();
-        for (Category category : budget.getCategories()) {
-            this.categories.add(category.getName());
+        this.total = budget.getTotal();
+        this.left = budget.getLeft();
+        this.budgetItems = new ArrayList<>();
+        for(BudgetItem budgetItem : budget.getBudgetItems()) {
+            this.budgetItems.add(new BudgetItemDTO(budgetItem));
         }
     }
 }

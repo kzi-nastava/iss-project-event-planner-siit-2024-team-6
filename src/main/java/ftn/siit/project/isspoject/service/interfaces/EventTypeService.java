@@ -5,7 +5,7 @@ import ftn.siit.project.isspoject.entity.EventType;
 import java.util.List;
 
 public interface EventTypeService {
-    void save(EventType eventType);
+    EventType save(EventType eventType);
 
     List<EventType> findAll();
 

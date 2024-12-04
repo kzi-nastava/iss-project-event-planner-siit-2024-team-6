@@ -1,12 +1,17 @@
 package ftn.siit.project.isspoject.controller;
 
+import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
+import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
+import ftn.siit.project.isspoject.dto.category.CategorySuggestionDTO;
+import ftn.siit.project.isspoject.dto.category.NewCategorySuggestionDTO;
+import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
-import ftn.siit.project.isspoject.service.interfaces.CategoryService;
+import ftn.siit.project.isspoject.service.interfaces.*;
 import ftn.siit.project.isspoject.service.interfaces.OfferService;
-import ftn.siit.project.isspoject.service.interfaces.ProviderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +26,12 @@ public class ProviderController {
     private CategoryService categoryService;
     @Autowired
     private OfferService offerService;
+    @Autowired
+    private BudgetService budgetService;
+    @Autowired
+    private CategorySuggestionService categorySuggestionService;
 
-    @GetMapping("offers/{providerId}/all")
+    @GetMapping("{providerId}")
     public ResponseEntity<List<OfferDTO>> getAllOffers(@PathVariable int providerId) {
         Provider provider = providerService.findById(providerId);
         if (provider == null) { throw new NotFoundException("Provider not found."); }
@@ -30,32 +39,31 @@ public class ProviderController {
         return ResponseEntity.ok(dtos);
     }
 
-    @PostMapping("offers/{providerId}/create")
-    public ResponseEntity<String> createOffer(@PathVariable int providerId, @RequestBody OfferDTO dto) {
+    @PostMapping("{providerId}")
+    public ResponseEntity<OfferDTO> createOffer(@PathVariable int providerId, @RequestBody NewOfferDTO dto) {
         Provider provider = providerService.findById(providerId);
         if (provider == null) { throw new NotFoundException("Provider not found."); }
-        Offer created = new Offer();
-        created.toOffer(dto, categoryService.findByName(dto.getCategory()));
-        provider.getMyOffers().add(created);
+//        Offer created = new Offer();
+//        created.toOffer(dto, categoryService.findByName(dto.getCategory().getName()));
+        Offer saved = offerService.save(dto);
+        provider.getMyOffers().add(saved);
         providerService.update(provider);
-        offerService.save(created);
-        return ResponseEntity.ok("Offer created");
+        return ResponseEntity.status(HttpStatus.CREATED).body(new OfferDTO(saved));
     }
 
-    @PutMapping("offers/{providerId}/update")
+    @PutMapping("{providerId}")
     public ResponseEntity<OfferDTO> updateOffer(@PathVariable Integer providerId, @RequestBody OfferDTO dto) {
         Provider provider = providerService.findById(providerId);
         if(provider == null) {throw new NotFoundException("Provider not found."); }
         Offer oldOffer = offerService.findById(dto.getId());
         if(oldOffer == null) {throw new NotFoundException("Offer not found."); }
-        Offer updated = offerService.update(oldOffer);
-        provider.getMyOffers().remove(oldOffer);
-        provider.getMyOffers().add(updated);
+        Offer updated = offerService.update(dto);
         providerService.update(provider);
         return ResponseEntity.ok().body(new OfferDTO(updated));
     }
-    @DeleteMapping("offers/{providerId}/delete/{offerId}")
-    public ResponseEntity<String> deleteOffer(@PathVariable int providerId, @PathVariable int offerId) {
+
+    @DeleteMapping("{providerId}/{offerId}")
+    public ResponseEntity<Void> deleteOffer(@PathVariable int providerId, @PathVariable int offerId) {
         Provider provider = providerService.findById(providerId);
         if(provider == null) {throw new NotFoundException("Provider not found.");}
         Offer offer = offerService.findById(offerId);
@@ -63,10 +71,10 @@ public class ProviderController {
         provider.getMyOffers().remove(offer);
         offerService.delete(offer);
         providerService.update(provider);
-        return ResponseEntity.ok().body("Offer deleted");
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("{providerId}/services")
+    @GetMapping("{providerId}/filter")
     public ResponseEntity<List<OfferDTO>> getFilteredServices( @PathVariable int providerId, @RequestParam(required = false) String name,
         @RequestParam(required = false) String category,
         @RequestParam(required = false) String eventType,
@@ -77,5 +85,47 @@ public class ProviderController {
         List<Offer> filteredServices = offerService.getFilteredServices(provider, name, category, eventType, price, isAvailable);
         List<OfferDTO> dtos = filteredServices.stream().map(OfferDTO::new).toList();
         return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("{providerId}/search")
+    public ResponseEntity<List<OfferDTO>> getFilteredServices( @PathVariable int providerId, @RequestParam(required = true) String name){
+        Provider provider = providerService.findById(providerId);
+        if(provider == null) {throw new NotFoundException("Provider not found."); }
+        List<Offer> filteredServices = offerService.getFilteredServices(provider, name, null, null, null, null);
+        List<OfferDTO> dtos = filteredServices.stream().map(OfferDTO::new).toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<BudgetDTO> getBudget(@PathVariable int id) {
+        Budget budget = budgetService.findById(id);
+        if(budget == null) throw  new NotFoundException("Budget not found");
+        return ResponseEntity.ok(new BudgetDTO(budget));
+    }
+
+    @PostMapping
+    public ResponseEntity<BudgetDTO> createBudget(@RequestBody NewBudgetDTO dto) {
+        Budget budget = new Budget();
+        if(budget == null){ throw new IllegalArgumentException("Budget is null"); }
+        Budget created = budgetService.save(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new BudgetDTO(created));
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<BudgetDTO> updateBudget(@PathVariable int id, @RequestBody NewBudgetDTO dto) {
+        Budget updatedBudget = budgetService.update(id, dto);
+        return ResponseEntity.ok(new BudgetDTO(updatedBudget));
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> deleteBudget(@PathVariable int id) {
+        budgetService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping
+    public ResponseEntity<CategorySuggestionDTO> createCategorySuggestion(NewCategorySuggestionDTO dto) {
+        CategorySuggestion created = categorySuggestionService.save(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new CategorySuggestionDTO(created));
     }
 }

@@ -32,7 +32,7 @@ public class OfferController {
     @Autowired
     private OfferServiceImpl offerServiceImpl;
 
-    @GetMapping("all")
+    @GetMapping()
     public ResponseEntity<List<OfferDTO>> getAll() {
         List<Offer> offers = offerService.findAll();
 

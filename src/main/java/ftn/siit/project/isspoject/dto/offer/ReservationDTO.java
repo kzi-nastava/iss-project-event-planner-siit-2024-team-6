@@ -1,21 +1,22 @@
 package ftn.siit.project.isspoject.dto.offer;
 
 import ftn.siit.project.isspoject.entity.Reservation;
-import ftn.siit.project.isspoject.entity.TimeSlot;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 @Data
 public class ReservationDTO {
-    private Integer eventId;
+    private Integer id;
     private Integer serviceId;
-    private TimeSlot timeSlot;
+    private LocalDateTime start;
+    private LocalDateTime end;
 
-    public Reservation toReservation() {
-        Reservation reservation = new Reservation();
-        reservation.setEventId(eventId);
-        reservation.setServiceId(serviceId);
-        reservation.setTime(timeSlot);
-        reservation.setCanceled(false);
-        return reservation;
+    public ReservationDTO() {}
+    public ReservationDTO(Reservation reservation) {
+        this.id = reservation.getId();
+        this.serviceId = reservation.getService().getId();
+        this.start = reservation.getStart();
+        this.end = reservation.getEnd();
     }
 }

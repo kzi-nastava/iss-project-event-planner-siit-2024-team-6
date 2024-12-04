@@ -1,4 +1,5 @@
 package ftn.siit.project.isspoject.controller;
+import ftn.siit.project.isspoject.dto.offer.NewProductDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.dto.offer.ProductDTO;
 import ftn.siit.project.isspoject.entity.Category;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/products/")
 public class ProductController {
 
     @Autowired
@@ -28,15 +29,14 @@ public class ProductController {
     @Autowired
     private NotificationService notificationService;
 
-    @PostMapping("/create")
-    public ResponseEntity<String> createProduct(@RequestBody ProductDTO productDTO) {
+    @PostMapping
+    public ResponseEntity<ProductDTO> createProduct(@RequestBody NewProductDTO productDTO) {
+        Category category = categoryService.findByName(productDTO.getCategory().getName());
 
-        Category category = categoryService.findByName(productDTO.getCategory());
         if (category == null) {
-
-            categoryService.createPendingCategory(productDTO.getCategory());
+            categoryService.createPendingCategory(productDTO.getCategory().getName());
             notificationService.notifyAdmin("New category suggestion: " + productDTO.getCategory());
-            return new ResponseEntity<>("Category suggestion submitted for approval", HttpStatus.ACCEPTED);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).build(); // Категория ожидает одобрения
         }
 
         Product product = new Product();
@@ -46,13 +46,30 @@ public class ProductController {
         product.setSale(productDTO.getSale());
         product.setPhotos(productDTO.getPhotos());
 
-        product.setIsVisible(productDTO.getIsVisible());
-        product.setIsAvailable(productDTO.getIsAvailable());
+//        product.setIsVisible(productDTO.getIsVisible());
+//        product.setIsAvailable(productDTO.getIsAvailable());
         product.setCategory(category);
 
-        productService.save(product);
-        return new ResponseEntity<>("Product created successfully", HttpStatus.CREATED);
+        Product savedProduct = productService.save(product);
+
+        // Преобразуем сохранённый продукт в DTO
+        ProductDTO responseDTO = toProductDTO(savedProduct);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO); // Возвращаем созданный продукт
     }
+    private ProductDTO toProductDTO(Product product) {
+        ProductDTO productDTO = new ProductDTO();
+        productDTO.setName(product.getName());
+        productDTO.setDescription(product.getDescription());
+        productDTO.setPrice(product.getPrice());
+        productDTO.setSale(product.getSale());
+        productDTO.setPhotos(product.getPhotos());
+        productDTO.setIsVisible(product.getIsVisible());
+        productDTO.setIsAvailable(product.getIsAvailable());
+        productDTO.setCategory(product.getCategory());
+        return productDTO;
+    }
+
 //    @GetMapping
 //    public ResponseEntity<PagedResponse<ProductDTO>> getProductsPage(Pageable pageable) {
 //        Page<Product> productPage = productService.findAll(pageable);
@@ -69,19 +86,19 @@ public class ProductController {
 //
 //        return ResponseEntity.ok(response);
 //    }
-    @GetMapping("/{providerId}/list")
+    @GetMapping("{providerId}/list")
     public ResponseEntity<List<ProductDTO>> getProductsByProvider(@PathVariable Integer providerId) {
         List<Product> products = productService.findByProvider(providerId);
         return getListResponseEntity(products);
     }
 
-    @GetMapping("/search")
+    @GetMapping("search")
     public ResponseEntity<List<ProductDTO>> searchProducts(@RequestParam String name) {
         List<Product> products = productService.searchByName(name);
         return getListResponseEntity(products);
     }
 
-    @GetMapping("/filter")
+    @GetMapping("filter")
     public ResponseEntity<List<ProductDTO>> filterProducts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String eventType,
@@ -106,10 +123,10 @@ public class ProductController {
             productDTO.setPrice(offerDTO.getPrice());
             productDTO.setSale(offerDTO.getSale());
             productDTO.setPhotos(offerDTO.getPhotos());
-            productDTO.setIsVisible(offerDTO.getIsVisible());
-            productDTO.setIsAvailable(offerDTO.getIsAvailable());
-            productDTO.setIsDeleted(offerDTO.getIsDeleted());
-            productDTO.setLastChanged(offerDTO.getLastChanged());
+//            productDTO.setIsVisible(offerDTO.getIsVisible());
+//            productDTO.setIsAvailable(offerDTO.getIsAvailable());
+//            productDTO.setIsDeleted(offerDTO.getIsDeleted());
+//            productDTO.setLastChanged(offerDTO.getLastChanged());
             productDTO.setCategory(offerDTO.getCategory());
             productDTO.setType(offerDTO.getType());
 
@@ -118,40 +135,53 @@ public class ProductController {
         return new ResponseEntity<>(productDTOs, HttpStatus.OK);
     }
 
-    @PutMapping("/{productId}/update")
-    public ResponseEntity<String> updateProduct(@PathVariable Integer productId, @RequestBody ProductDTO productDTO) {
+    @PutMapping("{productId}")
+    public ResponseEntity<ProductDTO> updateProduct(@PathVariable Integer productId, @RequestBody NewProductDTO productDTO) {
         Product product = productService.findById(productId);
+
         if (product == null) {
-            return new ResponseEntity<>("Product not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Продукт не найден
         }
 
+        if (productDTO.getType() != null && productDTO.getType().equalsIgnoreCase("Service")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Нельзя изменить тип продукта
+        }
+
+        // Обновление полей продукта
         product.setName(productDTO.getName());
         product.setDescription(productDTO.getDescription());
         product.setPrice(productDTO.getPrice());
         product.setSale(productDTO.getSale());
         product.setPhotos(productDTO.getPhotos());
-        product.setIsVisible(productDTO.getIsVisible());
-        product.setIsAvailable(productDTO.getIsAvailable());
+//        product.setIsVisible(productDTO.getIsVisible());
+//        product.setIsAvailable(productDTO.getIsAvailable());
         product.setLastChanged(LocalDateTime.now());
 
+        Product updatedProduct = productService.save(product);
 
-        if (productDTO.getType() != null && productDTO.getType().equalsIgnoreCase("Service")) {
-            return new ResponseEntity<>("Product type cannot be changed to Service", HttpStatus.BAD_REQUEST);
-        }
+        // Преобразование в DTO
+        ProductDTO updatedProductDTO = toProductDTO(updatedProduct);
 
-        productService.save(product);
-        return new ResponseEntity<>("Product updated successfully", HttpStatus.OK);
+        return ResponseEntity.ok(updatedProductDTO); // Возвращаем обновлённый продукт
     }
-    @DeleteMapping("/{productId}/delete")
-    public ResponseEntity<String> deleteProduct(@PathVariable Integer productId) {
+
+    @DeleteMapping("{productId}")
+    public ResponseEntity<ProductDTO> deleteProduct(@PathVariable Integer productId) {
         Product product = productService.findById(productId);
+
         if (product == null) {
-            return new ResponseEntity<>("Product not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Продукт не найден
         }
 
+        // Логическое удаление
         product.setIsDeleted(true);
-        productService.save(product);
-        return new ResponseEntity<>("Product deleted successfully", HttpStatus.OK);
+        Product deletedProduct = productService.save(product);
+
+        // Преобразование в DTO
+        ProductDTO deletedProductDTO = toProductDTO(deletedProduct);
+
+        return ResponseEntity.ok(deletedProductDTO); // Возвращаем "удалённый" продукт
     }
+
 }
 

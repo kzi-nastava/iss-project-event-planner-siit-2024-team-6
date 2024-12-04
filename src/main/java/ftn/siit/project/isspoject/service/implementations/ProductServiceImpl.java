@@ -12,8 +12,9 @@ import java.util.stream.Collectors;
 @Service
 public class ProductServiceImpl implements ProductService {
     @Override
-    public void save(Product product) {
+    public Product save(Product product) {
         System.out.println(product);
+        return product;
     }
 
     @Override
@@ -22,9 +23,10 @@ public class ProductServiceImpl implements ProductService {
         List<Product> products = findAll();
 
         // Filter products by provider ID
-        return products.stream()
-                .filter(product -> product.getProvider() != null && product.getProvider().getId().equals(providerId))
-                .collect(Collectors.toList());
+//        return products.stream()
+//                .filter(product -> product.getProvider() != null && product.getProvider().getId().equals(providerId))
+//                .collect(Collectors.toList());
+        return List.of();
     }
 //    @Override
 //    public Page<Product> findAll(Pageable pageable) {
@@ -64,7 +66,7 @@ public class ProductServiceImpl implements ProductService {
         product1.setIsAvailable(true);
         product1.setIsDeleted(false);
         product1.setLastChanged(LocalDateTime.now().minusDays(2));
-        product1.setProvider(provider);
+        //product1.setProvider(provider);
 
         Product product2 = new Product();
         product2.setId(2);
@@ -77,7 +79,7 @@ public class ProductServiceImpl implements ProductService {
         product2.setIsAvailable(false);
         product2.setIsDeleted(false);
         product2.setLastChanged(LocalDateTime.now().minusDays(5));
-        product2.setProvider(provider);
+        //product2.setProvider(provider);
 
         Product product3 = new Product();
         product3.setId(3);
@@ -90,7 +92,7 @@ public class ProductServiceImpl implements ProductService {
         product3.setIsAvailable(true);
         product3.setIsDeleted(false);
         product3.setLastChanged(LocalDateTime.now().minusDays(10));
-        product3.setProvider(provider2);
+        //product3.setProvider(provider2);
 
         // Return the fake list of products
         return List.of(product1, product2, product3);

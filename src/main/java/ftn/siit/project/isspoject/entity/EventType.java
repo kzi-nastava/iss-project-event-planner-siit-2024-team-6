@@ -1,11 +1,19 @@
 package ftn.siit.project.isspoject.entity;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import ftn.siit.project.isspoject.dto.event.NewEventTypeDTO;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
+@Entity
 public class EventType {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
     private String description;
