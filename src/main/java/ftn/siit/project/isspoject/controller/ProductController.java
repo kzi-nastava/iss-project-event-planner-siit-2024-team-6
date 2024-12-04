@@ -1,4 +1,5 @@
 package ftn.siit.project.isspoject.controller;
+import ftn.siit.project.isspoject.dto.offer.NewProductDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.dto.offer.ProductDTO;
 import ftn.siit.project.isspoject.entity.Category;
@@ -28,31 +29,47 @@ public class ProductController {
     @Autowired
     private NotificationService notificationService;
 
-    @PostMapping()
-    public ResponseEntity<String> createProduct(@RequestBody ProductDTO productDTO) {
+    @PostMapping
+    public ResponseEntity<ProductDTO> createProduct(@RequestBody NewProductDTO productDTO) {
+        Category category = categoryService.findByName(productDTO.getCategory().getName());
 
-        Category category = categoryService.findByName(productDTO.getCategory());
         if (category == null) {
-
-            categoryService.createPendingCategory(productDTO.getCategory());
+            categoryService.createPendingCategory(productDTO.getCategory().getName());
             notificationService.notifyAdmin("New category suggestion: " + productDTO.getCategory());
-            return new ResponseEntity<>("Category suggestion submitted for approval", HttpStatus.ACCEPTED);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).build(); // Категория ожидает одобрения
         }
 
+        // Создаём продукт
         Product product = new Product();
         product.setName(productDTO.getName());
         product.setDescription(productDTO.getDescription());
         product.setPrice(productDTO.getPrice());
         product.setSale(productDTO.getSale());
         product.setPhotos(productDTO.getPhotos());
-
         product.setIsVisible(productDTO.getIsVisible());
         product.setIsAvailable(productDTO.getIsAvailable());
         product.setCategory(category);
 
-        productService.save(product);
-        return new ResponseEntity<>("Product created successfully", HttpStatus.CREATED);
+        Product savedProduct = productService.save(product);
+
+        // Преобразуем сохранённый продукт в DTO
+        ProductDTO responseDTO = toProductDTO(savedProduct);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO); // Возвращаем созданный продукт
     }
+    private ProductDTO toProductDTO(Product product) {
+        ProductDTO productDTO = new ProductDTO();
+        productDTO.setName(product.getName());
+        productDTO.setDescription(product.getDescription());
+        productDTO.setPrice(product.getPrice());
+        productDTO.setSale(product.getSale());
+        productDTO.setPhotos(product.getPhotos());
+        productDTO.setIsVisible(product.getIsVisible());
+        productDTO.setIsAvailable(product.getIsAvailable());
+        productDTO.setCategory(product.getCategory());
+        return productDTO;
+    }
+
 //    @GetMapping
 //    public ResponseEntity<PagedResponse<ProductDTO>> getProductsPage(Pageable pageable) {
 //        Page<Product> productPage = productService.findAll(pageable);
@@ -119,12 +136,18 @@ public class ProductController {
     }
 
     @PutMapping("{productId}")
-    public ResponseEntity<String> updateProduct(@PathVariable Integer productId, @RequestBody ProductDTO productDTO) {
+    public ResponseEntity<ProductDTO> updateProduct(@PathVariable Integer productId, @RequestBody NewProductDTO productDTO) {
         Product product = productService.findById(productId);
+
         if (product == null) {
-            return new ResponseEntity<>("Product not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Продукт не найден
         }
 
+        if (productDTO.getType() != null && productDTO.getType().equalsIgnoreCase("Service")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Нельзя изменить тип продукта
+        }
+
+        // Обновление полей продукта
         product.setName(productDTO.getName());
         product.setDescription(productDTO.getDescription());
         product.setPrice(productDTO.getPrice());
@@ -134,24 +157,31 @@ public class ProductController {
         product.setIsAvailable(productDTO.getIsAvailable());
         product.setLastChanged(LocalDateTime.now());
 
+        Product updatedProduct = productService.save(product);
 
-        if (productDTO.getType() != null && productDTO.getType().equalsIgnoreCase("Service")) {
-            return new ResponseEntity<>("Product type cannot be changed to Service", HttpStatus.BAD_REQUEST);
-        }
+        // Преобразование в DTO
+        ProductDTO updatedProductDTO = toProductDTO(updatedProduct);
 
-        productService.save(product);
-        return new ResponseEntity<>("Product updated successfully", HttpStatus.OK);
+        return ResponseEntity.ok(updatedProductDTO); // Возвращаем обновлённый продукт
     }
+
     @DeleteMapping("{productId}")
-    public ResponseEntity<String> deleteProduct(@PathVariable Integer productId) {
+    public ResponseEntity<ProductDTO> deleteProduct(@PathVariable Integer productId) {
         Product product = productService.findById(productId);
+
         if (product == null) {
-            return new ResponseEntity<>("Product not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Продукт не найден
         }
 
+        // Логическое удаление
         product.setIsDeleted(true);
-        productService.save(product);
-        return new ResponseEntity<>("Product deleted successfully", HttpStatus.OK);
+        Product deletedProduct = productService.save(product);
+
+        // Преобразование в DTO
+        ProductDTO deletedProductDTO = toProductDTO(deletedProduct);
+
+        return ResponseEntity.ok(deletedProductDTO); // Возвращаем "удалённый" продукт
     }
+
 }
 
