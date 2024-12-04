@@ -8,9 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class OfferDTO {
-
-    private Integer id;
+public class NewOfferDTO {
     private Status status;
     private String name;
     private String description;
@@ -35,11 +33,10 @@ public class OfferDTO {
     private int latestReservation;
     private int latestCancelation;
 
-    public OfferDTO() {}
+    public NewOfferDTO() {}
 
-    public OfferDTO(Offer offer) {
+    public NewOfferDTO(Offer offer) {
         if (offer != null) {
-            this.id = offer.getId();
             this.status = offer.getStatus() != null ? Status.valueOf(offer.getStatus().toString()) : null;
             this.name = offer.getName();
             this.description = offer.getDescription();
