@@ -2,6 +2,7 @@ package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.activity.NewActivityDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
+import ftn.siit.project.isspoject.dto.event.NewEventDTO;
 import ftn.siit.project.isspoject.entity.Activity;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.Organizer;
@@ -28,12 +29,14 @@ public class OrganizerController {
     private PDFGeneratorService pdfGeneratorService;
 
     @PostMapping("events")
-    public ResponseEntity<String> createEvent(@RequestParam Integer organizerId, @RequestBody EventDTO eventDTO) {
+    public ResponseEntity<EventDTO> createEvent(@RequestParam Integer organizerId, @RequestBody NewEventDTO eventDTO) {
+        // Проверка наличия организатора
         Organizer organizer = organizerService.findById(organizerId);
         if (organizer == null) {
-            return new ResponseEntity<>("Organizer not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Организатор не найден
         }
 
+        // Создание нового события
         Event event = new Event();
         event.setName(eventDTO.getName());
         event.setDescription(eventDTO.getDescription());
@@ -44,11 +47,18 @@ public class OrganizerController {
         event.setEventType(eventDTO.getEventType());
         event.setParticipants(0);
 
-        //event.setOrganizer(organizer);
+//        // Устанавливаем организатора
+//        event.setOrganizer(organizer);
 
-        eventService.save(event);
-        return new ResponseEntity<>("Event created successfully", HttpStatus.CREATED);
+        // Сохраняем событие
+        Event savedEvent = eventService.save(event);
+
+        // Преобразование в DTO
+        EventDTO responseDTO = toEventDTO(savedEvent);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO); // Возвращаем созданное событие
     }
+
     @GetMapping("events/{organizerId}")
     public ResponseEntity<List<EventDTO>> getOrganizerEvents(@PathVariable Integer organizerId) {
         Organizer organizer = organizerService.findById(organizerId);
@@ -74,58 +84,87 @@ public class OrganizerController {
     }
 
     @PutMapping("events/{organizerId}/{eventId}")
-    public ResponseEntity<String> updateEvent(
+    public ResponseEntity<EventDTO> updateEvent(
             @PathVariable Integer organizerId,
             @PathVariable Integer eventId,
             @RequestBody EventDTO eventDTO) {
+
+        // Проверка наличия организатора
         Organizer organizer = organizerService.findById(organizerId);
         if (organizer == null) {
-            return new ResponseEntity<>("Organizer not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Организатор не найден
         }
 
+        // Проверка наличия события и его принадлежности организатору
         Event event = eventService.findById(eventId);
 //        if (event == null || !event.getOrganizer().equals(organizer)) {
-//            return new ResponseEntity<>("Event not found or not owned by this organizer", HttpStatus.NOT_FOUND);
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Событие не найдено или не принадлежит организатору
 //        }
 
+        // Обновление полей события
         event.setName(eventDTO.getName());
         event.setDescription(eventDTO.getDescription());
         event.setMaxParticipants(eventDTO.getMaxParticipants());
         event.setIsPublic(eventDTO.getIsPublic());
         event.setPlace(eventDTO.getPlace());
         event.setDate(eventDTO.getDate());
-        eventService.save(event);
 
-        return new ResponseEntity<>("Event updated successfully", HttpStatus.OK);
+        Event updatedEvent = eventService.save(event);
+
+        // Преобразование в DTO
+        EventDTO updatedEventDTO = toEventDTO(updatedEvent);
+
+        return ResponseEntity.ok(updatedEventDTO); // Возвращаем обновлённое событие
     }
+    private EventDTO toEventDTO(Event event) {
+        EventDTO eventDTO = new EventDTO();
+        eventDTO.setId(event.getId());
+        eventDTO.setName(event.getName());
+        eventDTO.setDescription(event.getDescription());
+        eventDTO.setMaxParticipants(event.getMaxParticipants());
+        eventDTO.setIsPublic(event.getIsPublic());
+        eventDTO.setPlace(event.getPlace());
+        eventDTO.setDate(event.getDate());
+        return eventDTO;
+    }
+
     @DeleteMapping("events/{organizerId}/{eventId}")
-    public ResponseEntity<String> deleteEvent(@PathVariable Integer organizerId, @PathVariable Integer eventId) {
+    public ResponseEntity<EventDTO> deleteEvent(@PathVariable Integer organizerId, @PathVariable Integer eventId) {
+
         Organizer organizer = organizerService.findById(organizerId);
         if (organizer == null) {
-            return new ResponseEntity<>("Organizer not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+
 
         Event event = eventService.findById(eventId);
 //        if (event == null || !event.getOrganizer().equals(organizer)) {
-//            return new ResponseEntity<>("Event not found or not owned by this organizer", HttpStatus.NOT_FOUND);
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 //        }
 
+
         eventService.delete(event);
-        return new ResponseEntity<>("Event deleted successfully", HttpStatus.OK);
+
+
+        EventDTO deletedEventDTO = toEventDTO(event);
+
+        return ResponseEntity.ok(deletedEventDTO);
     }
+
     @PostMapping("events/{organizerId}/{eventId}/add-agenda")
-    public ResponseEntity<String> addAgenda(
+    public ResponseEntity<EventDTO> addAgenda(
             @PathVariable Integer organizerId,
             @PathVariable Integer eventId,
             @RequestBody List<NewActivityDTO> activities) {
+
         Organizer organizer = organizerService.findById(organizerId);
         if (organizer == null) {
-            return new ResponseEntity<>("Organizer not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         Event event = eventService.findById(eventId);
 //        if (event == null || !event.getOrganizer().equals(organizer)) {
-//            return new ResponseEntity<>("Event not found or not owned by this organizer", HttpStatus.NOT_FOUND);
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 //        }
 
         List<Activity> agenda = activities.stream().map(activityDTO -> {
@@ -137,10 +176,13 @@ public class OrganizerController {
         }).collect(Collectors.toList());
 
         event.setActivities(agenda);
-        eventService.save(event);
+        Event updatedEvent = eventService.save(event);
 
-        return new ResponseEntity<>("Agenda added successfully", HttpStatus.OK);
+        EventDTO updatedEventDTO = toEventDTO(updatedEvent);
+
+        return ResponseEntity.ok(updatedEventDTO);
     }
+
 
     @GetMapping("events/{organizerId}/{eventId}/agenda")
     public ResponseEntity<List<NewActivityDTO>> getAgenda(
