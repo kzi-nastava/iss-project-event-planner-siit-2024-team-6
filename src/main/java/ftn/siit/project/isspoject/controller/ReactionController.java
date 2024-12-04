@@ -5,6 +5,7 @@ import ftn.siit.project.isspoject.dto.reaction.ReactionDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.interfaces.*;
+import ftn.siit.project.isspoject.service.interfaces.OfferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
