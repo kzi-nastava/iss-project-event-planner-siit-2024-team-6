@@ -26,7 +26,7 @@ public class BudgetController {
 
     @PostMapping("add")
     public ResponseEntity<String> createBudget(@RequestBody BudgetDTO budgetDTO) {
-        Budget budget = new Budget(budgetDTO, categoryService.findAllByNames(budgetDTO.getCategories()));
+        Budget budget = new Budget();
         if(budget == null){ throw new IllegalArgumentException("Budget is null"); }
         budgetService.save(budget);
         return ResponseEntity.ok("Budget created.");
@@ -36,10 +36,6 @@ public class BudgetController {
     public ResponseEntity<BudgetDTO> updateBudget(@PathVariable int id, @RequestBody BudgetDTO budgetDTO) {
         Budget existingBudget = budgetService.findById(id);
         if(existingBudget == null) return ResponseEntity.notFound().build();
-
-        existingBudget.setMaxPrices(budgetDTO.getMaxPrices());
-        existingBudget.setCurrentPrices(budgetDTO.getCurrentPrices());
-        existingBudget.setCategories(categoryService.findAllByNames(budgetDTO.getCategories()));
         Budget updatedBudget = budgetService.update(existingBudget);
 
         return ResponseEntity.ok(new BudgetDTO(updatedBudget));
