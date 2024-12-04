@@ -2,26 +2,41 @@ package ftn.siit.project.isspoject.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
+
 
 @Data
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "user_type")
 public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false)
     private String password;
+
     private String photoUrl;
+
+    @Column(nullable = false)
     private Boolean isActive;
+
     private LocalDateTime suspendedSince;
+
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
     private String lastname;
+
     private String address;
+
     private String phoneNumber;
-    private List<Offer> favouriteOffers;
-    private List<Event> favouriteEvents;
-    private List<Event> attends;
-//    private List<Notification> notifications;
 }
+

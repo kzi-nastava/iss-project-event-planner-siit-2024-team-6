@@ -132,7 +132,6 @@ public class OrganizerController {
             Activity activity = new Activity();
             activity.setName(activityDTO.getName());
             activity.setDescription(activityDTO.getDescription());
-            activity.setTime(activityDTO.getTime());
             activity.setLocation(activityDTO.getLocation());
             return activity;
         }).collect(Collectors.toList());
@@ -161,7 +160,6 @@ public class OrganizerController {
             ActivityDTO dto = new ActivityDTO();
             dto.setName(activity.getName());
             dto.setDescription(activity.getDescription());
-            dto.setTime(activity.getTime());
             dto.setLocation(activity.getLocation());
             return dto;
         }).collect(Collectors.toList());
