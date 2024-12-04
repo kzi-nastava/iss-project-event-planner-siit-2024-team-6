@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.service.implementations;
 
+import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
 import ftn.siit.project.isspoject.entity.Budget;
 import ftn.siit.project.isspoject.entity.Category;
 import ftn.siit.project.isspoject.service.interfaces.BudgetService;
@@ -26,6 +27,11 @@ public class BudgetServiceImpl implements BudgetService {
     }
 
     @Override
+    public Budget save(NewBudgetDTO budgetDTO) {
+        return null;
+    }
+
+    @Override
     public Budget update(Budget budget) {
         Budget existingBudget = findById(budget.getId());
         if (existingBudget != null) {
@@ -35,7 +41,13 @@ public class BudgetServiceImpl implements BudgetService {
     }
 
     @Override
-    public void delete(Budget budget) {
+    public Budget update(int id, NewBudgetDTO budgetDTO) {
+        return null;
+    }
+
+    @Override
+    public void delete(int id) {
 
     }
+
 }

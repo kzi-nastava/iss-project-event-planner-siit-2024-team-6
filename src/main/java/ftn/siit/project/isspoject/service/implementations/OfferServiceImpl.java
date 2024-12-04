@@ -1,5 +1,7 @@
 package ftn.siit.project.isspoject.service.implementations;
 
+import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
+import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.dto.offer.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.service.interfaces.OfferService;
@@ -105,6 +107,11 @@ public class OfferServiceImpl implements OfferService {
         );
     }
 
+    @Override
+    public Offer save(NewOfferDTO dto) {
+        return null;
+    }
+
 
     @Override
     public void save(Offer offer) {
@@ -113,6 +120,11 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public Offer update(Offer offer) {
+        return null;
+    }
+
+    @Override
+    public Offer update(OfferDTO dto) {
         return null;
     }
 

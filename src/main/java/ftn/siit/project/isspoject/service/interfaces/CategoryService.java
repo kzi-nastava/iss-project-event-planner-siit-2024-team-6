@@ -10,6 +10,7 @@ public interface CategoryService {
     List<Category> findAllByNames(List<String> names);
     void createPendingCategory(String category);
 
+
     Category save(Category category);
     Category update(Category category);
     void delete(Category category);
