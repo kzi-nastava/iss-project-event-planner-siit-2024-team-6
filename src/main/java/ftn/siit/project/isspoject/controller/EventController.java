@@ -128,7 +128,7 @@ public class EventController {
         eventDTO.setIsPublic(event.getIsPublic());
         eventDTO.setPlace(event.getPlace());
         eventDTO.setDate(event.getDate());
-        eventDTO.setEventType(event.getEventType());
+        eventDTO.setEventTypeId(event.getEventType().getId());
         eventDTO.setParticipants(event.getParticipants());
         return eventDTO;
     }

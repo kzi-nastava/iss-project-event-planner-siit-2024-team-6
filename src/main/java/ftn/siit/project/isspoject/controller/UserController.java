@@ -266,6 +266,10 @@ public class UserController {
             throw new IllegalArgumentException("Not all arguments were given while reporting user");
         }
         Report report = new Report(userReportDTO);
+        User reporter = userService.findById(userReportDTO.getReporterId());
+        User reported = userService.findById(userReportDTO.getReportedId());
+        report.setReporter(reporter);
+        report.setReported(reported);
         Report savedReport = reportService.save(report);
         return ResponseEntity.status(HttpStatus.CREATED).body(new UserReportDTO(savedReport));
     }

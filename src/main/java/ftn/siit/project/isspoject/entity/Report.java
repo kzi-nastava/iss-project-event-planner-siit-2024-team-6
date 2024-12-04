@@ -40,8 +40,6 @@ public class Report {
             throw new IllegalArgumentException("UserReportDTO cannot be null");
         }
         this.reason = userReportDTO.getReason();
-        this.reported = userReportDTO.getReported();
-        this.reporter = userReportDTO.getReporter();
         this.status = Status.PENDING;
         this.reactions = null;
     }

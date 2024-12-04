@@ -2,6 +2,7 @@ package ftn.siit.project.isspoject.dto.offer;
 
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.entity.*;
+
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -50,9 +51,9 @@ public class NewOfferDTO {
 
             if (offer instanceof Product) {
                 this.type = "Product";
-            } else if (offer instanceof Service) {
+            } else if (offer instanceof OfferService) {
                 this.type = "Service";
-                Service service = (Service) offer;
+                OfferService service = (OfferService) offer;
                 this.specifics = service.getSpecifics();
                 this.minDuration = service.getMinDuration();
                 this.maxDuration = service.getMaxDuration();

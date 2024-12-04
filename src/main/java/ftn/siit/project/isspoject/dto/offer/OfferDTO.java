@@ -54,7 +54,7 @@ public class OfferDTO {
 //            this.isAvailable = offer.getIsAvailable();
 //            this.isDeleted = offer.getIsDeleted();
 //            this.lastChanged = offer.getLastChanged();
-            this.category = offer.getCategory() != null ? offer.getCategory().getName() : null;
+            this.category = offer.getCategory();
             if (offer instanceof Product) {
                 this.type = "Product";
             } else if (offer instanceof OfferService) {

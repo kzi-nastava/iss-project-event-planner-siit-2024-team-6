@@ -43,8 +43,8 @@ public class ProviderController {
     public ResponseEntity<OfferDTO> createOffer(@PathVariable int providerId, @RequestBody NewOfferDTO dto) {
         Provider provider = providerService.findById(providerId);
         if (provider == null) { throw new NotFoundException("Provider not found."); }
-        Offer created = new Offer();
-        created.toOffer(dto, categoryService.findByName(dto.getCategory().getName()));
+//        Offer created = new Offer();
+//        created.toOffer(dto, categoryService.findByName(dto.getCategory().getName()));
         Offer saved = offerService.save(dto);
         provider.getMyOffers().add(saved);
         providerService.update(provider);
