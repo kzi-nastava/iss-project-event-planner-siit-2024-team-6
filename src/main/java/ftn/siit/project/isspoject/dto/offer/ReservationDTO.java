@@ -7,8 +7,16 @@ import java.time.LocalDateTime;
 
 @Data
 public class ReservationDTO {
+    private Integer id;
     private Integer serviceId;
     private LocalDateTime start;
-    private Integer duration;
+    private LocalDateTime end;
 
+    public ReservationDTO() {}
+    public ReservationDTO(Reservation reservation) {
+        this.id = reservation.getId();
+        this.serviceId = reservation.getService().getId();
+        this.start = reservation.getStart();
+        this.end = reservation.getEnd();
+    }
 }
