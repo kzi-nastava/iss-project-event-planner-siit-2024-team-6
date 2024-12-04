@@ -2,6 +2,7 @@ package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
+import ftn.siit.project.isspoject.dto.event.NewEventTypeDTO;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.interfaces.EventTypeService;
@@ -46,19 +47,34 @@ public class AdminController {
     private ReportService reportService;
 
     @PostMapping("event-types")
-    public ResponseEntity<String> addEventType(@RequestBody EventTypeDTO eventTypeDTO) {
+    public ResponseEntity<EventTypeDTO> addEventType(@RequestBody NewEventTypeDTO eventTypeDTO) {
+        // Проверка валидности входных данных
         if (eventTypeDTO == null || eventTypeDTO.getName() == null || eventTypeDTO.getDescription() == null) {
-            return new ResponseEntity<>("Invalid event type data", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Некорректные данные
         }
 
+        // Создание нового типа события
         EventType eventType = new EventType();
         eventType.setName(eventTypeDTO.getName());
         eventType.setDescription(eventTypeDTO.getDescription());
         eventType.setIsDeleted(false);
 
-        eventTypeService.save(eventType);
-        return new ResponseEntity<>("Event type added successfully", HttpStatus.CREATED);
+        // Сохранение типа события
+        EventType savedEventType = eventTypeService.save(eventType);
+
+        // Преобразование в DTO
+        EventTypeDTO responseDTO = toEventTypeDTO(savedEventType);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO); // Возвращаем созданный тип события
     }
+    private EventTypeDTO toEventTypeDTO(EventType eventType) {
+        EventTypeDTO eventTypeDTO = new EventTypeDTO();
+        eventTypeDTO.setId(eventType.getId());
+        eventTypeDTO.setName(eventType.getName());
+        eventTypeDTO.setDescription(eventType.getDescription());
+        return eventTypeDTO;
+    }
+
 
     @GetMapping("event-types")
     public ResponseEntity<List<EventTypeDTO>> getAllEventTypes() {
@@ -78,31 +94,42 @@ public class AdminController {
     }
 
     @PutMapping("event-types/{id}")
-    public ResponseEntity<String> updateEventType(
+    public ResponseEntity<EventTypeDTO> updateEventType(
             @PathVariable Integer id,
-            @RequestBody EventTypeDTO eventTypeDTO) {
+            @RequestBody NewEventTypeDTO eventTypeDTO) {
         EventType eventType = eventTypeService.findById(id);
         if (eventType == null) {
-           return new ResponseEntity<>("Event type not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Тип события не найден
         }
-        System.out.println("Updating event type with ID " + id);
-        eventType.setDescription(eventTypeDTO.getDescription());
-        eventTypeService.save(eventType);
 
-        return new ResponseEntity<>("Event type updated successfully", HttpStatus.OK);
+        // Обновление полей типа события
+        eventType.setDescription(eventTypeDTO.getDescription());
+        EventType updatedEventType = eventTypeService.save(eventType);
+
+        // Преобразование в DTO
+        EventTypeDTO responseDTO = toEventTypeDTO(updatedEventType);
+
+        return ResponseEntity.ok(responseDTO); // Возвращаем обновлённый тип события
     }
+
 
     @PutMapping("event-types/{id}/activate")
-    public ResponseEntity<String> activateEventType(@PathVariable Integer id) {
+    public ResponseEntity<EventTypeDTO> activateEventType(@PathVariable Integer id) {
         EventType eventType = eventTypeService.findById(id);
         if (eventType == null) {
-            return new ResponseEntity<>("Event type not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Тип события не найден
         }
 
+        // Активация типа события
         eventType.setIsDeleted(false);
-        eventTypeService.save(eventType);
-        return new ResponseEntity<>("Event type activated", HttpStatus.OK);
+        EventType activatedEventType = eventTypeService.save(eventType);
+
+        // Преобразование в DTO
+        EventTypeDTO responseDTO = toEventTypeDTO(activatedEventType);
+
+        return ResponseEntity.ok(responseDTO); // Возвращаем активированный тип события
     }
+
 //    @GetMapping
 //    public ResponseEntity<PagedResponse<EventTypeDTO>> getEventTypesPage(Pageable pageable) {
 //        Page<EventType> eventTypePage = eventTypeService.findAll(pageable);
@@ -122,16 +149,23 @@ public class AdminController {
 //    }
 
     @PutMapping("event-types/{id}/deactivate")
-    public ResponseEntity<String> deactivateEventType(@PathVariable Integer id) {
+    public ResponseEntity<EventTypeDTO> deactivateEventType(@PathVariable Integer id) {
+        // Проверка существования типа события
         EventType eventType = eventTypeService.findById(id);
         if (eventType == null) {
-            return new ResponseEntity<>("Event type not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Тип события не найден
         }
 
+        // Деактивация типа события
         eventType.setIsDeleted(true);
-        eventTypeService.save(eventType);
-        return new ResponseEntity<>("Event type deactivated", HttpStatus.OK);
+        EventType deactivatedEventType = eventTypeService.save(eventType);
+
+        // Преобразование в DTO
+        EventTypeDTO responseDTO = toEventTypeDTO(deactivatedEventType);
+
+        return ResponseEntity.ok(responseDTO); // Возвращаем деактивированный тип события
     }
+
 
     @PostMapping("suspend/{id}")
     public ResponseEntity<User> suspendUser(@PathVariable Integer id) {
