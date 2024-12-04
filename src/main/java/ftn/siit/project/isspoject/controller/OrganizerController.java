@@ -1,6 +1,6 @@
 package ftn.siit.project.isspoject.controller;
 
-import ftn.siit.project.isspoject.dto.activity.ActivityDTO;
+import ftn.siit.project.isspoject.dto.activity.NewActivityDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.entity.Activity;
 import ftn.siit.project.isspoject.entity.Event;
@@ -117,7 +117,7 @@ public class OrganizerController {
     public ResponseEntity<String> addAgenda(
             @PathVariable Integer organizerId,
             @PathVariable Integer eventId,
-            @RequestBody List<ActivityDTO> activities) {
+            @RequestBody List<NewActivityDTO> activities) {
         Organizer organizer = organizerService.findById(organizerId);
         if (organizer == null) {
             return new ResponseEntity<>("Organizer not found", HttpStatus.NOT_FOUND);
@@ -143,7 +143,7 @@ public class OrganizerController {
     }
 
     @GetMapping("events/{organizerId}/{eventId}/agenda")
-    public ResponseEntity<List<ActivityDTO>> getAgenda(
+    public ResponseEntity<List<NewActivityDTO>> getAgenda(
             @PathVariable Integer organizerId,
             @PathVariable Integer eventId) {
         Organizer organizer = organizerService.findById(organizerId);
@@ -156,8 +156,8 @@ public class OrganizerController {
 //            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 //        }
 
-        List<ActivityDTO> agenda = event.getActivities().stream().map(activity -> {
-            ActivityDTO dto = new ActivityDTO();
+        List<NewActivityDTO> agenda = event.getActivities().stream().map(activity -> {
+            NewActivityDTO dto = new NewActivityDTO();
             dto.setName(activity.getName());
             dto.setDescription(activity.getDescription());
             dto.setLocation(activity.getLocation());
