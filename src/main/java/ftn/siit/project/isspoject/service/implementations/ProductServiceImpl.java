@@ -12,8 +12,9 @@ import java.util.stream.Collectors;
 @Service
 public class ProductServiceImpl implements ProductService {
     @Override
-    public void save(Product product) {
+    public Product save(Product product) {
         System.out.println(product);
+        return product;
     }
 
     @Override

@@ -35,7 +35,7 @@ public class ProviderController {
         Provider provider = providerService.findById(providerId);
         if (provider == null) { throw new NotFoundException("Provider not found."); }
         Offer created = new Offer();
-        created.toOffer(dto, categoryService.findByName(dto.getCategory()));
+        created.toOffer(dto, categoryService.findByName(dto.getCategory().getName()));
         provider.getMyOffers().add(created);
         providerService.update(provider);
         offerService.save(created);
