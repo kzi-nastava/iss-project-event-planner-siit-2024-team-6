@@ -20,7 +20,7 @@ public class ReservationController {
     public ResponseEntity<String> createReservation(@RequestBody ReservationDTO dto) {
         Reservation reservation = reservationService.save(dto);
         sendConfirmations(reservation);
-        return ResponseEntity.ok("Service with id " + reservation.getService().getId() + " is reserved");
+        return ResponseEntity.ok("Service is reserved");
     }
 
     private void sendConfirmations(Reservation reservation) {
