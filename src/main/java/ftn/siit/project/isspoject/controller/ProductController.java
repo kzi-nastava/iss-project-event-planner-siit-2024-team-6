@@ -46,8 +46,8 @@ public class ProductController {
         product.setSale(productDTO.getSale());
         product.setPhotos(productDTO.getPhotos());
 
-        product.setIsVisible(productDTO.getIsVisible());
-        product.setIsAvailable(productDTO.getIsAvailable());
+//        product.setIsVisible(productDTO.getIsVisible());
+//        product.setIsAvailable(productDTO.getIsAvailable());
         product.setCategory(category);
 
         productService.save(product);
@@ -106,10 +106,10 @@ public class ProductController {
             productDTO.setPrice(offerDTO.getPrice());
             productDTO.setSale(offerDTO.getSale());
             productDTO.setPhotos(offerDTO.getPhotos());
-            productDTO.setIsVisible(offerDTO.getIsVisible());
-            productDTO.setIsAvailable(offerDTO.getIsAvailable());
-            productDTO.setIsDeleted(offerDTO.getIsDeleted());
-            productDTO.setLastChanged(offerDTO.getLastChanged());
+//            productDTO.setIsVisible(offerDTO.getIsVisible());
+//            productDTO.setIsAvailable(offerDTO.getIsAvailable());
+//            productDTO.setIsDeleted(offerDTO.getIsDeleted());
+//            productDTO.setLastChanged(offerDTO.getLastChanged());
             productDTO.setCategory(offerDTO.getCategory());
             productDTO.setType(offerDTO.getType());
 
@@ -130,8 +130,8 @@ public class ProductController {
         product.setPrice(productDTO.getPrice());
         product.setSale(productDTO.getSale());
         product.setPhotos(productDTO.getPhotos());
-        product.setIsVisible(productDTO.getIsVisible());
-        product.setIsAvailable(productDTO.getIsAvailable());
+//        product.setIsVisible(productDTO.getIsVisible());
+//        product.setIsAvailable(productDTO.getIsAvailable());
         product.setLastChanged(LocalDateTime.now());
 
 
