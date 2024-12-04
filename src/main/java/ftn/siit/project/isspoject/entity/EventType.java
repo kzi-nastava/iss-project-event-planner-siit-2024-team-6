@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import ftn.siit.project.isspoject.dto.event.NewEventTypeDTO;
 import lombok.Data;
 
 import java.util.List;
@@ -17,7 +18,6 @@ public class EventType {
     private String name;
     private String description;
     private Boolean isDeleted;
-
     public EventType (){}
     public EventType(int i, String corporate, String professionalCorporateEvents, boolean b) {
         this.id = i;

@@ -1,7 +1,8 @@
 package ftn.siit.project.isspoject.service.implementations;
 
-import ftn.siit.project.isspoject.dto.event.ClosedEventDTO;
+import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
 import ftn.siit.project.isspoject.entity.*;
+import ftn.siit.project.isspoject.repository.EventTypeRepository;
 import ftn.siit.project.isspoject.service.interfaces.EventService;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ public class EventServiceImpl implements EventService {
 
     //@Autowired
     //private EventRepository eventRepository;
+    private EventTypeRepository eventTypeRepository;
 
     @Override
     public List<Event> findAll() { return List.of(
@@ -70,11 +72,14 @@ public class EventServiceImpl implements EventService {
                 );
     }
 
-    public void addClosedEvent(ClosedEventDTO eventDTO) {
+    public Event addClosedEvent(NewClosedEventDTO eventDTO) {
+        //EventType type = eventTypeRepository.findById(eventDTO.getEventTypeId());
         Event event = new Event(eventDTO);
+        //event.setEventType(type);
         //Event savedEvent = eventRepository.save(event);
 
         sendInvitations("",eventDTO.getEmails());
+        return event;
     }
     private void sendInvitations(String text,List<String> emails) {}
 

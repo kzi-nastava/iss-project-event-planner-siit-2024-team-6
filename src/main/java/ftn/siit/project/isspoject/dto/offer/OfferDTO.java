@@ -18,10 +18,10 @@ public class OfferDTO {
     private Double price;
     private Double sale;
     private List<String> photos;
-    private Boolean isVisible;
-    private Boolean isAvailable;
-    private Boolean isDeleted;
-    private LocalDateTime lastChanged;
+//    private Boolean isVisible;
+//    private Boolean isAvailable;
+//    private Boolean isDeleted;
+//    private LocalDateTime lastChanged;
     private String category;
 
     private String type; // product or service
@@ -46,10 +46,10 @@ public class OfferDTO {
             this.price = offer.getPrice();
             this.sale = offer.getSale();
             this.photos = offer.getPhotos();
-            this.isVisible = offer.getIsVisible();
-            this.isAvailable = offer.getIsAvailable();
-            this.isDeleted = offer.getIsDeleted();
-            this.lastChanged = offer.getLastChanged();
+//            this.isVisible = offer.getIsVisible();
+//            this.isAvailable = offer.getIsAvailable();
+//            this.isDeleted = offer.getIsDeleted();
+//            this.lastChanged = offer.getLastChanged();
             this.category = offer.getCategory() != null ? offer.getCategory().getName() : null;
 
             if (offer instanceof Product) {

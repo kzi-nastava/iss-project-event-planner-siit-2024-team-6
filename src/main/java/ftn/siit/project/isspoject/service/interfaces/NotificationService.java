@@ -11,7 +11,7 @@ public interface NotificationService {
     List<Notification> findByRecipient(User recipient);
     void notifyAdmin(String s);
 
-    void save(Notification notification);
+    Notification save(Notification notification);
 
     void notifyUsers(List<User> users, String message);
     void notifyUser(User user, String message);

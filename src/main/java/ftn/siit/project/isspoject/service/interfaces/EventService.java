@@ -1,6 +1,6 @@
 package ftn.siit.project.isspoject.service.interfaces;
 
-import ftn.siit.project.isspoject.dto.event.ClosedEventDTO;
+import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.entity.Organizer;
@@ -20,6 +20,6 @@ public interface EventService {
     Event save(Event event);
     void delete(Event event);
     List<Event> getEventsUserAttends(Integer userId);
-    void addClosedEvent(ClosedEventDTO eventDTO);
+    Event addClosedEvent(NewClosedEventDTO eventDTO);
     List<Event> searchEvents(String name, String description, String place, EventType eventType, Boolean isPublic, LocalDateTime startDate, LocalDateTime endDate);
 }
