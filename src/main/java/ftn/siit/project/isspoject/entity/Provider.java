@@ -34,6 +34,7 @@ public class Provider extends User {
     @JoinColumn(name = "provider_id")
     private List<Offer> myOffers;
 
+
     public boolean hasActiveServices() {
         return false;
     }
