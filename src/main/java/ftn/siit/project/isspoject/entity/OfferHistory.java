@@ -8,11 +8,13 @@ import java.util.List;
 
 @Data
 @Entity
+@Table(name = "offer_histories")
 public class OfferHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @OneToMany(mappedBy = "offer_history")
+    @OneToMany
+    @JoinColumn(name = "offer_history_id")
     private List<Offer> offers;
     @ElementCollection
     @CollectionTable(name = "offer_history_timestamps", joinColumns = @JoinColumn(name = "offer_history_id"))

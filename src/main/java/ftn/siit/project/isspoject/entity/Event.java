@@ -11,6 +11,7 @@ import java.util.List;
 
 @Data
 @Entity
+@Table(name = "events")
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,12 +26,14 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "event_type_id", nullable = false)
     private EventType eventType;
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "event_id")
     private List<Activity> activities;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "budget_id", referencedColumnName = "id")
     private Budget budget;
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "event_id")
     private List<Reservation> reservations;
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(

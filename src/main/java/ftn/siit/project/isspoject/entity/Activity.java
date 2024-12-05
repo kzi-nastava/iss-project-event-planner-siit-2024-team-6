@@ -1,9 +1,6 @@
 package ftn.siit.project.isspoject.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jdk.jfr.Enabled;
 import lombok.Data;
 
@@ -11,6 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
+@Table(name = "activities")
 public class Activity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

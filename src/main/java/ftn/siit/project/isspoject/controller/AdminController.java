@@ -200,7 +200,7 @@ public class AdminController {
                 .header("Content-Disposition", "attachment; filename=event-analytics.pdf")
                 .body(pdf);
     }
-    @GetMapping
+    @GetMapping("categories")
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = categoryService.findAll();
         if (categories.isEmpty()) {
@@ -217,7 +217,7 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
     }
 
-    @PutMapping("{id}")
+    @PutMapping("category/{id}")
     public ResponseEntity<Category> updateCategory(@PathVariable int id, @RequestBody NewCategoryDTO dto) {
         Category oldCategory = categoryService.findById(id);
         if (oldCategory == null) {
@@ -229,7 +229,7 @@ public class AdminController {
         return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("category/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable int id) {
         Category oldCategory = categoryService.findById(id);
         if (oldCategory == null) {
@@ -242,7 +242,7 @@ public class AdminController {
         return ResponseEntity.ok("Category deleted successfully");
     }
 
-    @GetMapping
+    @GetMapping("suggestions")
     public ResponseEntity<List<CategorySuggestionDTO>> getAllCategorySuggestions() {
         List<CategorySuggestion> suggestions = categorySuggestionService.getPending();
         if (suggestions.isEmpty()) {
@@ -251,7 +251,7 @@ public class AdminController {
         return ResponseEntity.ok(suggestions.stream().map(CategorySuggestionDTO::new).collect(Collectors.toList()));
     }
 
-    @PutMapping("{id}")
+    @PutMapping("suggestion/{id}")
     public ResponseEntity<CategorySuggestionDTO> updateCategorySuggestion(@PathVariable int id, @RequestBody NewCategorySuggestionDTO dto) {
         CategorySuggestion cs = categorySuggestionService.findById(id);
         if (cs == null) {
@@ -263,7 +263,7 @@ public class AdminController {
         return ResponseEntity.ok(new CategorySuggestionDTO(updated));
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("suggestion/{id}")
     public ResponseEntity<Void> deleteCategorySuggestion(@PathVariable int id) {
         CategorySuggestion cs = categorySuggestionService.findById(id);
         if (cs == null) {throw new NotFoundException("Category suggestion not found");}

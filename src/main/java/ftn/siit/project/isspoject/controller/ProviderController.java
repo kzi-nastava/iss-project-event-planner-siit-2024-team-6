@@ -51,11 +51,11 @@ public class ProviderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new OfferDTO(saved));
     }
 
-    @PutMapping("{providerId}")
-    public ResponseEntity<OfferDTO> updateOffer(@PathVariable Integer providerId, @RequestBody OfferDTO dto) {
+    @PutMapping("{providerId}/{offerId}")
+    public ResponseEntity<OfferDTO> updateOffer(@PathVariable int providerId, @PathVariable int offerId, @RequestBody NewOfferDTO dto) {
         Provider provider = providerService.findById(providerId);
         if(provider == null) {throw new NotFoundException("Provider not found."); }
-        Offer oldOffer = offerService.findById(dto.getId());
+        Offer oldOffer = offerService.findById(offerId);
         if(oldOffer == null) {throw new NotFoundException("Offer not found."); }
         Offer updated = offerService.update(dto);
         providerService.update(provider);
@@ -96,7 +96,7 @@ public class ProviderController {
         return ResponseEntity.ok(dtos);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("{id}/budget")
     public ResponseEntity<BudgetDTO> getBudget(@PathVariable int id) {
         Budget budget = budgetService.findById(id);
         if(budget == null) throw  new NotFoundException("Budget not found");
@@ -123,7 +123,7 @@ public class ProviderController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping
+    @PostMapping("suggestion")
     public ResponseEntity<CategorySuggestionDTO> createCategorySuggestion(NewCategorySuggestionDTO dto) {
         CategorySuggestion created = categorySuggestionService.save(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(new CategorySuggestionDTO(created));
