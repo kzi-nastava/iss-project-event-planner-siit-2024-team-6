@@ -3,6 +3,7 @@ package ftn.siit.project.isspoject.entity;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

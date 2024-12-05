@@ -8,6 +8,7 @@ import java.util.List;
 
 @Data
 @Entity
+@Table(name = "offer_histories")
 public class OfferHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
