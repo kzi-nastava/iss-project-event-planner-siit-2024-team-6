@@ -13,7 +13,7 @@ public class OfferHistoryServiceImpl implements OfferHistoryService {
     private OfferHistoryRepository offerHistoryRepository;
     @Override
     public OfferHistory save(OfferHistory offerHistory) {
-        return null;
+        return offerHistoryRepository.save(offerHistory);
     }
 
     @Override
@@ -23,7 +23,7 @@ public class OfferHistoryServiceImpl implements OfferHistoryService {
 
     @Override
     public void delete(Integer id) {
-
+        offerHistoryRepository.deleteById(id);
     }
 
     @Override

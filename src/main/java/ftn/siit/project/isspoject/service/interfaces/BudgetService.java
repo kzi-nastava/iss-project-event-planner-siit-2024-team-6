@@ -2,6 +2,9 @@ package ftn.siit.project.isspoject.service.interfaces;
 
 import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
 import ftn.siit.project.isspoject.entity.Budget;
+import ftn.siit.project.isspoject.entity.BudgetItem;
+
+import java.util.Optional;
 
 public interface BudgetService {
     Budget findById(Integer id);

@@ -28,13 +28,13 @@ public class Event {
     private EventType eventType;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "event_id")
-    private List<Activity> activities;
+    private List<Activity> eventActivities;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "budget_id", referencedColumnName = "id")
     private Budget budget;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "event_id")
-    private List<Reservation> reservations;
+    private List<Reservation> eventReservations;
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "event_products",
@@ -69,9 +69,9 @@ public class Event {
         this.place = place;
         this.date = date;
         this.eventType = eventType;
-        this.activities = activities;
+        this.eventActivities = activities;
         this.budget = budget;
-        this.reservations = reservations;
+        this.eventReservations = reservations;
         this.products = products;
     }
     public Event(EventDTO eventDTO) {
@@ -85,8 +85,8 @@ public class Event {
             this.place = eventDTO.getPlace();
             this.date = eventDTO.getDate();
             this.products = new ArrayList<>();
-            this.reservations = new ArrayList<>();
-            this.activities = new ArrayList<>();
+            this.eventActivities = new ArrayList<>();
+            this.eventReservations = new ArrayList<>();
         }
     }
     public Event(NewEventDTO eventDTO) {
@@ -99,8 +99,8 @@ public class Event {
             this.place = eventDTO.getPlace();
             this.date = eventDTO.getDate();
             this.products = new ArrayList<>();
-            this.reservations = new ArrayList<>();
-            this.activities = new ArrayList<>();
+            this.eventReservations = new ArrayList<>();
+            this.eventActivities = new ArrayList<>();
         }
     }
     public Event(NewClosedEventDTO eventDTO) {
@@ -116,7 +116,7 @@ public class Event {
         this.place = eventDTO.getPlace();
         this.date = eventDTO.getDate();
         this.products = new ArrayList<>();
-        this.reservations = new ArrayList<>();
-        this.activities = new ArrayList<>();
+        this.eventReservations = new ArrayList<>();
+        this.eventActivities = new ArrayList<>();
     }
 }

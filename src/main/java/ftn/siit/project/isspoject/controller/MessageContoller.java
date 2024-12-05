@@ -22,9 +22,8 @@ public class MessageContoller {
     @Autowired
     private UserService userService;
 
-    @PostMapping("{senderId}/to/{recieverId}")
+    @PostMapping("{senderId}/send/{recieverId}")
     public ResponseEntity<MessageDTO> sendMessage(@RequestBody NewMessageDTO dto, @PathVariable Integer senderId, @PathVariable Integer recieverId) {
-
         User sender = userService.findById(senderId);
         User reciever = userService.findById(recieverId);
         Message created = messageService.save(dto, sender, reciever);

@@ -177,7 +177,7 @@ public class OrganizerController {
             return activity;
         }).collect(Collectors.toList());
 
-        event.setActivities(agenda);
+        event.setEventActivities(agenda);
         Event updatedEvent = eventService.save(event);
 
         EventDTO updatedEventDTO = toEventDTO(updatedEvent);
@@ -200,7 +200,7 @@ public class OrganizerController {
 //            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 //        }
 
-        List<NewActivityDTO> agenda = event.getActivities().stream().map(activity -> {
+        List<NewActivityDTO> agenda = event.getEventActivities().stream().map(activity -> {
             NewActivityDTO dto = new NewActivityDTO();
             dto.setName(activity.getName());
             dto.setDescription(activity.getDescription());
