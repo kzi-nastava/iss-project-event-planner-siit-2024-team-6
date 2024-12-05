@@ -12,10 +12,11 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "offer_service_id", nullable = false)
-    private OfferService service;
     private boolean isCanceled;
     private LocalDateTime start;
     private LocalDateTime end;
+
+    @ManyToOne
+    @JoinColumn(name = "offers", nullable = false)
+    private OfferService service;
 }
