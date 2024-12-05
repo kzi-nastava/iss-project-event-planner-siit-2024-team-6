@@ -4,6 +4,7 @@ import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
 import ftn.siit.project.isspoject.dto.message.MessageDTO;
 import ftn.siit.project.isspoject.dto.message.NewMessageDTO;
 import ftn.siit.project.isspoject.entity.Message;
+import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.service.interfaces.MessageService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,10 @@ public class MessageContoller {
 
     @PostMapping("{senderId}/to/{recieverId}")
     public ResponseEntity<MessageDTO> sendMessage(@RequestBody NewMessageDTO dto, @PathVariable Integer senderId, @PathVariable Integer recieverId) {
-        Message created = messageService.save(dto, senderId, recieverId);
+
+        User sender = userService.findById(senderId);
+        User reciever = userService.findById(recieverId);
+        Message created = messageService.save(dto, sender, reciever);
         return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDTO(created));
     }
 

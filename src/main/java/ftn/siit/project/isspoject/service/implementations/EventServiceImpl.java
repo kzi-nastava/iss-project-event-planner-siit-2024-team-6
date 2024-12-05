@@ -2,8 +2,10 @@ package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
 import ftn.siit.project.isspoject.entity.*;
+import ftn.siit.project.isspoject.repository.EventRepository;
 import ftn.siit.project.isspoject.repository.EventTypeRepository;
 import ftn.siit.project.isspoject.service.interfaces.EventService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,83 +14,63 @@ import java.util.List;
 @Service
 public class EventServiceImpl implements EventService {
 
-    //@Autowired
-    //private EventRepository eventRepository;
+    @Autowired
+    private EventRepository eventRepository;
     private EventTypeRepository eventTypeRepository;
 
     @Override
-    public List<Event> findAll() { return List.of(
-            new Event(1, "Event 1", "Description 1", 100, 50, true, "Place 1", LocalDateTime.now(), new EventType(), List.of(), new Budget(), List.of(), List.of()),
-            new Event(2, "Event 2", "Description 2", 200, 150, false, "Place 2", LocalDateTime.now().plusDays(1), new EventType(), List.of(), new Budget(), List.of(), List.of()),
-            new Event(3, "Event 3", "Description 3", 50, 25, true, "Place 3", LocalDateTime.now().plusDays(2), new EventType(), List.of(), new Budget(), List.of(), List.of()),
-            new Event(4, "Event 4", "Description 4", 500, 300, false, "Place 4", LocalDateTime.now().plusDays(3), new EventType(), List.of(), new Budget(), List.of(), List.of()),
-            new Event(5, "Event 5", "Description 5", 300, 100, true, "Place 5", LocalDateTime.now().plusDays(4), new EventType(), List.of(), new Budget(), List.of(), List.of()),
-            new Event(6, "Event 6", "Description 6", 400, 200, false, "Place 6", LocalDateTime.now().plusDays(5), new EventType(), List.of(), new Budget(), List.of(), List.of()),
-            new Event(7, "Event 7", "Description 7", 250, 120, true, "Place 7", LocalDateTime.now().plusDays(6), new EventType(), List.of(), new Budget(), List.of(), List.of())
-
-    );}
+    public List<Event> findAll() {
+        return eventRepository.findAll();
+    }
 
     @Override
     public Event findById(Integer eventId) {
-        if(eventId == 1){
-            return new Event(1, "Event 1", "Description 1", 100, 50, true, "Place 1", LocalDateTime.now(), new EventType(), List.of(), new Budget(), List.of(), List.of());
-
-        } else if (eventId == 2) {
-            return new Event(2, "Event 2", "Description 2", 200, 150, false, "Place 2", LocalDateTime.now().plusDays(1), new EventType(), List.of(), new Budget(), List.of(), List.of());
-
-        }
-        return null;
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Event not found with ID: " + eventId));
     }
 
     @Override
     public List<Event> findByOrganizer(Organizer organizer) {
-        return List.of();
+        return eventRepository.findByOrganizer(organizer);
     }
 
     @Override
     public List<Event> findTopFive() {
-        return List.of(
-                new Event(1, "Event 1", "Description 1", 100, 50, true, "Place 1", LocalDateTime.now(), new EventType(), List.of(), new Budget(), List.of(), List.of()),
-                new Event(2, "Event 2", "Description 2", 200, 150, false, "Place 2", LocalDateTime.now().plusDays(1), new EventType(), List.of(), new Budget(), List.of(), List.of()),
-                new Event(3, "Event 3", "Description 3", 50, 25, true, "Place 3", LocalDateTime.now().plusDays(2), new EventType(), List.of(), new Budget(), List.of(), List.of()),
-                new Event(4, "Event 4", "Description 4", 500, 300, false, "Place 4", LocalDateTime.now().plusDays(3), new EventType(), List.of(), new Budget(), List.of(), List.of()),
-                new Event(5, "Event 5", "Description 5", 300, 100, true, "Place 5", LocalDateTime.now().plusDays(4), new EventType(), List.of(), new Budget(), List.of(), List.of())
-                );
+        return eventRepository.findTop5ByOrderByDateAsc();
     }
 
-
     @Override
-    public Event save(Event event) { return null;}
+    public Event save(Event event) {
+        return eventRepository.save(event);
+    }
 
     @Override
     public void delete(Event event) {
-
+        eventRepository.delete(event);
     }
 
     @Override
     public List<Event> getEventsUserAttends(Integer userId) {
-        return List.of(
-                new Event(1, "Event 1", "Description 1", 100, 50, true, "Place 1", LocalDateTime.now(), new EventType(), List.of(), new Budget(), List.of(), List.of())
-                );
+        return eventRepository.findEventsByUserId(userId);
     }
 
     public Event addClosedEvent(NewClosedEventDTO eventDTO) {
-        //EventType type = eventTypeRepository.findById(eventDTO.getEventTypeId());
+        EventType type = eventTypeRepository.findById(eventDTO.getEventTypeId())
+                .orElseThrow(() -> new RuntimeException("Event type not found with ID: " + eventDTO.getEventTypeId()));
         Event event = new Event(eventDTO);
-        //event.setEventType(type);
-        //Event savedEvent = eventRepository.save(event);
-
-        sendInvitations("",eventDTO.getEmails());
-        return event;
+        event.setEventType(type);
+        Event savedEvent = eventRepository.save(event);
+        sendInvitations("You are invited to a new event!", eventDTO.getEmails());
+        return savedEvent;
     }
-    private void sendInvitations(String text,List<String> emails) {}
+
+    private void sendInvitations(String text, List<String> emails) {}
 
 //    public Page<Event> findAll(Pageable page) {
 //        return eventRepository.findAll(page);
 //    }
 
     public List<Event> searchEvents(String name, String description, String place, EventType eventType, Boolean isPublic, LocalDateTime startDate, LocalDateTime endDate) {
-        //return eventRepository.searchEvents(name, description, place, eventType, isPublic, startDate, endDate);
-        return List.of();
+        return eventRepository.searchEvents(name, description, place, eventType, isPublic, startDate, endDate);
     }
 }
