@@ -7,8 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-//@Repository
-//extends JpaRepository<Reaction, Integer>
-public interface ReactionRepository {
+@Repository
+public interface ReactionRepository extends JpaRepository<Reaction, Integer>{
     List<Reaction> findByStatus(Status status);
 }
