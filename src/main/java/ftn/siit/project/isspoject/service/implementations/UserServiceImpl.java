@@ -4,7 +4,9 @@ import ftn.siit.project.isspoject.dto.user.RegistrationRequestDTO;
 import ftn.siit.project.isspoject.entity.Block;
 import ftn.siit.project.isspoject.entity.Provider;
 import ftn.siit.project.isspoject.entity.User;
+import ftn.siit.project.isspoject.repository.UserRepository;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,89 +17,78 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
 
-    // dependency inversion
-//    private final UserRepository userRepository;
-//    @Autowired
-//    public UserServiceImpl(UserRepository userRepository) {
-//        this.userRepository = userRepository;
-//    }
+    private final UserRepository userRepository;
+
+    @Autowired
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public boolean existsByEmail(String email) {
-        return true;
+        return userRepository.existsByEmail(email);
     }
 
     @Override
     public User findByEmail(String email) {
-        List<User> users = findAll();
-        User user = null;
-        for(User u: users){
-            if(u.getEmail().equals(email))
-                user = u;
-        }
-        return user;
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User with email " + email + " not found"));
     }
 
     @Override
     public List<User> findAll() {
-        User user1 = new User();
-        user1.setId(0);
-        user1.setEmail("john.doe@gmail.com");
-        user1.setPassword("123");
-        user1.setPhotoUrl("https://example.com/photo.jpg");
-        user1.setIsActive(true);
-        user1.setSuspendedSince(LocalDateTime.now());
-        user1.setName("John");
-        user1.setLastname("Doe");
-        user1.setAddress("221B Baker Street, London");
-        user1.setPhoneNumber("+44 20 7946 0958");
-
-        User user2 = new Provider();
-        user2.setId(1);
-        user2.setEmail("jane.smith@example.com");
-        user2.setPassword("456");
-        user2.setPhotoUrl("https://example.com/jane.jpg");
-        user2.setIsActive(false);
-        user2.setSuspendedSince(null);
-        user2.setName("Jane");
-        user2.setLastname("Smith");
-        user2.setAddress("742 Evergreen Terrace, Springfield");
-        user2.setPhoneNumber("+1 555-123-4567");
-        ((Provider) user2).setCompanyName("company name");
-        List<User> users = new ArrayList<>();
-        users.add(user1);
-        users.add(user2);
-
-        return users;
+        return userRepository.findAll();
     }
 
     @Override
     public User save(RegistrationRequestDTO registrationRequestDTO) {
-
-        return null;
+        User user = new User();
+        user.setName(registrationRequestDTO.getName());
+        user.setLastname(registrationRequestDTO.getLastname());
+        user.setEmail(registrationRequestDTO.getEmail());
+        user.setPassword(registrationRequestDTO.getPassword());
+        user.setIsActive(true);
+        user.setSuspendedSince(null);
+        return userRepository.save(user);
     }
 
     @Override
     public void delete(User user) {
-
+        if (userRepository.existsById(user.getId())) {
+            userRepository.delete(user);
+        } else {
+            throw new IllegalArgumentException("User with ID " + user.getId() + " does not exist");
+        }
     }
 
     @Override
     public User findById(Integer id) {
-        User user = null;
-        try{
-            user = findAll().get(id);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return user;
+        return userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User with ID " + id + " not found"));
     }
 
     @Override
     public User save(User user) {
-        System.out.println(user);
-        return user;
+        return userRepository.save(user);
     }
+
+
+//    @Override
+//    public void updateRole(Integer userId, String newRole) {
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("User with ID " + userId + " not found"));
+//
+//        if ("Provider".equalsIgnoreCase(newRole)) {
+//            if (!(user instanceof Provider)) {
+//                Provider provider = new Provider(user);
+//                userRepository.save(provider);
+//            }
+//        } else {
+//            throw new IllegalArgumentException("Invalid role: " + newRole + ". Allowed role is 'Provider'.");
+//        }
+//    }
+//
+
 
 
     @Override
