@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BlockRepository extends JpaRepository<Block, Integer> {
+    boolean existsByBlockerIdAndBlockedId(Integer blockerId, Integer blockedId);
 }
