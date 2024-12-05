@@ -16,4 +16,5 @@ public interface MessageRepositoy extends JpaRepository<Message, Integer> {
             "(m.sender.id = :user2 AND m.receiver.id = :user1) " +
             "ORDER BY m.time ASC")
     List<Message> findMessagesBetweenUsers(@Param("user1") Integer user1, @Param("user2") Integer user2);
+
 }

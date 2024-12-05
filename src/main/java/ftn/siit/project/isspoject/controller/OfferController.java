@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.controller;
 
+import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.dto.offer.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.*;
@@ -84,22 +85,22 @@ public class OfferController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<OfferDTO> get(@PathVariable int id) {
+    public ResponseEntity<OfferDTO> getOffer(@PathVariable int id) {
         Offer offer = offerService.findById(id);
         if (offer == null) {throw new NotFoundException("Offer not found");}
         return ResponseEntity.ok(new OfferDTO(offer));
     }
 
-    @PutMapping("update-price")
-    public ResponseEntity<PriceListOfferDTO> updatePrice(@RequestBody PriceListOfferDTO dto) {
+    @PutMapping("{id}")
+    public ResponseEntity<PriceListOfferDTO> updatePrice(@PathVariable int id, @RequestBody NewPriceListOfferDTO dto) {
         Offer updatedOffer = offerService.updatePrice(dto);
         // add implementation of updating the offer in the list of its provider's offers
-        offerHistoryService.add(offerService.findById(dto.getId()));
+        offerHistoryService.add(offerService.findById(id));
         return ResponseEntity.ok(new PriceListOfferDTO(updatedOffer));
     }
 
-    @GetMapping("price-list/{providerId}")
-    public ResponseEntity<List<PriceListOfferDTO>> getPriceList(@PathVariable Integer providerId) {
+    @GetMapping("{providerId}/price-list")
+    public ResponseEntity<List<PriceListOfferDTO>> getPriceList(@PathVariable int providerId) {
         Provider provider = (Provider) userService.findById(providerId);
         if (provider == null) {throw new NotFoundException("Provider not found");}
         List<PriceListOfferDTO> prices = offerService.getPriceList(provider.getMyOffers());

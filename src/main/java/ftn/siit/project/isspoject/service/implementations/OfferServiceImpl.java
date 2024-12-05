@@ -1,10 +1,13 @@
 package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
+import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.dto.offer.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.*;
+import ftn.siit.project.isspoject.repository.OfferRepository;
 import ftn.siit.project.isspoject.service.interfaces.OfferService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,8 +16,8 @@ import java.time.LocalDateTime;
 
 @Service
 public class OfferServiceImpl implements OfferService {
-    //@Autowired
-    //private OfferRepository offerRepository;
+    @Autowired
+    private OfferRepository offerRepository;
 
     @Override
     public List<Offer> allOffersWithCategory(Category category) {
@@ -40,11 +43,8 @@ public class OfferServiceImpl implements OfferService {
     }
 
     @Override
-    public Offer updatePrice(PriceListOfferDTO priceListOfferDTO) {
-        Offer offer = findById(priceListOfferDTO.getId());
-        offer.setPrice(priceListOfferDTO.getPrice());
-        offer.setSale(priceListOfferDTO.getSale());
-        return update(offer);
+    public Offer updatePrice(NewPriceListOfferDTO dto) {
+        return null;
     }
 
     @Override
@@ -124,7 +124,7 @@ public class OfferServiceImpl implements OfferService {
     }
 
     @Override
-    public Offer update(OfferDTO dto) {
+    public Offer update(NewOfferDTO dto) {
         return null;
     }
 

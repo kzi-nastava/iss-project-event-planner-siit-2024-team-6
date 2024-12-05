@@ -22,7 +22,7 @@ public class MessageContoller {
     @Autowired
     private UserService userService;
 
-    @PostMapping("{senderId}/{recieverId}")
+    @PostMapping("{senderId}/to/{recieverId}")
     public ResponseEntity<MessageDTO> sendMessage(@RequestBody NewMessageDTO dto, @PathVariable Integer senderId, @PathVariable Integer recieverId) {
 
         User sender = userService.findById(senderId);
