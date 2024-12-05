@@ -242,7 +242,7 @@ public class AdminController {
         return ResponseEntity.ok("Category deleted successfully");
     }
 
-    @GetMapping
+    @GetMapping("suggestions")
     public ResponseEntity<List<CategorySuggestionDTO>> getAllCategorySuggestions() {
         List<CategorySuggestion> suggestions = categorySuggestionService.getPending();
         if (suggestions.isEmpty()) {
@@ -251,7 +251,7 @@ public class AdminController {
         return ResponseEntity.ok(suggestions.stream().map(CategorySuggestionDTO::new).collect(Collectors.toList()));
     }
 
-    @PutMapping("{id}")
+    @PutMapping("{id}/category")
     public ResponseEntity<CategorySuggestionDTO> updateCategorySuggestion(@PathVariable int id, @RequestBody NewCategorySuggestionDTO dto) {
         CategorySuggestion cs = categorySuggestionService.findById(id);
         if (cs == null) {
@@ -263,7 +263,7 @@ public class AdminController {
         return ResponseEntity.ok(new CategorySuggestionDTO(updated));
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("{id}/suggestion")
     public ResponseEntity<Void> deleteCategorySuggestion(@PathVariable int id) {
         CategorySuggestion cs = categorySuggestionService.findById(id);
         if (cs == null) {throw new NotFoundException("Category suggestion not found");}

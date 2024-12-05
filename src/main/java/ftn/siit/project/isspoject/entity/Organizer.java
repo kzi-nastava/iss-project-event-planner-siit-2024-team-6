@@ -1,9 +1,6 @@
 package ftn.siit.project.isspoject.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,7 +12,8 @@ import java.util.List;
 @Data
 public class Organizer extends User {
 
-    @OneToMany(mappedBy = "organizer", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "organizer_id")
     private List<Event> myEvents;
 
     public boolean hasFutureEvents() {
