@@ -1,8 +1,9 @@
 package ftn.siit.project.isspoject.repository;
 
+import ftn.siit.project.isspoject.entity.Message;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-//@Repository
-//extends JpaRepository<Message, Integer>
-public interface MessageRepositoy {
+@Repository
+public interface MessageRepositoy extends JpaRepository<Message, Integer> {
 }
