@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CategorySuggestionRepository extends JpaRepository<CategorySuggestion, Integer>{
+    CategorySuggestion findById(int id);
 }
