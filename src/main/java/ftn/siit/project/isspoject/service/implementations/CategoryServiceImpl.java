@@ -1,7 +1,9 @@
 package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.entity.Category;
+import ftn.siit.project.isspoject.repository.CategoryRepository;
 import ftn.siit.project.isspoject.service.interfaces.CategoryService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,17 +11,19 @@ import java.util.List;
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
-    private final List<Category> categories = List.of(
-            new Category(1, "Electronics", "Devices and gadgets"),
-            new Category(2, "Furniture", "Home and office furniture"),
-            new Category(3, "Groceries", "Everyday essentials"),
-            new Category(4, "Sports", "Sports gear and accessories"),
-            new Category(5, "Beauty", "Cosmetics and skincare"),
-            new Category(6, "Books", "Educational and leisure reading"),
-            new Category(7, "Clothing", "Apparel and accessories"),
-            new Category(8, "Travel", "Transportation and lodging"),
-            new Category(9, "Entertainment", "Movies, music, and games")
-    );
+        @Autowired
+        private CategoryRepository categoryRepository;
+//    private final List<Category> categories = List.of(
+//            new Category(1, "Electronics", "Devices and gadgets"),
+//            new Category(2, "Furniture", "Home and office furniture"),
+//            new Category(3, "Groceries", "Everyday essentials"),
+//            new Category(4, "Sports", "Sports gear and accessories"),
+//            new Category(5, "Beauty", "Cosmetics and skincare"),
+//            new Category(6, "Books", "Educational and leisure reading"),
+//            new Category(7, "Clothing", "Apparel and accessories"),
+//            new Category(8, "Travel", "Transportation and lodging"),
+//            new Category(9, "Entertainment", "Movies, music, and games")
+//    );
 
     //public Page<Category> findAll(Pageable page) {
 //        return categoryRepository.findAll(page);
@@ -27,47 +31,37 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category findById(Integer id) {
-        return categories.stream()
-                .filter(category -> category.getId().equals(id))
-                .findFirst()
-                .orElse(null);
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found with ID: " + id));
     }
 
     @Override
     public Category findByName(String name) {
-        return categories.stream()
-                .filter(category -> category.getName().equalsIgnoreCase(name))
-                .findFirst()
-                .orElse(null);
+        return categoryRepository.findByNameIgnoreCase(name);
     }
 
     @Override
     public List<Category> findAll() {
-        return categories;
+        return categoryRepository.findAll();
     }
 
     @Override
     public List<Category> findAllByNames(List<String> names) {
-        return categories.stream()
+        return categoryRepository.findAll().stream()
                 .filter(category -> names.contains(category.getName()))
-                .toList();
-    }
+                .toList();    }
 
     @Override
     public Category save(Category category) {
-        categories.add(category);
-        return category;
+        return categoryRepository.save(category);
     }
 
     @Override
     public Category update(Category category) {
         Category existingCategory = findById(category.getId());
-        if (existingCategory != null) {
-            existingCategory.setName(category.getName());
-            existingCategory.setDescription(category.getDescription());
-            return existingCategory;
-        }
-        return null;
+        existingCategory.setName(category.getName());
+        existingCategory.setDescription(category.getDescription());
+        return categoryRepository.save(existingCategory);
     }
 
     @Override
