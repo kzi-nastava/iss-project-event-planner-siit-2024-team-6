@@ -50,11 +50,11 @@ public class NotificationController {
     }
 
 
-    @GetMapping("recipient/{recipientId}")
-    public ResponseEntity<List<NotificationDTO>> getByRecipient(@PathVariable Integer recipientId) {
-        User recipient = new User();
+    @GetMapping("receiver/{receiverId}")
+    public ResponseEntity<List<NotificationDTO>> getByReceiver(@PathVariable Integer receiverId) {
+        User receiver = new User();
 
-        List<Notification> notifications = notificationService.findByRecipient(recipient);
+        List<Notification> notifications = notificationService.findByReceiver(receiver);
 
         List<NotificationDTO> dtos = notifications.stream()
                 .map(NotificationDTO::new)
