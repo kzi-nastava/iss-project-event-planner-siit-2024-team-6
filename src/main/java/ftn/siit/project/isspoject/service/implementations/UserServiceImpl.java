@@ -5,12 +5,12 @@ import ftn.siit.project.isspoject.entity.Block;
 import ftn.siit.project.isspoject.entity.Provider;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.repository.UserRepository;
+import ftn.siit.project.isspoject.service.interfaces.BlockService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -18,10 +18,11 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-
+    private final BlockService blockService;
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, BlockService blockService) {
         this.userRepository = userRepository;
+        this.blockService = blockService;
     }
 
     @Override
@@ -73,21 +74,21 @@ public class UserServiceImpl implements UserService {
     }
 
 
-//    @Override
-//    public void updateRole(Integer userId, String newRole) {
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new IllegalArgumentException("User with ID " + userId + " not found"));
-//
-//        if ("Provider".equalsIgnoreCase(newRole)) {
-//            if (!(user instanceof Provider)) {
+    @Override
+    public void updateRole(Integer userId, String newRole) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User with ID " + userId + " not found"));
+
+        if ("Provider".equalsIgnoreCase(newRole)) {
+            if (!(user instanceof Provider)) {
 //                Provider provider = new Provider(user);
-//                userRepository.save(provider);
-//            }
-//        } else {
-//            throw new IllegalArgumentException("Invalid role: " + newRole + ". Allowed role is 'Provider'.");
-//        }
-//    }
-//
+                userRepository.save(user); // NEED TO FIX
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid role: " + newRole + ". Allowed role is 'Provider'.");
+        }
+    }
+
 
 
 
@@ -95,44 +96,45 @@ public class UserServiceImpl implements UserService {
     public List<User> findEventAttendees(Integer eventId) {
         return List.of();
     }
+//    @Override
+//    public void updateRole(Integer userId, String newRole){
+////        User user = userRepository.findById(userId)
+////                .orElseThrow(() -> new NotFoundException("User with ID " + userId + " not found"));
+////
+////        if ("Provider".equalsIgnoreCase(newRole)) {
+////            if (!(user instanceof Provider)) {
+////                Provider provider = new Provider(user);
+////                userRepository.save(provider);
+////            }
+////        } else if ("Organizer".equalsIgnoreCase(newRole)) {
+////            if (!(user instanceof Organizer)) {
+////                Organizer organizer = new Organizer(user);
+////                userRepository.save(organizer);
+////            }
+////        } else {
+////            throw new IllegalArgumentException("Invalid role: " + newRole + ". Allowed roles are 'Provider' or 'Organizer'.");
+////        }
+//    }
+@Override
+public Block blockUser(Integer blockerId, Integer blockedId) {
+    // Проверяем, существует ли уже блокировка через BlockService
+    if (blockService.existsByBlockerIdAndBlockedId(blockerId, blockedId)) {
+        throw new IllegalArgumentException("User is already blocked.");
+    }
+
+    Block block = new Block();
+    block.setBlockerId(userRepository.findById(blockerId).get());
+    block.setBlockedId(userRepository.findById(blockedId).get());
+
+    return blockService.save(block);
+}
     @Override
-    public void updateRole(Integer userId, String newRole){
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new NotFoundException("User with ID " + userId + " not found"));
-//
-//        if ("Provider".equalsIgnoreCase(newRole)) {
-//            if (!(user instanceof Provider)) {
-//                Provider provider = new Provider(user);
-//                userRepository.save(provider);
-//            }
-//        } else if ("Organizer".equalsIgnoreCase(newRole)) {
-//            if (!(user instanceof Organizer)) {
-//                Organizer organizer = new Organizer(user);
-//                userRepository.save(organizer);
-//            }
-//        } else {
-//            throw new IllegalArgumentException("Invalid role: " + newRole + ". Allowed roles are 'Provider' or 'Organizer'.");
-//        }
-    }
-    public Block blockUser(Integer blockerId, Integer blockedId) {
-//        if (blockRepository.existsByBlockerIdAndBlockedId(blockerId, blockedId)) {
-//            throw new IllegalArgumentException("User is already blocked.");
-//        }
-//
-//        Block block = new Block();
-//        block.setBlockerId(blockerId);
-//        block.setBlockedId(blockedId);
-//
-//        return blockRepository.save(block);
-        return null;
-    }
     public User suspendUser(Integer userId) {
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-//
-//        user.setSuspendedSince(LocalDateTime.now());
-//
-//        return userRepository.save(user);
-        return null;
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User with ID " + userId + " not found"));
+
+        user.setSuspendedSince(LocalDateTime.now());
+        userRepository.save(user);
+        return user;
     }
 }
