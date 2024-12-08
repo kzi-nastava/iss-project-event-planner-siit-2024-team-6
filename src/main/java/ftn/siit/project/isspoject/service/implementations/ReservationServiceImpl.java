@@ -45,8 +45,8 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public Reservation save(NewReservationDTO reservationDTO) {
         Reservation reservation = new Reservation();
-        reservation.setStart(reservationDTO.getStart());
-        reservation.setEnd(reservationDTO.getEnd());
+        reservation.setStartTime(reservationDTO.getStart());
+        reservation.setEndTime(reservationDTO.getEnd());
         return reservationRepository.save(reservation);
     }
 }

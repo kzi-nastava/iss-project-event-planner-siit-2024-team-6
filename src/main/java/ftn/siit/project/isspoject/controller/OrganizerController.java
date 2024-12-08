@@ -171,8 +171,8 @@ public class OrganizerController {
             Activity activity = new Activity();
             activity.setName(activityDTO.getName());
             activity.setDescription(activityDTO.getDescription());
-            activity.setStart(activityDTO.getStart());
-            activity.setEnd(activityDTO.getEnd());
+            activity.setStartTime(activityDTO.getStart());
+            activity.setEndTime(activityDTO.getEnd());
             activity.setLocation(activityDTO.getLocation());
             return activity;
         }).collect(Collectors.toList());
@@ -204,8 +204,8 @@ public class OrganizerController {
             NewActivityDTO dto = new NewActivityDTO();
             dto.setName(activity.getName());
             dto.setDescription(activity.getDescription());
-            dto.setStart(activity.getStart());
-            dto.setEnd(activity.getEnd());
+            dto.setStart(activity.getStartTime());
+            dto.setEnd(activity.getEndTime());
             dto.setLocation(activity.getLocation());
             return dto;
         }).collect(Collectors.toList());
