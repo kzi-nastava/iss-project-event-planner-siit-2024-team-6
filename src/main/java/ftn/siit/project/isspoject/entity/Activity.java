@@ -16,6 +16,6 @@ public class Activity {
     private String name;
     private String description;
     private String location;
-    private LocalDateTime start;
-    private LocalDateTime end;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
 }
