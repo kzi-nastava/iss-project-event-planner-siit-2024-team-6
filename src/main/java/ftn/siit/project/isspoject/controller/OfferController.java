@@ -93,9 +93,9 @@ public class OfferController {
 
     @PutMapping("{id}")
     public ResponseEntity<PriceListOfferDTO> updatePrice(@PathVariable int id, @RequestBody NewPriceListOfferDTO dto) {
-        Offer updatedOffer = offerService.updatePrice(dto);
+        Offer updatedOffer = offerService.updatePrice(id, dto);
         // add implementation of updating the offer in the list of its provider's offers
-        offerHistoryService.add(offerService.findById(id));
+        offerHistoryService.add(updatedOffer.getId(), updatedOffer);
         return ResponseEntity.ok(new PriceListOfferDTO(updatedOffer));
     }
 
@@ -103,7 +103,7 @@ public class OfferController {
     public ResponseEntity<List<PriceListOfferDTO>> getPriceList(@PathVariable int providerId) {
         Provider provider = (Provider) userService.findById(providerId);
         if (provider == null) {throw new NotFoundException("Provider not found");}
-        List<PriceListOfferDTO> prices = offerService.getPriceList(provider.getMyOffers());
+        List<PriceListOfferDTO> prices = offerService.getPriceList(provider);
         if (prices.isEmpty()) {return ResponseEntity.noContent().build();}
         return ResponseEntity.ok(prices);
     }
