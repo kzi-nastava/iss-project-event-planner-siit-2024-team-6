@@ -1,0 +1,73 @@
+BRISANJE SVIH TABELA
+
+DO $$ 
+DECLARE 
+    r RECORD;
+BEGIN
+    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
+        EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
+    END LOOP;
+END $$;
+
+
+INICIJALNO STANJE
+
+INSERT INTO activities (name, description, location, start_time, end_time) VALUES
+('Morning Yoga Session', 'A refreshing morning yoga session to start the day.', 'Yoga Deck', '2024-09-20 07:00:00', '2024-09-20 08:00:00'),
+('Keynote Speech', 'Opening keynote speech by a renowned tech leader.', 'Auditorium A', '2024-07-10 09:00:00', '2024-07-10 10:00:00'),
+('Live Band Performance', 'An energetic live band performance under the stars.', 'Main Stage', '2024-08-15 20:00:00', '2024-08-15 22:00:00');
+
+INSERT INTO event_types (name, description, is_deleted) VALUES
+('Conference', 'A formal gathering for discussion on various topics.', false),
+('Workshop', 'An interactive training session focused on a specific skill.', false),
+('Festival', 'A celebration event featuring various activities.', false);
+
+INSERT INTO budgets (total, available) VALUES
+(10000.00, 8000.00),
+(5000.00, 3000.00),
+(15000.00, 12000.00),
+(20000.00, 15000.00),
+(7500.00, 5000.00),
+(12000.00, 10000.00),
+(18000.00, 16000.00),
+(2500.00, 2000.00),
+(30000.00, 25000.00),
+(9000.00, 6000.00);
+
+INSERT INTO events (name, description, max_participants, participants, is_public, place, date, event_type_id, budget_id, is_deleted, organizer_id) VALUES
+('Tech Conference 2024', 'Annual technology conference with keynote speakers and workshops.', 500, 300, true, 'San Francisco, USA', '2024-07-10 09:00:00', 1, 1, false, NULL),
+('Yoga and Wellness Retreat', 'A relaxing yoga retreat focusing on mindfulness.', 30, 25, true, 'Aspen, Colorado', '2024-09-20 07:30:00', 2, 2, false, NULL),
+('Art and Creativity Workshop', 'A hands-on workshop for exploring painting techniques.', 50, 40, false, 'Chicago, Illinois', '2024-11-25 10:00:00', 3, 3, false, NULL),
+('Music Festival 2024', 'An outdoor music festival featuring various artists.', 1000, 750, true, 'Central Park, New York, USA', '2024-08-20 18:00:00', 1, 4, false, NULL),
+
+('Startup Pitch Night', 'A night for startups to pitch their ideas to investors.', 150, 120, true, 'Silicon Valley, California', '2024-10-05 18:30:00', 1, 5, false, NULL),
+
+('Cooking Masterclass', 'Learn to cook gourmet dishes with a professional chef.', 25, 20, false, 'Downtown Culinary School, Los Angeles', '2024-06-15 14:00:00', 3, 6, false, NULL),
+
+('Literary Symposium', 'A gathering of authors and literature enthusiasts.', 200, 180, true, 'Library Hall, Boston, Massachusetts', '2024-09-10 10:00:00', 2, 7, false, NULL),
+
+('Photography Exhibition', 'An exhibition showcasing works from local photographers.', 300, 250, true, 'Art Gallery, Seattle, Washington', '2024-08-05 15:00:00', 2, 8, false, NULL),
+
+('Film Screening: Indie Films Night', 'Screening of indie films followed by a Q&A session.', 80, 60, true, 'Indie Theatre, Portland, Oregon', '2024-10-20 19:00:00', 3, 9, false, NULL),
+
+('Clay Workshop', 'A hands-on workshop to learn and practice clay modeling techniques with expert guidance.', 40, 30, true, 'Pottery Studio, Santa Fe, New Mexico', '2024-08-15 13:00:00', 3, 10, false, NULL);
+
+
+INSERT INTO event_photos (event_id, photo_url) VALUES
+(1, 'https://www.thebrewery.co.uk/wp-content/uploads/2020/10/Theatre-style-7.jpg'),
+(2, 'https://images.squarespace-cdn.com/content/v1/590e5eff20099e49cdc1048d/1506078288556-5AXBZX4RZ2DCOJ6ECUW0/UBU_660.jpg'),
+(3, 'https://images.squarespace-cdn.com/content/v1/5804f37703596e417ce39f7f/7c4f36cb-2106-42c2-83ee-c2fbfb7a9460/Adult+abstract+art+painting+class+Brighton+UK.jpg'),
+(4, 'https://images.stockcake.com/public/b/1/e/b1efd91e-0c22-4e79-8d5b-6618f8d946ff_large/outdoor-concert-crowd-stockcake.jpg'),
+(5, 'https://www.eu-startups.com/wp-content/uploads/2023/03/Pitch-Night-VU-2.png'),
+(6, 'https://saucebylangham.com/app/uploads/2019/04/sauce-michel-roux-masterclass-2000x1333.jpg'),
+(7, 'https://dmn-dallas-news-prod.cdn.arcpublishing.com/resizer/v2/B4DYYA46FAI4IILZJAK5VBZ5MU.jpg?auth=c59f9039ecc4b6e1ca93ed21dbb4e515911dc15a52b060175b5d38903610c17b&height=287&width=430&smart=true&quality=80'),
+(8, 'https://amateurphotographer.com/wp-content/uploads/sites/7/2024/06/Fragile-Beauty-exhibition.jpg'),
+(9, 'https://img.freepik.com/premium-photo/outdoor-film-screening-event-celebrating-international-cinema-day-with-giant-screen-set-up-park-showing-films-from-different-countries-stars_837074-36253.jpg'),
+(10, 'https://cdn.aws.wecandoo.com/pages_content/c696d943-7733-4459-b3f3-e784204b3d28.jpg');
+
+
+
+PRAZNJENJE TABELE I RESTARTOVANJE ID COUNTERA 
+TRUNCATE TABLE event_photos RESTART IDENTITY CASCADE;
+
+
