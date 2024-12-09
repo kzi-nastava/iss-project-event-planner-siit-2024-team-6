@@ -23,31 +23,26 @@ public class ProviderController {
     @Autowired
     private ProviderService providerService;
     @Autowired
-    private CategoryService categoryService;
-    @Autowired
     private OfferService offerService;
     @Autowired
     private BudgetService budgetService;
     @Autowired
     private CategorySuggestionService categorySuggestionService;
+    @Autowired
+    private ServiceService serviceService;
 
     @GetMapping("{providerId}")
     public ResponseEntity<List<OfferDTO>> getAllOffers(@PathVariable int providerId) {
-        Provider provider = providerService.findById(providerId);
-        if (provider == null) { throw new NotFoundException("Provider not found."); }
-        List<OfferDTO> dtos = provider.getMyOffers().stream().map(OfferDTO::new).toList();
-        return ResponseEntity.ok(dtos);
+        //List<OfferDTO> dtos = offerService.find.stream().map(OfferDTO::new).toList();
+        //return ResponseEntity.ok(dtos);
+        return null;
     }
 
     @PostMapping("{providerId}")
     public ResponseEntity<OfferDTO> createOffer(@PathVariable int providerId, @RequestBody NewOfferDTO dto) {
         Provider provider = providerService.findById(providerId);
-        if (provider == null) { throw new NotFoundException("Provider not found."); }
-//        Offer created = new Offer();
-//        created.toOffer(dto, categoryService.findByName(dto.getCategory().getName()));
-        Offer saved = offerService.save(dto);
-        provider.getMyOffers().add(saved);
-        providerService.update(provider);
+        //Offer saved = offerService.save(dto, provider);
+        Offer saved = new Offer();
         return ResponseEntity.status(HttpStatus.CREATED).body(new OfferDTO(saved));
     }
 
@@ -57,20 +52,16 @@ public class ProviderController {
         if(provider == null) {throw new NotFoundException("Provider not found."); }
         Offer oldOffer = offerService.findById(offerId);
         if(oldOffer == null) {throw new NotFoundException("Offer not found."); }
-        Offer updated = offerService.update(dto);
+        //Offer updated = offerService.update(dto);
         providerService.update(provider);
-        return ResponseEntity.ok().body(new OfferDTO(updated));
+        //return ResponseEntity.ok().body(new OfferDTO(updated));
+        return ResponseEntity.ok(new OfferDTO(oldOffer));
     }
 
-    @DeleteMapping("{providerId}/{offerId}")
-    public ResponseEntity<Void> deleteOffer(@PathVariable int providerId, @PathVariable int offerId) {
-        Provider provider = providerService.findById(providerId);
-        if(provider == null) {throw new NotFoundException("Provider not found.");}
+    @DeleteMapping("{offerId}")
+    public ResponseEntity<Void> deleteOffer(@PathVariable int offerId) {
         Offer offer = offerService.findById(offerId);
-        if(offer == null) {throw new NotFoundException("Offer not found.");}
-        provider.getMyOffers().remove(offer);
         offerService.delete(offer);
-        providerService.update(provider);
         return ResponseEntity.noContent().build();
     }
 
@@ -81,8 +72,7 @@ public class ProviderController {
         @RequestParam(required = false) Double price,
         @RequestParam(required = false) Boolean isAvailable){
         Provider provider = providerService.findById(providerId);
-        if(provider == null) {throw new NotFoundException("Provider not found."); }
-        List<Offer> filteredServices = offerService.getFilteredServices(provider, name, category, eventType, price, isAvailable);
+        List<Service> filteredServices = serviceService.getFilteredServices(provider, name, category, eventType, price, isAvailable);
         List<OfferDTO> dtos = filteredServices.stream().map(OfferDTO::new).toList();
         return ResponseEntity.ok(dtos);
     }
@@ -90,8 +80,7 @@ public class ProviderController {
     @GetMapping("{providerId}/search")
     public ResponseEntity<List<OfferDTO>> getFilteredServices( @PathVariable int providerId, @RequestParam(required = true) String name){
         Provider provider = providerService.findById(providerId);
-        if(provider == null) {throw new NotFoundException("Provider not found."); }
-        List<Offer> filteredServices = offerService.getFilteredServices(provider, name, null, null, null, null);
+        List<Service> filteredServices = serviceService.getFilteredServices(provider, name, null, null, null, null);
         List<OfferDTO> dtos = filteredServices.stream().map(OfferDTO::new).toList();
         return ResponseEntity.ok(dtos);
     }

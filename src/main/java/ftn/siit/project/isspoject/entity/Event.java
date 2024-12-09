@@ -32,9 +32,6 @@ public class Event {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "event_id", referencedColumnName = "id")
     private Budget budget;
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "event_id")
-    private List<Reservation> eventReservations;
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "event_products",
@@ -71,7 +68,6 @@ public class Event {
         this.eventType = eventType;
         this.eventActivities = activities;
         this.budget = budget;
-        this.eventReservations = reservations;
         this.products = products;
     }
     public Event(EventDTO eventDTO) {
@@ -86,7 +82,6 @@ public class Event {
             this.date = eventDTO.getDate();
             this.products = new ArrayList<>();
             this.eventActivities = new ArrayList<>();
-            this.eventReservations = new ArrayList<>();
         }
     }
     public Event(NewEventDTO eventDTO) {
@@ -99,7 +94,6 @@ public class Event {
             this.place = eventDTO.getPlace();
             this.date = eventDTO.getDate();
             this.products = new ArrayList<>();
-            this.eventReservations = new ArrayList<>();
             this.eventActivities = new ArrayList<>();
         }
     }
@@ -116,7 +110,6 @@ public class Event {
         this.place = eventDTO.getPlace();
         this.date = eventDTO.getDate();
         this.products = new ArrayList<>();
-        this.eventReservations = new ArrayList<>();
         this.eventActivities = new ArrayList<>();
     }
 }

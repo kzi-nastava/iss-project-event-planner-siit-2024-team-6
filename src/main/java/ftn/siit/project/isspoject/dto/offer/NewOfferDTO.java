@@ -20,7 +20,7 @@ public class NewOfferDTO {
     private Boolean isAvailable;
     private Boolean isDeleted;
     private LocalDateTime lastChanged;
-    private Category category;
+    private String category;
     private List<EventTypeDTO> eventTypes;
     private String type; // product or service
 
@@ -32,6 +32,7 @@ public class NewOfferDTO {
     private int preciseDuration;
     private int latestReservation;
     private int latestCancelation;
+    private boolean isReservationAutoApproved;
 
     public NewOfferDTO() {}
 
@@ -47,19 +48,20 @@ public class NewOfferDTO {
             this.isAvailable = offer.getIsAvailable();
             this.isDeleted = offer.getIsDeleted();
             this.lastChanged = offer.getLastChanged();
-            this.category = offer.getCategory() != null ? offer.getCategory() : null;
+            this.category = offer.getCategory() != null ? offer.getCategory().getName() : null;
 
             if (offer instanceof Product) {
                 this.type = "Product";
-            } else if (offer instanceof OfferService) {
+            } else if (offer instanceof Service) {
                 this.type = "Service";
-                OfferService service = (OfferService) offer;
+                Service service = (Service) offer;
                 this.specifics = service.getSpecifics();
                 this.minDuration = service.getMinDuration();
                 this.maxDuration = service.getMaxDuration();
                 this.preciseDuration = service.getPreciseDuration();
                 this.latestReservation = service.getLatestReservation();
                 this.latestCancelation = service.getLatestCancelation();
+                this.isReservationAutoApproved = service.getIsReservationAutoApproved();
             }
         }
     }

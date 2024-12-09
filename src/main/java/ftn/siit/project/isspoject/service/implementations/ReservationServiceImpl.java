@@ -35,7 +35,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public List<Reservation> findByEventId(Integer eventId) {
-        List<Reservation> reservations = reservationRepository.findByEventId(eventId);
+        List<Reservation> reservations = reservationRepository.findReservationsByEventId(eventId);
         if (reservations.isEmpty()) {
             throw new NotFoundException("No reservations found for event ID: " + eventId);
         }
@@ -44,7 +44,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public List<Reservation> findByServiceId(Integer serviceId) {
-        List<Reservation> reservations = reservationRepository.findByServiceId(serviceId);
+        List<Reservation> reservations = reservationRepository.findReservationsByServiceId(serviceId);
         if (reservations.isEmpty()) {
             throw new NotFoundException("No reservations found for service ID: " + serviceId);
         }

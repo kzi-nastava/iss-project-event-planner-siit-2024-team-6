@@ -30,11 +30,6 @@ public class Provider extends User {
     private String openingTime;
     private String closingTime;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "provider_id")
-    private List<Offer> myOffers;
-
-
     public boolean hasActiveServices() {
         return false;
     }

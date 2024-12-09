@@ -19,7 +19,7 @@ public class BudgetDTO {
     public BudgetDTO(Budget budget) {
         this.id = budget.getId();
         this.total = budget.getTotal();
-        this.left = budget.getLeft();
+        this.left = budget.getAvailable();
         this.budgetItems = new ArrayList<>();
         for(BudgetItem budgetItem : budget.getBudgetItems()) {
             this.budgetItems.add(new BudgetItemDTO(budgetItem));
