@@ -43,9 +43,6 @@ public class EventController {
     @GetMapping("{eventId}")
     public ResponseEntity<EventDTO> getEvent(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
-        if (event == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
 
         EventDTO eventDTO = new EventDTO();
         eventDTO.setName(event.getName());
@@ -60,9 +57,6 @@ public class EventController {
     @GetMapping("{eventId}/generate-pdf")
     public ResponseEntity<byte[]> generateEventPDF(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
-        if (event == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
 
         byte[] pdf = pdfGeneratorService.generateEventPDF(event);
 
@@ -81,9 +75,6 @@ public class EventController {
 
         // Проверка существования события
         Event event = eventService.findById(eventId);
-        if (event == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Событие не найдено
-        }
 
         // Проверка, что событие уже добавлено в избранное
         if (user.getFavouriteEvents().contains(event)) {
@@ -143,9 +134,6 @@ public class EventController {
 
         // Проверка существования события
         Event event = eventService.findById(eventId);
-        if (event == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Событие не найдено
-        }
 
         // Проверка, что событие есть в избранном
         if (!user.getFavouriteEvents().contains(event)) {
@@ -165,10 +153,6 @@ public class EventController {
     @GetMapping("{id}")
     public ResponseEntity<EventDTO> getEvent(@PathVariable int id) {
         Event event = eventService.findById(id);
-
-        if (event == null) {
-            throw new NotFoundException("Event with id " + id + " not found");
-        }
 
         EventDTO dto = new EventDTO(event);
         return ResponseEntity.ok(dto);
@@ -244,9 +228,6 @@ public class EventController {
     @PutMapping("{id}")
     public ResponseEntity<EventDTO>  updateEvent(@PathVariable int id, @RequestBody NewEventDTO dto) {
         Event existingEvent = eventService.findById(id);
-        if (existingEvent == null) {
-            throw new NotFoundException("Event with id " + id + " not found, can't be updated");
-        }
 
         existingEvent.setName(dto.getName());
         existingEvent.setDescription(dto.getDescription());
