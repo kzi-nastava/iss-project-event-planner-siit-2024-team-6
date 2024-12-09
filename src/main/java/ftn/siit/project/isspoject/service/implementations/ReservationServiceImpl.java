@@ -20,7 +20,11 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public List<Reservation> findAll() {
-        return reservationRepository.findAll();
+        List<Reservation> reservations = reservationRepository.findAll();
+        if (reservations.isEmpty()) {
+            throw new NotFoundException("No reservations found.");
+        }
+        return reservations;
     }
 
     @Override
@@ -30,23 +34,36 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public List<Reservation> findByEvent(Event event) {
-        return reservationRepository.findByEvent(event);
+    public List<Reservation> findByEventId(Integer eventId) {
+        List<Reservation> reservations = reservationRepository.findByEventId(eventId);
+        if (reservations.isEmpty()) {
+            throw new NotFoundException("No reservations found for event ID: " + eventId);
+        }
+        return reservations;
     }
 
     @Override
-    public List<Reservation> findByService(OfferService service) {
-        return reservationRepository.findByService(service);
+    public List<Reservation> findByServiceId(Integer serviceId) {
+        List<Reservation> reservations = reservationRepository.findByServiceId(serviceId);
+        if (reservations.isEmpty()) {
+            throw new NotFoundException("No reservations found for service ID: " + serviceId);
+        }
+        return reservations;
     }
-
 
     @Override
     public Reservation save(Reservation reservation) {
+        if (reservation == null) {
+            throw new IllegalArgumentException("Reservation cannot be null while saving.");
+        }
         return reservationRepository.save(reservation);
     }
 
     @Override
     public Reservation save(NewReservationDTO reservationDTO) {
+        if (reservationDTO == null) {
+            throw new IllegalArgumentException("ReservationDTO cannot be null while saving.");
+        }
         Reservation reservation = new Reservation();
         reservation.setStartTime(reservationDTO.getStart());
         reservation.setEndTime(reservationDTO.getEnd());

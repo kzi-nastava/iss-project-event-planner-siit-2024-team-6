@@ -11,8 +11,8 @@ import java.util.List;
 public interface ReservationService {
     List<Reservation> findAll();
     Reservation findById(Integer id);
-    List<Reservation> findByEvent(Event event);
-    List<Reservation> findByService(OfferService service);
+    List<Reservation> findByEventId(Integer eventId);
+    List<Reservation> findByServiceId(Integer serviceId);
     Reservation save(Reservation reservation);
     Reservation save(NewReservationDTO reservationDTO);
 }
