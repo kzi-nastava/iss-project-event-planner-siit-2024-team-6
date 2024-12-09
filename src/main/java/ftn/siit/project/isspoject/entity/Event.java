@@ -30,7 +30,7 @@ public class Event {
     @JoinColumn(name = "event_id")
     private List<Activity> eventActivities;
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "budget_id", referencedColumnName = "id")
+    @JoinColumn(name = "event_id", referencedColumnName = "id")
     private Budget budget;
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(

@@ -7,8 +7,7 @@ import java.util.List;
 public interface NotificationService {
 
     Notification findById(Integer id);
-
-    List<Notification> findByReceiver(User recipient);
+    List<Notification> findByReceiverId(Integer receiverId);
     void notifyAdmin(String s);
 
     Notification save(Notification notification);

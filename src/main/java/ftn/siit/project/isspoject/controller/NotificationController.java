@@ -40,9 +40,6 @@ public class NotificationController {
     @PutMapping("{id}")
     public ResponseEntity<NotificationDTO> updateNotification(@PathVariable Integer id, @RequestBody NewNotificationDTO dto) {
         Notification notification = notificationService.findById(id);
-        if (notification == null) {
-            throw new NotFoundException("Notification with id " + id + " not found");
-        }
         notification.setText(dto.getText());
 
         Notification updated = notificationService.save(notification);
@@ -52,9 +49,8 @@ public class NotificationController {
 
     @GetMapping("receiver/{receiverId}")
     public ResponseEntity<List<NotificationDTO>> getByReceiver(@PathVariable Integer receiverId) {
-        User receiver = new User();
 
-        List<Notification> notifications = notificationService.findByReceiver(receiver);
+        List<Notification> notifications = notificationService.findByReceiverId(receiverId);
 
         List<NotificationDTO> dtos = notifications.stream()
                 .map(NotificationDTO::new)

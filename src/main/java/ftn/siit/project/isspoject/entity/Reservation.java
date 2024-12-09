@@ -16,7 +16,7 @@ public class Reservation {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "service_id", nullable = false)
     private Service service;
 
