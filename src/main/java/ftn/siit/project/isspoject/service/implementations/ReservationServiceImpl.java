@@ -2,6 +2,8 @@ package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.dto.offer.NewReservationDTO;
 import ftn.siit.project.isspoject.dto.offer.ReservationDTO;
+import ftn.siit.project.isspoject.entity.Event;
+import ftn.siit.project.isspoject.entity.OfferService;
 import ftn.siit.project.isspoject.entity.Reservation;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.ReservationRepository;
@@ -28,14 +30,15 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public List<Reservation> findByEventId(Integer eventId) {
-        return List.of();
+    public List<Reservation> findByEvent(Event event) {
+        return reservationRepository.findByEvent(event);
     }
 
     @Override
-    public List<Reservation> findByServiceId(Integer serviceId) {
-        return List.of();
+    public List<Reservation> findByService(OfferService service) {
+        return reservationRepository.findByService(service);
     }
+
 
     @Override
     public Reservation save(Reservation reservation) {
