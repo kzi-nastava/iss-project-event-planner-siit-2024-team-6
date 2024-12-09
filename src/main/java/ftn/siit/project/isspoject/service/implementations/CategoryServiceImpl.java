@@ -1,6 +1,7 @@
 package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.entity.Category;
+import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.CategoryRepository;
 import ftn.siit.project.isspoject.service.interfaces.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,27 +38,48 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category findByName(String name) {
-        return categoryRepository.findByNameIgnoreCase(name);
+        Category category = categoryRepository.findByNameIgnoreCase(name);
+        if (category == null) {
+            throw new NotFoundException("Category not found with name: " + name);
+        }
+        return category;
     }
 
     @Override
     public List<Category> findAll() {
-        return categoryRepository.findAll();
+        List<Category> categories = categoryRepository.findAll();
+        if (categories.isEmpty()) {
+            throw new NotFoundException("No categories found.");
+        }
+        return categories;
     }
 
     @Override
     public List<Category> findAllByNames(List<String> names) {
-        return categoryRepository.findAll().stream()
+        List<Category> categories = categoryRepository.findAll().stream()
                 .filter(category -> names.contains(category.getName()))
-                .toList();    }
+                .toList();
+
+        if (categories.isEmpty()) {
+            throw new NotFoundException("No categories found matching the given names.");
+        }
+        return categories;
+    }
 
     @Override
     public Category save(Category category) {
+        if (category == null) {
+            throw new IllegalArgumentException("Category cannot be null while saving.");
+        }
         return categoryRepository.save(category);
     }
 
     @Override
     public Category update(Category category) {
+        if (category == null || category.getId() == null) {
+            throw new IllegalArgumentException("Category or Category ID cannot be null while updating.");
+        }
+
         Category existingCategory = findById(category.getId());
         existingCategory.setName(category.getName());
         existingCategory.setDescription(category.getDescription());

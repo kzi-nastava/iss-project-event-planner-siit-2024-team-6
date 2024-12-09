@@ -28,8 +28,8 @@ public class ReservationController {
     public ResponseEntity<ReservationDTO> updateReservation(@PathVariable Integer id, @RequestBody NewReservationDTO dto) {
         Reservation existingReservation = reservationService.findById(id);
 
-        existingReservation.setStart(dto.getStart());
-        existingReservation.setEnd(dto.getEnd());
+        existingReservation.setStartTime(dto.getStart());
+        existingReservation.setEndTime(dto.getEnd());
         Reservation updated = reservationService.save(existingReservation);
 
         return ResponseEntity.ok(new ReservationDTO(updated));

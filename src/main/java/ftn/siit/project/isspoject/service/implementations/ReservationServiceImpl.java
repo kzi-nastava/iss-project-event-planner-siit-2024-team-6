@@ -2,6 +2,8 @@ package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.dto.offer.NewReservationDTO;
 import ftn.siit.project.isspoject.dto.offer.ReservationDTO;
+import ftn.siit.project.isspoject.entity.Event;
+import ftn.siit.project.isspoject.entity.OfferService;
 import ftn.siit.project.isspoject.entity.Reservation;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.ReservationRepository;
@@ -18,7 +20,11 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public List<Reservation> findAll() {
-        return reservationRepository.findAll();
+        List<Reservation> reservations = reservationRepository.findAll();
+        if (reservations.isEmpty()) {
+            throw new NotFoundException("No reservations found.");
+        }
+        return reservations;
     }
 
     @Override
@@ -29,24 +35,38 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public List<Reservation> findByEventId(Integer eventId) {
-        return List.of();
+        List<Reservation> reservations = reservationRepository.findByEventId(eventId);
+        if (reservations.isEmpty()) {
+            throw new NotFoundException("No reservations found for event ID: " + eventId);
+        }
+        return reservations;
     }
 
     @Override
     public List<Reservation> findByServiceId(Integer serviceId) {
-        return List.of();
+        List<Reservation> reservations = reservationRepository.findByServiceId(serviceId);
+        if (reservations.isEmpty()) {
+            throw new NotFoundException("No reservations found for service ID: " + serviceId);
+        }
+        return reservations;
     }
 
     @Override
     public Reservation save(Reservation reservation) {
+        if (reservation == null) {
+            throw new IllegalArgumentException("Reservation cannot be null while saving.");
+        }
         return reservationRepository.save(reservation);
     }
 
     @Override
     public Reservation save(NewReservationDTO reservationDTO) {
+        if (reservationDTO == null) {
+            throw new IllegalArgumentException("ReservationDTO cannot be null while saving.");
+        }
         Reservation reservation = new Reservation();
-        reservation.setStart(reservationDTO.getStart());
-        reservation.setEnd(reservationDTO.getEnd());
+        reservation.setStartTime(reservationDTO.getStart());
+        reservation.setEndTime(reservationDTO.getEnd());
         return reservationRepository.save(reservation);
     }
 }
