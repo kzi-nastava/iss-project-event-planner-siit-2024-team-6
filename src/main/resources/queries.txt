@@ -10,6 +10,13 @@ BEGIN
 END $$;
 
 
+
+PRAZNJENJE TABELE I RESTARTOVANJE ID COUNTERA 
+TRUNCATE TABLE event_photos RESTART IDENTITY CASCADE;
+
+
+
+
 INICIJALNO STANJE
 
 INSERT INTO activities (name, description, location, start_time, end_time) VALUES
@@ -65,9 +72,5 @@ INSERT INTO event_photos (event_id, photo_url) VALUES
 (9, 'https://img.freepik.com/premium-photo/outdoor-film-screening-event-celebrating-international-cinema-day-with-giant-screen-set-up-park-showing-films-from-different-countries-stars_837074-36253.jpg'),
 (10, 'https://cdn.aws.wecandoo.com/pages_content/c696d943-7733-4459-b3f3-e784204b3d28.jpg');
 
-
-
-PRAZNJENJE TABELE I RESTARTOVANJE ID COUNTERA 
-TRUNCATE TABLE event_photos RESTART IDENTITY CASCADE;
 
 
