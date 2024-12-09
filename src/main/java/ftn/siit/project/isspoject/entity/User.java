@@ -7,11 +7,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static jakarta.persistence.DiscriminatorType.STRING;
+
 
 @Data
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "user_type")
+@DiscriminatorColumn(name = "user_type", discriminatorType=STRING)
 @Table(name = "users")
 public class User {
 
