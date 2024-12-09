@@ -2,65 +2,67 @@ package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
-import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.dto.offer.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.*;
+import ftn.siit.project.isspoject.exceptions.NotFoundException;
+import ftn.siit.project.isspoject.repository.CategoryRepository;
 import ftn.siit.project.isspoject.repository.OfferRepository;
+import ftn.siit.project.isspoject.repository.ServiceRepository;
 import ftn.siit.project.isspoject.service.interfaces.OfferService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.time.LocalDateTime;
 
-@Service
+@org.springframework.stereotype.Service
 public class OfferServiceImpl implements OfferService {
     @Autowired
     private OfferRepository offerRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Override
     public List<Offer> allOffersWithCategory(Category category) {
-        return new ArrayList<>();
+        return offerRepository.findNonDeletedOffersByCategory(category.getId());
     }
 
     @Override
-    public List<Offer> getFilteredServices(Provider provider, String name, String category, String eventType, Double price, Boolean isAvailable) {
-//        return offers.stream()
-//                .filter(offer -> (provider == null || offer.getProvider().equals(provider)) &&
-//                        (name == null || offer.getName().toLowerCase().contains(name.toLowerCase())) &&
-//                        (category == null || offer.getCategory().getName().equalsIgnoreCase(category)) &&
-//                        (eventType == null || offer.getEventTypes().stream().anyMatch(event -> event.getName().equalsIgnoreCase(eventType))) &&
-//                        (price == null || offer.getPrice() <= price) &&
-//                        (isAvailable == null || offer.getIsAvailable().equals(isAvailable)))
-//                .toList();
-        return List.of();
+    public List<PriceListOfferDTO> getPriceList(Provider p) {
+        List<Offer> offers = offerRepository.findByProviderAndIsDeletedFalseOrIsDeletedIsNull(p);
+        List<PriceListOfferDTO> dtos = new ArrayList<>();
+        for (Offer offer : offers) {
+            PriceListOfferDTO priceListOfferDTO = new PriceListOfferDTO();
+            priceListOfferDTO.setPrice(offer.getPrice());
+            priceListOfferDTO.setName(offer.getName());
+            priceListOfferDTO.setSale(offer.getSale());
+            priceListOfferDTO.setSalePrice(offer.getPrice()*offer.getSale()/100);
+            dtos.add(priceListOfferDTO);
+        }
+        return dtos;
     }
 
     @Override
-    public List<PriceListOfferDTO> getPriceList(List<Offer> offers) {
-        return List.of();
-    }
-
-    @Override
-    public Offer updatePrice(NewPriceListOfferDTO dto) {
-        return null;
+    public Offer updatePrice(int offerId, NewPriceListOfferDTO dto) {
+        Offer o = offerRepository.findById(offerId).orElseThrow(() -> new NotFoundException("Offer not found"));
+        o.setPrice(dto.getPrice());
+        o.setName(dto.getName());
+        o.setSale(dto.getSale());
+        return update(o);
     }
 
     @Override
     public List<Offer> findAll() {
-
-        return offerRepository.findAll();
+        return offerRepository.findByIsDeletedFalseOrIsDeletedIsNull();
     }
 
     @Override
     public Offer findById(Integer offerId) {
-        return null;
-    }
-
-    @Override
-    public List<Offer> findByProvider(Provider provider) {
-        return List.of();
+        Offer o = offerRepository.findById(offerId).orElseThrow(() -> new NotFoundException("Offer not found"));
+        if(o.getIsDeleted()){
+            throw new NotFoundException("Offer is deleted");
+        }
+        return o;
     }
 
     @Override
@@ -70,32 +72,49 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public Offer save(NewOfferDTO dto) {
-        return null;
+        Offer offer = new Offer(dto, categoryRepository.findByNameIgnoreCase(dto.getCategory()));
+        offer.setLastChanged(LocalDateTime.now());
+        return offerRepository.save(offer);
     }
 
-
     @Override
-    public void save(Offer offer) {
-
+    public Offer save(Offer offer) {
+        offer.setLastChanged(LocalDateTime.now());
+        return offerRepository.save(offer);
     }
 
     @Override
     public Offer update(Offer offer) {
-        return null;
+        Offer existingOffer = offerRepository.findById(offer.getId()).orElseThrow(() -> new NotFoundException("Offer not found"));
+        existingOffer.setName(offer.getName());
+        existingOffer.setCategory(offer.getCategory());
+        existingOffer.setSale(offer.getSale());
+        existingOffer.setIsDeleted(offer.getIsDeleted());
+        existingOffer.setPrice(offer.getPrice());
+        existingOffer.setDescription(offer.getDescription());
+        existingOffer.setEventTypes(offer.getEventTypes());
+        existingOffer.setIsVisible(offer.getIsVisible());
+        existingOffer.setIsAvailable(offer.getIsAvailable());
+        existingOffer.setPhotos(offer.getPhotos());
+        existingOffer.setLastChanged(LocalDateTime.now());
+        return offerRepository.save(existingOffer);
     }
 
     @Override
-    public Offer update(NewOfferDTO dto) {
-        return null;
+    public Offer update(int id, NewOfferDTO dto) {
+        Offer offer = new Offer(dto, categoryRepository.findByNameIgnoreCase(dto.getCategory()));
+        offer.setId(id);
+        return update(offer);
     }
 
     @Override
     public void delete(Offer offer) {
-
+        offer.setIsDeleted(true);
+        update(offer);
     }
 
     @Override
     public List<Offer> searchItems(String name, String description, Double minPrice, Double maxPrice, LocalDateTime startDate, LocalDateTime endDate, String category, Boolean isService) {
-        return List.of();
+        return offerRepository.searchItems(name, description, minPrice, maxPrice, startDate, endDate, category, isService);
     }
 }

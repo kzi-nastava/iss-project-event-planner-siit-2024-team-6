@@ -7,18 +7,32 @@ import ftn.siit.project.isspoject.service.interfaces.OfferHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 @Service
 public class OfferHistoryServiceImpl implements OfferHistoryService {
     @Autowired
     private OfferHistoryRepository offerHistoryRepository;
+
     @Override
     public OfferHistory save(OfferHistory offerHistory) {
         return offerHistoryRepository.save(offerHistory);
     }
 
     @Override
-    public OfferHistory update(OfferHistory offerHistory) {
-        return null;
+    public OfferHistory update(OfferHistory updatedOfferHistory) {
+        OfferHistory existingOfferHistory = offerHistoryRepository.findById(updatedOfferHistory.getId())
+                .orElseThrow(() -> new IllegalArgumentException("OfferHistory not found with ID, cannot be updated: " + updatedOfferHistory.getId()));
+
+        if (updatedOfferHistory.getOffers() != null) {
+            existingOfferHistory.setOffers(updatedOfferHistory.getOffers());
+        }
+        if (updatedOfferHistory.getTimestamps() != null) {
+            existingOfferHistory.setTimestamps(updatedOfferHistory.getTimestamps());
+        }
+
+        return offerHistoryRepository.save(existingOfferHistory);
     }
 
     @Override
@@ -27,12 +41,16 @@ public class OfferHistoryServiceImpl implements OfferHistoryService {
     }
 
     @Override
-    public OfferHistory findById(Integer id) {
-        return null;
+    public Optional<OfferHistory> findById(Integer id) {
+        return offerHistoryRepository.findById(id);
     }
 
     @Override
-    public void add(Offer offer) {
-
+    public OfferHistory add(int id, Offer offer) {
+        OfferHistory existingOfferHistory = offerHistoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("OfferHistory not found with ID: " + id));
+        existingOfferHistory.getOffers().add(offer);
+        existingOfferHistory.getTimestamps().add(LocalDateTime.now());
+        return update(existingOfferHistory);
     }
 }
