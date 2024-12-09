@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.entity;
 
+import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import jakarta.persistence.*;
 import jakarta.persistence.InheritanceType;
@@ -39,6 +40,9 @@ public class Offer {
             inverseJoinColumns = @JoinColumn(name = "event_type_id")
     )
     private List<EventType> eventTypes;
+    @ManyToOne
+    @JoinColumn(name = "provider_id", nullable = false)
+    private Provider provider;
 
     public Offer() {}
     public Offer(
@@ -82,12 +86,23 @@ public class Offer {
         this.lastChanged = dto.getLastChanged();
         this.category = category;
     }
+    public Offer(NewOfferDTO dto, Category category) {
+        this.name = dto.getName();
+        this.description = dto.getDescription();
+        this.price = dto.getPrice();
+        this.sale = dto.getSale();
+        this.photos = dto.getPhotos();
+        this.isVisible = dto.getIsVisible();
+        this.isDeleted = dto.getIsDeleted();
+        this.lastChanged = dto.getLastChanged();
+        this.category = category;
+    }
     public Offer toOffer(OfferDTO dto, Category category) {
         if (dto == null) {return null;}
         if (dto.getType().equals("Product")){
             return new Product(dto, category);
         }else{
-            return new OfferService(dto, category);
+            return new Service(dto, category);
         }
     }
 }

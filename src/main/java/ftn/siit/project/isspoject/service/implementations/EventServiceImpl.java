@@ -2,12 +2,15 @@ package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
 import ftn.siit.project.isspoject.entity.*;
+import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.EventRepository;
 import ftn.siit.project.isspoject.repository.EventTypeRepository;
 import ftn.siit.project.isspoject.service.interfaces.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,43 +23,66 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<Event> findAll() {
-        return eventRepository.findAll();
+        List<Event> events = eventRepository.findAll();
+        if (events.isEmpty()) {
+            throw new NotFoundException("No events found.");
+        }
+        return events;
     }
 
     @Override
     public Event findById(Integer eventId) {
         return eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found with ID: " + eventId));
+                .orElseThrow(() -> new NotFoundException("Event not found with ID: " + eventId));
     }
 
     @Override
     public List<Event> findByOrganizer(Organizer organizer) {
-        return eventRepository.findByOrganizer(organizer);
+        List<Event> events = eventRepository.findByOrganizer(organizer);
+        if (events.isEmpty()) {
+            throw new NotFoundException("No events found for organizer: " + organizer.getName());
+        }
+        return events;
     }
 
     @Override
     public List<Event> findTopFive() {
-        return eventRepository.findTop5ByOrderByDateAsc();
+        List<Event> events = eventRepository.findTop5ByOrderByDateAsc();
+        if (events.isEmpty()) {
+            throw new NotFoundException("No top 5 upcoming events found.");
+        }
+        return events;
     }
 
     @Override
     public Event save(Event event) {
+        if (event == null) {
+            throw new IllegalArgumentException("Event cannot be null while saving.");
+        }
         return eventRepository.save(event);
     }
 
     @Override
     public void delete(Event event) {
+        if (event == null || !eventRepository.existsById(event.getId())) {
+            throw new NotFoundException("Event not found or already deleted with ID: " + (event != null ? event.getId() : "null"));
+        }
         eventRepository.delete(event);
     }
 
     @Override
     public List<Event> getEventsUserAttends(Integer userId) {
-        return eventRepository.findEventsByUserId(userId);
+        List<Event> events = eventRepository.findEventsByUserId(userId);
+        if (events.isEmpty()) {
+            throw new NotFoundException("No events found for user with ID: " + userId);
+        }
+        return events;
     }
 
     public Event addClosedEvent(NewClosedEventDTO eventDTO) {
         EventType type = eventTypeRepository.findById(eventDTO.getEventTypeId())
-                .orElseThrow(() -> new RuntimeException("Event type not found with ID: " + eventDTO.getEventTypeId()));
+                .orElseThrow(() -> new NotFoundException("Event type not found with ID: " + eventDTO.getEventTypeId()+ "while creating closed event"));
+
         Event event = new Event(eventDTO);
         event.setEventType(type);
         Event savedEvent = eventRepository.save(event);
@@ -64,13 +90,14 @@ public class EventServiceImpl implements EventService {
         return savedEvent;
     }
 
-    private void sendInvitations(String text, List<String> emails) {}
-
-//    public Page<Event> findAll(Pageable page) {
-//        return eventRepository.findAll(page);
-//    }
+    private void sendInvitations(String text, List<String> emails) {
+    }
 
     public List<Event> searchEvents(String name, String description, String place, EventType eventType, Boolean isPublic, LocalDateTime startDate, LocalDateTime endDate) {
-        return eventRepository.searchEvents(name, description, place, eventType, isPublic, startDate, endDate);
+        List<Event> events = eventRepository.searchEvents(name, description, place, eventType, isPublic, startDate, endDate);
+        if (events.isEmpty()) {
+            throw new NotFoundException("No events found matching the given criteria.");
+        }
+        return events;
     }
 }

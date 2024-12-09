@@ -1,6 +1,7 @@
 package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.entity.EventType;
+import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.EventTypeRepository;
 import ftn.siit.project.isspoject.service.interfaces.EventTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +17,25 @@ public class EventTypeServiceImpl implements EventTypeService {
 
     @Override
     public EventType save(EventType eventType) {
+        if (eventType == null) {
+            throw new IllegalArgumentException("EventType cannot be null while saving.");
+        }
         return eventTypeRepository.save(eventType);
     }
 
     @Override
     public List<EventType> findAll() {
-        return eventTypeRepository.findAll();
+        List<EventType> eventTypes = eventTypeRepository.findAll();
+        if (eventTypes.isEmpty()) {
+            throw new NotFoundException("No event types found.");
+        }
+        return eventTypes;
+    }
+
+    @Override
+    public EventType findById(Integer id) {
+        return eventTypeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("EventType not found with ID: " + id));
     }
 
 //    @Override
@@ -29,9 +43,4 @@ public class EventTypeServiceImpl implements EventTypeService {
 //        return eventTypeRepository.findAll(pageable);
 //    }
 
-    @Override
-    public EventType findById(Integer id) {
-        return eventTypeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("EventType not found with ID: " + id));
-    }
 }

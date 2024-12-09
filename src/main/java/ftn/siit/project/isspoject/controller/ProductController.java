@@ -31,10 +31,10 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<ProductDTO> createProduct(@RequestBody NewProductDTO productDTO) {
-        Category category = categoryService.findByName(productDTO.getCategory().getName());
+        Category category = categoryService.findByName(productDTO.getCategory());
 
         if (category == null) {
-            categoryService.createPendingCategory(productDTO.getCategory().getName());
+            categoryService.createPendingCategory(productDTO.getCategory());
             notificationService.notifyAdmin("New category suggestion: " + productDTO.getCategory());
             return ResponseEntity.status(HttpStatus.ACCEPTED).build(); // Категория ожидает одобрения
         }
@@ -66,7 +66,7 @@ public class ProductController {
         productDTO.setPhotos(product.getPhotos());
         productDTO.setIsVisible(product.getIsVisible());
         productDTO.setIsAvailable(product.getIsAvailable());
-        productDTO.setCategory(product.getCategory());
+        productDTO.setCategory(product.getCategory().getName());
         return productDTO;
     }
 

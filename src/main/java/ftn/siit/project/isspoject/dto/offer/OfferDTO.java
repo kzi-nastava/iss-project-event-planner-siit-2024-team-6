@@ -4,7 +4,7 @@ import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.entity.Offer;
 import ftn.siit.project.isspoject.entity.Product;
-import ftn.siit.project.isspoject.entity.OfferService;
+import ftn.siit.project.isspoject.entity.Service;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -24,7 +24,7 @@ public class OfferDTO {
     private Boolean isAvailable;
     private Boolean isDeleted;
     private LocalDateTime lastChanged;
-    private Category category;
+    private String category;
     private List<EventTypeDTO> eventTypes;
 
     private String type; // product or service
@@ -37,6 +37,7 @@ public class OfferDTO {
     private int preciseDuration;
     private int latestReservation;
     private int latestCancelation;
+    private boolean isReservationAutoApproved;
 
     public OfferDTO() {}
 
@@ -54,18 +55,19 @@ public class OfferDTO {
 //            this.isAvailable = offer.getIsAvailable();
 //            this.isDeleted = offer.getIsDeleted();
 //            this.lastChanged = offer.getLastChanged();
-            this.category = offer.getCategory();
+            this.category = offer.getCategory().getName();
             if (offer instanceof Product) {
                 this.type = "Product";
-            } else if (offer instanceof OfferService) {
+            } else if (offer instanceof Service) {
                 this.type = "Service";
-                OfferService service = (OfferService) offer;
+                Service service = (Service) offer;
                 this.specifics = service.getSpecifics();
                 this.minDuration = service.getMinDuration();
                 this.maxDuration = service.getMaxDuration();
                 this.preciseDuration = service.getPreciseDuration();
                 this.latestReservation = service.getLatestReservation();
                 this.latestCancelation = service.getLatestCancelation();
+                this.isReservationAutoApproved = service.getIsReservationAutoApproved();
             }
         }
     }

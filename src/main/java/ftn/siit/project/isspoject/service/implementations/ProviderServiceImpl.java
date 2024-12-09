@@ -18,12 +18,6 @@ public class ProviderServiceImpl implements ProviderService {
     }
 
     @Override
-    public Provider findByOffer(Offer offer) {
-        return providerRepository.findByOffersContaining(offer)
-                .orElseThrow(() -> new IllegalArgumentException("Provider for the given offer not found"));
-    }
-
-    @Override
     public Provider findById(Integer id) {
         return providerRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Provider with ID " + id + " not found"));

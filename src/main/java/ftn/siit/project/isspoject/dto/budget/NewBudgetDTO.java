@@ -6,6 +6,5 @@ import java.util.List;
 
 @Data
 public class NewBudgetDTO {
-    private Integer id;
     private List<NewBudgetItemDTO> budgetItems;
 }

@@ -8,5 +8,4 @@ import java.util.List;
 
 @Repository
 public interface OrganizerRepository extends JpaRepository<Organizer, Integer> {
-    List<Organizer> findBySomeSpecificField(String value);
 }

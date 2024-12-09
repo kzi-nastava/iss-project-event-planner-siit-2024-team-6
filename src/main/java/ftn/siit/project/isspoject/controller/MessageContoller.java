@@ -33,9 +33,7 @@ public class MessageContoller {
     @GetMapping("{userId1}/chat/{userId2}")
     public ResponseEntity<List<MessageDTO>> getMessagesBetweenUsers(@PathVariable int userId1, @PathVariable int userId2){
         List<Message> messages = messageService.findMessagessBetween(userId1, userId2);
-        if(messages.isEmpty()){
-            return ResponseEntity.noContent().build();
-        }
+
         List<MessageDTO> dtos = messages.stream()
                 .map(MessageDTO::new)
                 .toList();
