@@ -17,7 +17,11 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public List<Activity> findAll() {
-        return activityRepository.findAll();
+        List<Activity> activities = activityRepository.findAll();
+        if (activities.isEmpty()) {
+            throw new NotFoundException("No activities found.");
+        }
+        return activities;
     }
 
     @Override
@@ -27,11 +31,17 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public Activity save(Activity activity) {
+        if (activity == null) {
+            throw new IllegalArgumentException("Activity cannot be null while saving.");
+        }
         return activityRepository.save(activity);
     }
 
     @Override
     public void delete(Activity activity) {
-
+        if (activity == null || !activityRepository.existsById(activity.getId())) {
+            throw new NotFoundException("Activity not found or already deleted with ID: " + activity.getId());
+        }
+        activityRepository.delete(activity);
     }
 }
