@@ -8,9 +8,9 @@ import ftn.siit.project.isspoject.repository.EventTypeRepository;
 import ftn.siit.project.isspoject.service.interfaces.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,6 +29,12 @@ public class EventServiceImpl implements EventService {
         }
         return events;
     }
+
+    @Override
+    public Page<Event> findAll(Pageable page) {
+        return eventRepository.findAll(page);
+    }
+
 
     @Override
     public Event findById(Integer eventId) {
