@@ -11,14 +11,14 @@ import java.util.List;
 @Entity
 @Table(name = "budgets")
 public class Budget {
-     @Id
-     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     private Integer id;
-     private double total;
-     private double left;
-     @OneToMany(cascade = CascadeType.ALL)
-     @JoinColumn(name = "budget_item_id", nullable = false)
-     private List<BudgetItem> budgetItems;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+    private double total;
+    private double available;
+    @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BudgetItem> budgetItems = new ArrayList<>();
 
-     public Budget() {}
+    public Budget() {
+    }
 }
