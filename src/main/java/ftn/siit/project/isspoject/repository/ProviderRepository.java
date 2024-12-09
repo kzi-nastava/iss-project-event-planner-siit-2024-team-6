@@ -11,7 +11,4 @@ import java.util.Optional;
 
 @Repository
 public interface ProviderRepository extends JpaRepository<Provider, Integer> {
-    List<Provider> findByCompanyName(String companyName);
-
-    Optional<Provider> findByOffersContaining(Offer offer);
 }
