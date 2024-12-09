@@ -2,6 +2,7 @@ package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.entity.Notification;
 import ftn.siit.project.isspoject.entity.User;
+import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.NotificationRepository;
 import ftn.siit.project.isspoject.service.interfaces.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,21 +21,31 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public Notification findById(Integer id) {
         return notificationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Notification not found with ID: " + id));
+                .orElseThrow(() -> new NotFoundException("Notification not found with ID: " + id));
     }
 
     @Override
-    public List<Notification> findByReceiver(User receiver) {
-        return notificationRepository.findByReceiverId(receiver.getId());
+    public List<Notification> findByReceiverId(Integer receiverId) {
+        List<Notification> notifications = notificationRepository.findByReceiverId(receiverId);
+        if (notifications.isEmpty()) {
+            throw new NotFoundException("No notifications found for receiver with ID: " + receiverId);
+        }
+        return notifications;
     }
 
     @Override
     public Notification save(Notification notification) {
+        if (notification == null) {
+            throw new IllegalArgumentException("Notification cannot be null while saving.");
+        }
         return notificationRepository.save(notification);
     }
 
     @Override
     public void notifyUsers(List<User> users, String message) {
+        if (users == null || users.isEmpty()) {
+            throw new IllegalArgumentException("User list cannot be null or empty.");
+        }
         for (User user : users) {
             notifyUser(user, message);
         }
@@ -42,6 +53,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void notifyUser(User user, String message) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null.");
+        }
         Notification notification = new Notification();
         notification.setReceiver(user);
         notification.setText(message);
