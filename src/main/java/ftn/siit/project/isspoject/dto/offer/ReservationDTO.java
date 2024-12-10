@@ -15,7 +15,7 @@ public class ReservationDTO {
     public ReservationDTO() {}
     public ReservationDTO(Reservation reservation) {
         this.id = reservation.getId();
-        this.serviceId = reservation.getService().getId();
+        this.serviceId = reservation.getOfferService().getId();
         this.start = reservation.getStartTime();
         this.end = reservation.getEndTime();
     }

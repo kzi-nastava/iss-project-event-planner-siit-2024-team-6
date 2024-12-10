@@ -117,14 +117,17 @@ public class UserServiceImpl implements UserService {
 //    }
 @Override
 public Block blockUser(Integer blockerId, Integer blockedId) {
+
+        User blocker = userRepository.findById(blockerId).get();
+        User blocked = userRepository.findById(blockedId).get();
     // Проверяем, существует ли уже блокировка через BlockService
-    if (blockService.existsByBlockerIdAndBlockedId(blockerId, blockedId)) {
+    if (blockService.existsByBlockerIdAndBlockedId(blocker, blocked)) {
         throw new IllegalArgumentException("User is already blocked.");
     }
 
     Block block = new Block();
-    block.setBlockerId(userRepository.findById(blockerId).get());
-    block.setBlockedId(userRepository.findById(blockedId).get());
+    block.setBlockerId(blocker);
+    block.setBlockedId(blocked);
 
     return blockService.save(block);
 }

@@ -7,9 +7,9 @@ import ftn.siit.project.isspoject.dto.category.NewCategorySuggestionDTO;
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.entity.*;
+import ftn.siit.project.isspoject.entity.OfferService;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.interfaces.*;
-import ftn.siit.project.isspoject.service.interfaces.OfferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,7 @@ public class ProviderController {
     @Autowired
     private ProviderService providerService;
     @Autowired
-    private OfferService offerService;
+    private ftn.siit.project.isspoject.service.interfaces.OfferService offerService;
     @Autowired
     private BudgetService budgetService;
     @Autowired
@@ -72,16 +72,16 @@ public class ProviderController {
         @RequestParam(required = false) Double price,
         @RequestParam(required = false) Boolean isAvailable){
         Provider provider = providerService.findById(providerId);
-        List<Service> filteredServices = serviceService.getFilteredServices(provider, name, category, eventType, price, isAvailable);
-        List<OfferDTO> dtos = filteredServices.stream().map(OfferDTO::new).toList();
+        List<OfferService> filteredOfferServices = serviceService.getFilteredServices(provider, name, category, eventType, price, isAvailable);
+        List<OfferDTO> dtos = filteredOfferServices.stream().map(OfferDTO::new).toList();
         return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("{providerId}/search")
     public ResponseEntity<List<OfferDTO>> getFilteredServices( @PathVariable int providerId, @RequestParam(required = true) String name){
         Provider provider = providerService.findById(providerId);
-        List<Service> filteredServices = serviceService.getFilteredServices(provider, name, null, null, null, null);
-        List<OfferDTO> dtos = filteredServices.stream().map(OfferDTO::new).toList();
+        List<OfferService> filteredOfferServices = serviceService.getFilteredServices(provider, name, null, null, null, null);
+        List<OfferDTO> dtos = filteredOfferServices.stream().map(OfferDTO::new).toList();
         return ResponseEntity.ok(dtos);
     }
 

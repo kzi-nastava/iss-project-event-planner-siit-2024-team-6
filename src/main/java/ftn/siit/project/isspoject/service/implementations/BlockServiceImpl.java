@@ -1,6 +1,7 @@
 package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.entity.Block;
+import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.repository.BlockRepository;
 import ftn.siit.project.isspoject.service.interfaces.BlockService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public boolean existsByBlockerIdAndBlockedId(Integer blockerId, Integer blockedId) {
+    public boolean existsByBlockerIdAndBlockedId(User blockerId, User blockedId) {
         return blockRepository.existsByBlockerIdAndBlockedId(blockerId, blockedId);
     }
 

@@ -102,7 +102,7 @@ public class Offer {
         if (dto.getType().equals("Product")){
             return new Product(dto, category);
         }else{
-            return new Service(dto, category);
+            return new OfferService(dto, category);
         }
     }
 }

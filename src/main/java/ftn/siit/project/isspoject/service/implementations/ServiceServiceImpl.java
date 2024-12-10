@@ -1,7 +1,7 @@
 package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.entity.Provider;
-import ftn.siit.project.isspoject.entity.Service;
+import ftn.siit.project.isspoject.entity.OfferService;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.ServiceRepository;
 import ftn.siit.project.isspoject.service.interfaces.ServiceService;
@@ -16,13 +16,13 @@ public class ServiceServiceImpl implements ServiceService {
     private ServiceRepository serviceRepository;
 
     @Override
-    public List<Service> getFilteredServices(Provider p, String name, String category, String eventType, Double price, Boolean isAvailable) {
+    public List<OfferService> getFilteredServices(Provider p, String name, String category, String eventType, Double price, Boolean isAvailable) {
         return serviceRepository.findFilteredServices(p.getId(), name, category, eventType, price, isAvailable);
     }
 
     @Override
-    public Service findById(Integer id) {
-        Service s = serviceRepository.findById(id).orElseThrow(() -> new NotFoundException("Service with id " + id + " not found"));
+    public OfferService findById(Integer id) {
+        OfferService s = serviceRepository.findById(id).orElseThrow(() -> new NotFoundException("Service with id " + id + " not found"));
         if(s.getIsDeleted()){
             throw new NotFoundException("Service with id " + id + " not found");
         }
@@ -30,35 +30,35 @@ public class ServiceServiceImpl implements ServiceService {
     }
 
     @Override
-    public Service save(Service service) {
-        return serviceRepository.save(service);
+    public OfferService save(OfferService offerService) {
+        return serviceRepository.save(offerService);
     }
 
     @Override
-    public Service update(Service service) {
-        Service existingService = this.findById(service.getId());
-        existingService.setName(service.getName());
-        existingService.setCategory(service.getCategory());
-        existingService.setDescription(service.getDescription());
-        existingService.setPrice(service.getPrice());
-        existingService.setIsAvailable(service.getIsAvailable());
-        existingService.setSpecifics(service.getSpecifics());
-        existingService.setSale(service.getSale());
-        existingService.setPhotos(service.getPhotos());
-        existingService.setIsDeleted(false);
-        existingService.setProvider(service.getProvider());
-        existingService.setIsVisible(service.getIsVisible());
-        existingService.setPreciseDuration(service.getPreciseDuration());
-        existingService.setMaxDuration(service.getMaxDuration());
-        existingService.setMinDuration(service.getMinDuration());
-        existingService.setLatestCancelation(service.getLatestCancelation());
-        existingService.setLatestReservation(service.getLatestReservation());
-        existingService.setLastChanged(LocalDateTime.now());
-        return serviceRepository.save(existingService);
+    public OfferService update(OfferService offerService) {
+        OfferService existingOfferService = this.findById(offerService.getId());
+        existingOfferService.setName(offerService.getName());
+        existingOfferService.setCategory(offerService.getCategory());
+        existingOfferService.setDescription(offerService.getDescription());
+        existingOfferService.setPrice(offerService.getPrice());
+        existingOfferService.setIsAvailable(offerService.getIsAvailable());
+        existingOfferService.setSpecifics(offerService.getSpecifics());
+        existingOfferService.setSale(offerService.getSale());
+        existingOfferService.setPhotos(offerService.getPhotos());
+        existingOfferService.setIsDeleted(false);
+        existingOfferService.setProvider(offerService.getProvider());
+        existingOfferService.setIsVisible(offerService.getIsVisible());
+        existingOfferService.setPreciseDuration(offerService.getPreciseDuration());
+        existingOfferService.setMaxDuration(offerService.getMaxDuration());
+        existingOfferService.setMinDuration(offerService.getMinDuration());
+        existingOfferService.setLatestCancelation(offerService.getLatestCancelation());
+        existingOfferService.setLatestReservation(offerService.getLatestReservation());
+        existingOfferService.setLastChanged(LocalDateTime.now());
+        return serviceRepository.save(existingOfferService);
     }
 
     @Override
-    public void delete(Service s) {
+    public void delete(OfferService s) {
         s.setIsDeleted(true);
         serviceRepository.save(s);
     }
