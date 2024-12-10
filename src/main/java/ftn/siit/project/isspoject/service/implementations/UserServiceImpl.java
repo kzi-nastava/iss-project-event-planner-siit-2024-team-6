@@ -2,6 +2,7 @@ package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.dto.user.RegistrationRequestDTO;
 import ftn.siit.project.isspoject.entity.Block;
+import ftn.siit.project.isspoject.entity.Organizer;
 import ftn.siit.project.isspoject.entity.Provider;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.repository.UserRepository;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -43,15 +45,48 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User save(RegistrationRequestDTO registrationRequestDTO) {
-        User user = new User();
+        User user;
+
+        // Определяем тип пользователя на основе роли
+        switch (registrationRequestDTO.getRole().toLowerCase()) {
+            case "provider":
+                Provider provider = new Provider();
+                provider.setCompanyEmail(registrationRequestDTO.getCompanyEmail());
+                provider.setCompanyName(registrationRequestDTO.getCompanyName());
+                provider.setCompanyAddress(registrationRequestDTO.getCompanyAddress());
+                provider.setDescription(registrationRequestDTO.getDescription());
+                provider.setCompanyPhotos(List.of(registrationRequestDTO.getCompanyPhoto()));
+                provider.setOpeningTime(registrationRequestDTO.getOpeningTime());
+                provider.setClosingTime(registrationRequestDTO.getClosingTime());
+                user = provider;
+                break;
+
+            case "organizer":
+                Organizer organizer = new Organizer();
+                organizer.setMyEvents(new ArrayList<>()); // Пустой список событий по умолчанию
+                user = organizer;
+                break;
+
+            default:
+                // Если роль не указана или некорректная, создаем обычного пользователя
+                user = new User();
+        }
+
+        // Общие свойства для всех пользователей
         user.setName(registrationRequestDTO.getName());
         user.setLastname(registrationRequestDTO.getLastname());
         user.setEmail(registrationRequestDTO.getEmail());
         user.setPassword(registrationRequestDTO.getPassword());
+        user.setPhotoUrl(registrationRequestDTO.getPhotoUrl());
+        user.setAddress(registrationRequestDTO.getAddress());
+        user.setPhoneNumber(registrationRequestDTO.getPhoneNumber());
         user.setIsActive(true);
         user.setSuspendedSince(null);
+
+        // Сохраняем пользователя в репозитории
         return userRepository.save(user);
     }
+
 
     @Override
     public void delete(User user) {
