@@ -1,7 +1,6 @@
 package ftn.siit.project.isspoject.repository;
 
 import ftn.siit.project.isspoject.entity.Event;
-import ftn.siit.project.isspoject.entity.OfferService;
 import ftn.siit.project.isspoject.entity.Reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,6 +15,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     @Query("SELECT r FROM Reservation r WHERE r.event.id = :eventId")
     List<Reservation> findReservationsByEventId(@Param("eventId") Integer eventId);
 
-    @Query("SELECT r FROM Reservation r WHERE r.offerService.id = :eventId")
+    @Query("SELECT r FROM Reservation r WHERE r.service.id = :eventId")
     List<Reservation> findReservationsByServiceId(@Param("eventId") Integer eventId);
 }

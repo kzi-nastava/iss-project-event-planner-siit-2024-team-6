@@ -7,7 +7,7 @@ import ftn.siit.project.isspoject.dto.category.NewCategorySuggestionDTO;
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.entity.*;
-import ftn.siit.project.isspoject.entity.OfferService;
+import ftn.siit.project.isspoject.entity.Service;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.interfaces.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +31,11 @@ public class ProviderController {
     @Autowired
     private ServiceService serviceService;
 
-    @GetMapping("{providerId}")
-    public ResponseEntity<List<OfferDTO>> getAllOffers(@PathVariable int providerId) {
-        //List<OfferDTO> dtos = offerService.find.stream().map(OfferDTO::new).toList();
-        //return ResponseEntity.ok(dtos);
-        return null;
+    @GetMapping("{providerId}/my-services")
+    public ResponseEntity<List<OfferDTO>> getAllProviderServices(@PathVariable int providerId) {
+        Provider p = providerService.findById(providerId);
+        List<OfferDTO> dtos = serviceService.findByProvider(p).stream().map(OfferDTO::new).toList();
+        return ResponseEntity.ok(dtos);
     }
 
     @PostMapping("{providerId}")
@@ -72,16 +72,16 @@ public class ProviderController {
         @RequestParam(required = false) Double price,
         @RequestParam(required = false) Boolean isAvailable){
         Provider provider = providerService.findById(providerId);
-        List<OfferService> filteredOfferServices = serviceService.getFilteredServices(provider, name, category, eventType, price, isAvailable);
-        List<OfferDTO> dtos = filteredOfferServices.stream().map(OfferDTO::new).toList();
+        List<Service> filteredServices = serviceService.getFilteredServices(provider, name, category, eventType, price, isAvailable);
+        List<OfferDTO> dtos = filteredServices.stream().map(OfferDTO::new).toList();
         return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("{providerId}/search")
     public ResponseEntity<List<OfferDTO>> getFilteredServices( @PathVariable int providerId, @RequestParam(required = true) String name){
         Provider provider = providerService.findById(providerId);
-        List<OfferService> filteredOfferServices = serviceService.getFilteredServices(provider, name, null, null, null, null);
-        List<OfferDTO> dtos = filteredOfferServices.stream().map(OfferDTO::new).toList();
+        List<Service> filteredServices = serviceService.getFilteredServices(provider, name, null, null, null, null);
+        List<OfferDTO> dtos = filteredServices.stream().map(OfferDTO::new).toList();
         return ResponseEntity.ok(dtos);
     }
 

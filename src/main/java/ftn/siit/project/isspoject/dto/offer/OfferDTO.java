@@ -4,7 +4,7 @@ import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.entity.Offer;
 import ftn.siit.project.isspoject.entity.Product;
-import ftn.siit.project.isspoject.entity.OfferService;
+import ftn.siit.project.isspoject.entity.Service;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -58,16 +58,16 @@ public class OfferDTO {
             this.category = offer.getCategory().getName();
             if (offer instanceof Product) {
                 this.type = "Product";
-            } else if (offer instanceof OfferService) {
+            } else if (offer instanceof Service) {
                 this.type = "Service";
-                OfferService offerService = (OfferService) offer;
-                this.specifics = offerService.getSpecifics();
-                this.minDuration = offerService.getMinDuration();
-                this.maxDuration = offerService.getMaxDuration();
-                this.preciseDuration = offerService.getPreciseDuration();
-                this.latestReservation = offerService.getLatestReservation();
-                this.latestCancelation = offerService.getLatestCancelation();
-                this.isReservationAutoApproved = offerService.getIsReservationAutoApproved();
+                Service service = (Service) offer;
+                this.specifics = service.getSpecifics();
+                this.minDuration = service.getMinDuration();
+                this.maxDuration = service.getMaxDuration();
+                this.preciseDuration = service.getPreciseDuration();
+                this.latestReservation = service.getLatestReservation();
+                this.latestCancelation = service.getLatestCancelation();
+                this.isReservationAutoApproved = service.getIsReservationAutoApproved();
             }
         }
     }
