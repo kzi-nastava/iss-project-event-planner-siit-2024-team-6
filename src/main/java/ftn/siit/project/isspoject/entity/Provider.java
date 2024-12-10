@@ -13,10 +13,8 @@ import java.util.List;
 @Data
 public class Provider extends User {
 
-    @Column(nullable = false)
     private String companyEmail;
 
-    @Column(nullable = false)
     private String companyName;
 
     private String companyAddress;
