@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "/api/users/")
+@RequestMapping(value = "/api/users")
 public class UserController {
 
     @Autowired
@@ -151,7 +151,7 @@ public class UserController {
         return new ResponseEntity<>("User was activated", HttpStatus.OK);
     }
 
-    @PostMapping("login")
+    @PostMapping("/login")
     public ResponseEntity<UserDTO> loginUser(@RequestBody LoginRequestDTO loginRequest) {
         User user = userService.findByEmail(loginRequest.getEmail());
 
