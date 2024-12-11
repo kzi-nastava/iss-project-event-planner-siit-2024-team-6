@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.dto.offer;
 
+import ftn.siit.project.isspoject.dto.category.NewCategoryDTO;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.entity.Offer;
@@ -24,7 +25,7 @@ public class OfferDTO {
     private Boolean isAvailable;
     private Boolean isDeleted;
     private LocalDateTime lastChanged;
-    private String category;
+    private NewCategoryDTO category;
     private List<EventTypeDTO> eventTypes;
 
     private String type; // product or service
@@ -55,7 +56,7 @@ public class OfferDTO {
 //            this.isAvailable = offer.getIsAvailable();
 //            this.isDeleted = offer.getIsDeleted();
 //            this.lastChanged = offer.getLastChanged();
-            this.category = offer.getCategory().getName();
+            this.category = new NewCategoryDTO(offer.getCategory());
             if (offer instanceof Product) {
                 this.type = "Product";
             } else if (offer instanceof Service) {

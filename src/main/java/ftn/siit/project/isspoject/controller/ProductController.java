@@ -1,4 +1,5 @@
 package ftn.siit.project.isspoject.controller;
+import ftn.siit.project.isspoject.dto.category.NewCategoryDTO;
 import ftn.siit.project.isspoject.dto.offer.NewProductDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.dto.offer.ProductDTO;
@@ -66,7 +67,7 @@ public class ProductController {
         productDTO.setPhotos(product.getPhotos());
         productDTO.setIsVisible(product.getIsVisible());
         productDTO.setIsAvailable(product.getIsAvailable());
-        productDTO.setCategory(product.getCategory().getName());
+        productDTO.setCategory(new NewCategoryDTO(product.getCategory()));
         return productDTO;
     }
 
