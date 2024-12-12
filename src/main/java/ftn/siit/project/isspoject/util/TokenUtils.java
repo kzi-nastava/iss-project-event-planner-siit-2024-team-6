@@ -60,23 +60,13 @@ public class TokenUtils {
         return new Date(new Date().getTime() + EXPIRES_IN);
     }
 
-    // =================================================================
-
-    // ============= Функции для чтения информации из JWT токена =============
-
-    /**
-     * Функция для извлечения JWT токена из запроса.
-     *
-     * @param request HTTP запрос клиента.
-     * @return JWT токен или null, если токен отсутствует в заголовке HTTP запроса.
-     */
     public String getToken(HttpServletRequest request) {
         String authHeader = getAuthHeaderFromHeader(request);
         // JWT передаётся через заголовок 'Authorization' в формате:
         // Bearer <token>
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7); // Извлекаем токен, удаляя префикс "Bearer ".
+            return authHeader.substring(7);
         }
 
         return null;
