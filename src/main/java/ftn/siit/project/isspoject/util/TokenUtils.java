@@ -1,0 +1,251 @@
+package ftn.siit.project.isspoject.util;
+
+import ftn.siit.project.isspoject.entity.User;
+import ftn.siit.project.isspoject.service.interfaces.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.Date;
+
+@Component
+public class TokenUtils {
+
+    @Value("spring-security-example")
+    private String APP_NAME;
+
+    // JWT https://jwt.io/
+    @Value("somesecret")
+    public String SECRET;
+
+    // 30 m
+    @Value("1800000")
+    private int EXPIRES_IN;
+
+    @Value("Authorization")
+    private String AUTH_HEADER;
+
+    @Autowired
+    private UserService userService;
+
+    private static final String AUDIENCE_WEB = "web";
+
+    private SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
+
+    public String generateToken(User user) {
+        return Jwts.builder()
+                .setIssuer(APP_NAME)
+                .setSubject(user.getEmail())
+                .setAudience(generateAudience())
+                .setIssuedAt(new Date())
+                .claim("role", userService.getUserRole(user.getId()))
+                .setExpiration(generateExpirationDate())
+                .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
+
+    }
+
+    /**
+     * Функция для определения типа устройства, для которого создаётся JWT.
+     *
+     * @return Тип устройства.
+     */
+    private String generateAudience() {
+        // Можно использовать объект org.springframework.mobile.device.Device для определения устройства.
+        return AUDIENCE_WEB;
+    }
+
+    /**
+     * Функция генерирует дату истечения срока действия JWT токена.
+     *
+     * @return Дата истечения срока действия токена.
+     */
+    private Date generateExpirationDate() {
+        return new Date(new Date().getTime() + EXPIRES_IN);
+    }
+
+    // =================================================================
+
+    // ============= Функции для чтения информации из JWT токена =============
+
+    /**
+     * Функция для извлечения JWT токена из запроса.
+     *
+     * @param request HTTP запрос клиента.
+     * @return JWT токен или null, если токен отсутствует в заголовке HTTP запроса.
+     */
+    public String getToken(HttpServletRequest request) {
+        String authHeader = getAuthHeaderFromHeader(request);
+        // JWT передаётся через заголовок 'Authorization' в формате:
+        // Bearer <token>
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7); // Извлекаем токен, удаляя префикс "Bearer ".
+        }
+
+        return null;
+    }
+
+    /**
+     * Функция для получения имени пользователя из токена.
+     *
+     * @param token JWT токен.
+     * @return Имя пользователя или null, если токен некорректен.
+     */
+    public String getUsernameFromToken(String token) {
+        String username;
+
+        try {
+            final Claims claims = this.getAllClaimsFromToken(token);
+            username = claims.getSubject();
+        } catch (ExpiredJwtException ex) {
+            throw ex;
+        } catch (Exception e) {
+            username = null;
+        }
+
+        return username;
+    }
+
+    /**
+     * Функция для получения даты создания токена.
+     *
+     * @param token JWT токен.
+     * @return Дата создания токена.
+     */
+    public Date getIssuedAtDateFromToken(String token) {
+        Date issueAt;
+        try {
+            final Claims claims = this.getAllClaimsFromToken(token);
+            issueAt = claims.getIssuedAt();
+        } catch (ExpiredJwtException ex) {
+            throw ex;
+        } catch (Exception e) {
+            issueAt = null;
+        }
+        return issueAt;
+    }
+
+    /**
+     * Функция для получения информации о типе устройства из токена.
+     *
+     * @param token JWT токен.
+     * @return Тип устройства.
+     */
+    public String getAudienceFromToken(String token) {
+        String audience;
+        try {
+            final Claims claims = this.getAllClaimsFromToken(token);
+            audience = claims.getAudience();
+        } catch (ExpiredJwtException ex) {
+            throw ex;
+        } catch (Exception e) {
+            audience = null;
+        }
+        return audience;
+    }
+
+    /**
+     * Функция для получения даты истечения срока действия токена.
+     *
+     * @param token JWT токен.
+     * @return Дата истечения срока действия токена.
+     */
+    public Date getExpirationDateFromToken(String token) {
+        Date expiration;
+        try {
+            final Claims claims = this.getAllClaimsFromToken(token);
+            expiration = claims.getExpiration();
+        } catch (ExpiredJwtException ex) {
+            throw ex;
+        } catch (Exception e) {
+            expiration = null;
+        }
+
+        return expiration;
+    }
+
+    /**
+     * Функция для чтения всех данных из JWT токена.
+     *
+     * @param token JWT токен.
+     * @return Данные из токена.
+     */
+    private Claims getAllClaimsFromToken(String token) {
+        Claims claims;
+        try {
+            claims = Jwts.parser()
+                    .setSigningKey(SECRET)
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException ex) {
+            throw ex;
+        } catch (Exception e) {
+            claims = null;
+        }
+        return claims;
+    }
+
+    // =================================================================
+
+    // ============= Функции для валидации JWT токена =============
+
+    /**
+     * Функция для проверки валидности JWT токена.
+     *
+     * @param token JWT токен.
+     * @param userDetails Информация о пользователе, владельце токена.
+     * @return true, если токен валиден, иначе false.
+     */
+    public Boolean validateToken(String token, UserDetails userDetails) {
+        User user = (User) userDetails;
+        final String username = getUsernameFromToken(token);
+        final Date created = getIssuedAtDateFromToken(token);
+
+        // Токен валиден, если:
+        return (username != null // Имя пользователя не null
+                && username.equals(userDetails.getUsername()) // Имя пользователя из токена совпадает с именем в базе
+                && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate())); // Токен создан после последнего изменения пароля
+    }
+
+    /**
+     * Функция проверяет, был ли пароль изменён после выдачи токена.
+     *
+     * @param created Дата создания токена.
+     * @param lastPasswordReset Дата последнего изменения пароля.
+     * @return true, если токен создан до изменения пароля, иначе false.
+     */
+    private Boolean isCreatedBeforeLastPasswordReset(Date created, Date lastPasswordReset) {
+        return (lastPasswordReset != null && created.before(lastPasswordReset));
+    }
+
+    // =================================================================
+
+    /**
+     * Функция для получения срока действия токена.
+     *
+     * @return Срок действия токена.
+     */
+    public int getExpiredIn() {
+        return EXPIRES_IN;
+    }
+
+    /**
+     * Функция для извлечения содержимого AUTH_HEADER из запроса.
+     *
+     * @param request HTTP запрос.
+     *
+     * @return Содержимое AUTH_HEADER.
+     */
+    public String getAuthHeaderFromHeader(HttpServletRequest request) {
+        return request.getHeader(AUTH_HEADER);
+    }
+
+}
+
