@@ -100,12 +100,6 @@ public class TokenUtils {
         return issueAt;
     }
 
-    /**
-     * Функция для получения информации о типе устройства из токена.
-     *
-     * @param token JWT токен.
-     * @return Тип устройства.
-     */
     public String getAudienceFromToken(String token) {
         String audience;
         try {
@@ -119,12 +113,6 @@ public class TokenUtils {
         return audience;
     }
 
-    /**
-     * Функция для получения даты истечения срока действия токена.
-     *
-     * @param token JWT токен.
-     * @return Дата истечения срока действия токена.
-     */
     public Date getExpirationDateFromToken(String token) {
         Date expiration;
         try {
