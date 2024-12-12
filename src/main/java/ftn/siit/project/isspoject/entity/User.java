@@ -48,6 +48,9 @@ public class User {
     @Column(name = "last_password_reset_date")
     private Timestamp lastPasswordResetDate;
 
+    @Column(name = "user_type", insertable = false, updatable = false)  //without insert
+    private String userType;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_favourite_offers",
