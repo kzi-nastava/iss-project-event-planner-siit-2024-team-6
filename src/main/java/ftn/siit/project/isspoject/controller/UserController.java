@@ -35,9 +35,9 @@ public class UserController {
 
         // Преобразуем сохранённого пользователя в соответствующий DTO
         UserDTO responseDto;
-        if (savedUser instanceof Provider) {
+        if (registrationRequestDTO.getRole().equals("provider")) {
             responseDto = new ProviderDTO((Provider) savedUser);
-        } else if (savedUser instanceof Organizer) {
+        } else if (registrationRequestDTO.getRole().equals("organizer")) {
             responseDto = new OrganizerDTO((Organizer) savedUser);
         } else {
             responseDto = new UserDTO(savedUser);
