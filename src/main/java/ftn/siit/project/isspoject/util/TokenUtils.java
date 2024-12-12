@@ -127,12 +127,6 @@ public class TokenUtils {
         return expiration;
     }
 
-    /**
-     * Функция для чтения всех данных из JWT токена.
-     *
-     * @param token JWT токен.
-     * @return Данные из токена.
-     */
     private Claims getAllClaimsFromToken(String token) {
         Claims claims;
         try {
@@ -148,17 +142,6 @@ public class TokenUtils {
         return claims;
     }
 
-    // =================================================================
-
-    // ============= Функции для валидации JWT токена =============
-
-    /**
-     * Функция для проверки валидности JWT токена.
-     *
-     * @param token JWT токен.
-     * @param userDetails Информация о пользователе, владельце токена.
-     * @return true, если токен валиден, иначе false.
-     */
     public Boolean validateToken(String token, UserDetails userDetails) {
         User user = (User) userDetails;
         final String username = getUsernameFromToken(token);

@@ -3,6 +3,7 @@ package ftn.siit.project.isspoject.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,9 @@ public class User {
     private String address;
 
     private String phoneNumber;
+
+    @Column(name = "last_password_reset_date")
+    private Timestamp lastPasswordResetDate;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
