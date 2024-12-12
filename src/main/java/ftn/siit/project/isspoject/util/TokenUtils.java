@@ -153,35 +153,15 @@ public class TokenUtils {
                 && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate())); // Токен создан после последнего изменения пароля
     }
 
-    /**
-     * Функция проверяет, был ли пароль изменён после выдачи токена.
-     *
-     * @param created Дата создания токена.
-     * @param lastPasswordReset Дата последнего изменения пароля.
-     * @return true, если токен создан до изменения пароля, иначе false.
-     */
     private Boolean isCreatedBeforeLastPasswordReset(Date created, Date lastPasswordReset) {
         return (lastPasswordReset != null && created.before(lastPasswordReset));
     }
 
-    // =================================================================
 
-    /**
-     * Функция для получения срока действия токена.
-     *
-     * @return Срок действия токена.
-     */
     public int getExpiredIn() {
         return EXPIRES_IN;
     }
 
-    /**
-     * Функция для извлечения содержимого AUTH_HEADER из запроса.
-     *
-     * @param request HTTP запрос.
-     *
-     * @return Содержимое AUTH_HEADER.
-     */
     public String getAuthHeaderFromHeader(HttpServletRequest request) {
         return request.getHeader(AUTH_HEADER);
     }
