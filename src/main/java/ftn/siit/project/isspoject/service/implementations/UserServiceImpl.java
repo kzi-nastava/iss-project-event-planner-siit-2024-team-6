@@ -175,4 +175,9 @@ public Block blockUser(Integer blockerId, Integer blockedId) {
         userRepository.save(user);
         return user;
     }
+
+    @Override
+    public String getUserRole(Integer userId) {
+        return userRepository.findUserTypeById(userId);
+    }
 }
