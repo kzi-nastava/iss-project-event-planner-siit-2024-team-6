@@ -73,18 +73,18 @@ public class TokenUtils {
     }
 
     public String getUsernameFromToken(String token) {
-        String username;
+        String email;
 
         try {
             final Claims claims = this.getAllClaimsFromToken(token);
-            username = claims.getSubject();
+            email = claims.getSubject();
         } catch (ExpiredJwtException ex) {
             throw ex;
         } catch (Exception e) {
-            username = null;
+            email = null;
         }
 
-        return username;
+        return email;
     }
 
     public Date getIssuedAtDateFromToken(String token) {
@@ -144,12 +144,12 @@ public class TokenUtils {
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         User user = (User) userDetails;
-        final String username = getUsernameFromToken(token);
+        final String email = getUsernameFromToken(token);
         final Date created = getIssuedAtDateFromToken(token);
 
         // Токен валиден, если:
-        return (username != null // Имя пользователя не null
-                && username.equals(userDetails.getUsername()) // Имя пользователя из токена совпадает с именем в базе
+        return (email != null // Имя пользователя не null
+                && email.equals(userDetails.getUsername()) // Имя пользователя из токена совпадает с именем в базе ! In our case email with that weird username
                 && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate())); // Токен создан после последнего изменения пароля
     }
 
