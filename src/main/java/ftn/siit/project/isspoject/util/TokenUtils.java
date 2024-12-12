@@ -72,12 +72,6 @@ public class TokenUtils {
         return null;
     }
 
-    /**
-     * Функция для получения имени пользователя из токена.
-     *
-     * @param token JWT токен.
-     * @return Имя пользователя или null, если токен некорректен.
-     */
     public String getUsernameFromToken(String token) {
         String username;
 
@@ -93,12 +87,6 @@ public class TokenUtils {
         return username;
     }
 
-    /**
-     * Функция для получения даты создания токена.
-     *
-     * @param token JWT токен.
-     * @return Дата создания токена.
-     */
     public Date getIssuedAtDateFromToken(String token) {
         Date issueAt;
         try {
