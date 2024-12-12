@@ -46,7 +46,7 @@ public class UserController {
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
-    @PostMapping("quick-register")
+    @PostMapping("/quick-register")
     public ResponseEntity<String> quicklyRegisterUser(@RequestBody QuickRegistrationDTO requestDTO) {
         if (requestDTO.getEmail() == null) {
             return new ResponseEntity<>("Error, invalid user", HttpStatus.BAD_REQUEST);
@@ -55,7 +55,7 @@ public class UserController {
         return new ResponseEntity<>("User was quickly registered, check out the activation code", HttpStatus.CREATED);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getProfile(@PathVariable Integer id) {
         User user = userService.findById(id);
         if (user == null) {
@@ -88,7 +88,7 @@ public class UserController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateProfile(@PathVariable Integer id, @RequestBody UserDTO updatedUser) {
         User user = userService.findById(id);
         if (user == null) {
@@ -119,7 +119,7 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
   
-    @PutMapping("{id}/password")
+    @PutMapping("/{id}/password")
     public ResponseEntity<String> changePassword(@PathVariable Integer id, @RequestBody PasswordChangeDTO passwordChangeDTO) {
         User user = userService.findById(id);
         if (user == null) {
@@ -141,7 +141,7 @@ public class UserController {
     }
 
 
-    @GetMapping("activate/{token}")
+    @GetMapping("/activate/{token}")
     public ResponseEntity<String> activateUser(@PathVariable String token) {
         boolean activated = true;
 //        activated =userService.activateUserByToken(token);
@@ -210,7 +210,7 @@ public class UserController {
         return new ResponseEntity<>(userDTOs, HttpStatus.OK);
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<UserDTO> deleteUser(@PathVariable Integer id) {
         User user = userService.findById(id);
 
@@ -235,14 +235,14 @@ public class UserController {
     }
 
 
-    @PutMapping("{id}/role")
+    @PutMapping("/{id}/role")
     public ResponseEntity<String> updateRole(@PathVariable Integer id, @RequestParam String newRole) {
         userService.updateRole(id, newRole);
         return ResponseEntity.ok("User successfully updated to " + newRole);
 
     }
 
-    @GetMapping("{id}/attends")
+    @GetMapping("/{id}/attends")
     public ResponseEntity<List<EventDTO>> getUserEvents(@PathVariable Integer id) {
         List<Event> events = eventService.getEventsUserAttends(id);
         List<EventDTO> eventDTOs = events.stream()
@@ -251,7 +251,7 @@ public class UserController {
 
         return ResponseEntity.ok(eventDTOs);
     }
-    @PostMapping("{blockerId}/block/{blockedId}")
+    @PostMapping("/{blockerId}/block/{blockedId}")
     public ResponseEntity<Block> blockUser(
             @PathVariable Integer blockerId,
             @PathVariable Integer blockedId
@@ -260,7 +260,7 @@ public class UserController {
         return ResponseEntity.ok(block);
     }
 
-    @PostMapping("report")
+    @PostMapping("/report")
     public ResponseEntity<UserReportDTO> reportUser(@RequestBody NewUserReportDTO userReportDTO) {
         if (userReportDTO == null || userReportDTO.getReporterId() == null || userReportDTO.getReportedId() == null) {
             throw new IllegalArgumentException("Not all arguments were given while reporting user");
