@@ -3,7 +3,6 @@ package ftn.siit.project.isspoject.service.implementations;
 import ftn.siit.project.isspoject.dto.offer.NewReservationDTO;
 import ftn.siit.project.isspoject.dto.offer.ReservationDTO;
 import ftn.siit.project.isspoject.entity.Event;
-import ftn.siit.project.isspoject.entity.OfferService;
 import ftn.siit.project.isspoject.entity.Reservation;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.ReservationRepository;

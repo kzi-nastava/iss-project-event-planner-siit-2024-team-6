@@ -1,0 +1,262 @@
+
+INSERT INTO activities (name, description, location, start_time, end_time) VALUES
+('Morning Yoga Session', 'A refreshing morning yoga session to start the day.', 'Yoga Deck', '2024-09-20 07:00:00', '2024-09-20 08:00:00'),
+('Keynote Speech', 'Opening keynote speech by a renowned tech leader.', 'Auditorium A', '2024-07-10 09:00:00', '2024-07-10 10:00:00'),
+('Live Band Performance', 'An energetic live band performance under the stars.', 'Main Stage', '2024-08-15 20:00:00', '2024-08-15 22:00:00');
+
+INSERT INTO event_types (name, description, is_deleted) VALUES
+('Conference', 'A formal gathering for discussion on various topics.', false),
+('Workshop', 'An interactive training session focused on a specific skill.', false),
+('Festival', 'A celebration event featuring various activities.', false);
+
+INSERT INTO categories (name, description) VALUES
+    ('Electronics', 'All kinds of electronic products'),
+    ('Services', 'Various services provided by professionals'),
+    ('Furniture', 'Home and office furniture');
+
+-- Insert 10 budgets
+INSERT INTO budgets (total, available) VALUES
+    (1000.00, 800.00),    -- Budget 1
+    (2000.00, 1500.00),   -- Budget 2
+    (1500.00, 1200.00),   -- Budget 3
+    (3000.00, 2500.00),   -- Budget 4
+    (500.00, 300.00),     -- Budget 5
+    (2500.00, 2200.00),   -- Budget 6
+    (1800.00, 1500.00),   -- Budget 7
+    (2200.00, 1800.00),   -- Budget 8
+    (4000.00, 3500.00),   -- Budget 9
+    (750.00, 500.00);     -- Budget 10
+
+
+INSERT INTO events (name, description, max_participants, participants, is_public, place, date, event_type_id, budget_id, is_deleted, organizer_id) VALUES
+('Tech Conference 2024', 'Annual technology conference with keynote speakers and workshops.', 500, 300, true, 'San Francisco, USA', '2024-07-10 09:00:00', 1, 1, false, NULL),
+('Yoga and Wellness Retreat', 'A relaxing yoga retreat focusing on mindfulness.', 30, 25, true, 'Aspen, Colorado', '2024-09-20 07:30:00', 2, 2, false, NULL),
+('Art and Creativity Workshop', 'A hands-on workshop for exploring painting techniques.', 50, 40, false, 'Chicago, Illinois', '2024-11-25 10:00:00', 3, 3, false, NULL),
+('Music Festival 2024', 'An outdoor music festival featuring various artists.', 1000, 750, true, 'Central Park, New York, USA', '2024-08-20 18:00:00', 1, 4, false, NULL),
+
+('Startup Pitch Night', 'A night for startups to pitch their ideas to investors.', 150, 120, true, 'Silicon Valley, California', '2024-10-05 18:30:00', 1, 5, false, NULL),
+
+('Cooking Masterclass', 'Learn to cook gourmet dishes with a professional chef.', 25, 20, false, 'Downtown Culinary School, Los Angeles', '2024-06-15 14:00:00', 3, 6, false, NULL),
+
+('Literary Symposium', 'A gathering of authors and literature enthusiasts.', 200, 180, true, 'Library Hall, Boston, Massachusetts', '2024-09-10 10:00:00', 2, 7, false, NULL),
+
+('Photography Exhibition', 'An exhibition showcasing works from local photographers.', 300, 250, true, 'Art Gallery, Seattle, Washington', '2024-08-05 15:00:00', 2, 8, false, NULL),
+
+('Film Screening: Indie Films Night', 'Screening of indie films followed by a Q&A session.', 80, 60, true, 'Indie Theatre, Portland, Oregon', '2024-10-20 19:00:00', 3, 9, false, NULL),
+
+('Environmental Awareness Seminar', 'A seminar on sustainability and climate change.', 400, 350, true, 'Convention Center, Denver, Colorado', '2024-07-30 09:30:00', 1, 10, false, NULL);
+
+
+--Insert photos for events
+INSERT INTO event_photos (event_id, photo_url) VALUES
+(1, 'https://www.thebrewery.co.uk/wp-content/uploads/2020/10/Theatre-style-7.jpg'),
+(2, 'https://images.squarespace-cdn.com/content/v1/590e5eff20099e49cdc1048d/1506078288556-5AXBZX4RZ2DCOJ6ECUW0/UBU_660.jpg'),
+(3, 'https://images.squarespace-cdn.com/content/v1/5804f37703596e417ce39f7f/7c4f36cb-2106-42c2-83ee-c2fbfb7a9460/Adult+abstract+art+painting+class+Brighton+UK.jpg'),
+(4, 'https://images.stockcake.com/public/b/1/e/b1efd91e-0c22-4e79-8d5b-6618f8d946ff_large/outdoor-concert-crowd-stockcake.jpg'),
+(5, 'https://www.eu-startups.com/wp-content/uploads/2023/03/Pitch-Night-VU-2.png'),
+(6, 'https://saucebylangham.com/app/uploads/2019/04/sauce-michel-roux-masterclass-2000x1333.jpg'),
+(7, 'https://dmn-dallas-news-prod.cdn.arcpublishing.com/resizer/v2/B4DYYA46FAI4IILZJAK5VBZ5MU.jpg?auth=c59f9039ecc4b6e1ca93ed21dbb4e515911dc15a52b060175b5d38903610c17b&height=287&width=430&smart=true&quality=80'),
+(8, 'https://amateurphotographer.com/wp-content/uploads/sites/7/2024/06/Fragile-Beauty-exhibition.jpg'),
+(9, 'https://img.freepik.com/premium-photo/outdoor-film-screening-event-celebrating-international-cinema-day-with-giant-screen-set-up-park-showing-films-from-different-countries-stars_837074-36253.jpg'),
+(10, 'https://cdn.aws.wecandoo.com/pages_content/c696d943-7733-4459-b3f3-e784204b3d28.jpg');
+
+
+
+
+-- Insert budget items for each budget
+INSERT INTO budget_items (max_price, curr_price, category_id, budget_id) VALUES
+    -- Budget 1 Items
+    (300.00, 250.00, 1, 1),
+    (200.00, 180.00, 2, 1),
+
+    -- Budget 2 Items
+    (500.00, 450.00, 3, 2),
+    (700.00, 650.00, 1, 2),
+
+    -- Budget 3 Items
+    (400.00, 350.00, 2, 3),
+    (600.00, 500.00, 3, 3),
+
+    -- Budget 4 Items
+    (1000.00, 900.00, 1, 4),
+    (800.00, 750.00, 2, 4),
+
+    -- Budget 5 Items
+    (200.00, 150.00, 3, 5),
+    (100.00, 80.00, 1, 5),
+
+    -- Budget 6 Items
+    (900.00, 850.00, 2, 6),
+    (1100.00, 1000.00, 3, 6),
+
+    -- Budget 7 Items
+    (400.00, 300.00, 1, 7),
+    (500.00, 450.00, 2, 7),
+
+    -- Budget 8 Items
+    (600.00, 550.00, 3, 8),
+    (700.00, 650.00, 1, 8),
+
+    -- Budget 9 Items
+    (1500.00, 1400.00, 2, 9),
+    (1200.00, 1100.00, 3, 9),
+
+    -- Budget 10 Items
+    (300.00, 250.00, 1, 10),
+    (400.00, 350.00, 2, 10);
+
+-- Insert sample providers into the users table with the discriminator value 'Provider'
+INSERT INTO users (
+    user_type, email, password, photo_url, is_active, suspended_since, name, lastname, address, phone_number, company_email, company_name, company_address, description, opening_time, closing_time
+) VALUES
+    ('Provider', 'provider1@example.com', 'password123', 'https://images.pexels.com/photos/3184298/pexels-photo-3184298.jpeg', TRUE, NULL, 'John', 'Smith', '123 Main St, Cityville', '555-1234', 'company1@example.com', 'Best Services Inc.', '456 Business Ave, Cityville', 'We provide top-notch services.', '08:00', '18:00'),
+
+    ('Provider', 'provider2@example.com', 'securepass456', 'https://images.pexels.com/photos/3153208/pexels-photo-3153208.jpeg', TRUE, NULL, 'Alice', 'Johnson', '789 Elm St, Townsville', '555-5678', 'company2@example.com', 'Quality Solutions Ltd.', '321 Corporate Blvd, Townsville', 'Quality solutions for your needs.', '09:00', '17:00'),
+
+    ('Provider', 'provider3@example.com', 'pass789', 'https://images.pexels.com/photos/3182748/pexels-photo-3182748.jpeg', TRUE, NULL, 'Robert', 'Brown', '101 Oak St, Villagetown', '555-9101', 'company3@example.com', 'Reliable Providers LLC', '222 Industrial Rd, Villagetown', 'Reliable and efficient services.', '07:00', '16:00');
+
+-- Insert sample photos for providers with real image URLs
+INSERT INTO provider_company_photos (provider_id, photo_url) VALUES
+    (1, 'https://images.pexels.com/photos/374870/pexels-photo-374870.jpeg'), -- Modern office building
+    (1, 'https://images.pexels.com/photos/3184298/pexels-photo-3184298.jpeg'), -- Company team meeting
+    (2, 'https://images.pexels.com/photos/136727/pexels-photo-136727.jpeg'), -- Corporate office exterior
+    (3, 'https://images.pexels.com/photos/3182748/pexels-photo-3182748.jpeg'), -- Business team collaboration
+    (3, 'https://images.pexels.com/photos/210647/pexels-photo-210647.jpeg'); -- Office building at night
+
+INSERT INTO offers (
+    offer_type, status, name, description, price, sale, is_visible, is_available, is_deleted, last_changed, 
+    category_id, provider_id, specifics, min_duration, max_duration, precise_duration, latest_reservation, 
+    latest_cancelation, is_reservation_auto_approved
+) VALUES
+    ('Service', '0', 'Gardening Service', 'Lawn mowing and garden maintenance', 80.00, 60.00, TRUE, TRUE, FALSE, NOW(), 2, 2, 'Lawn mowing and trimming', 1, 3, 2, 48, 24, TRUE),
+    ('Service', '0', 'Tutoring', 'Math tutoring for high school students', 50.00, 0.00, TRUE, TRUE, FALSE, NOW(), 2, 3, 'One-on-one tutoring', 1, 2, 1, 24, 12, FALSE),
+    ('Service', '0', 'Cleaning Service', 'Residential and commercial cleaning services', 100.00, 80.00, TRUE, TRUE, FALSE, NOW(), 2, 3, 'Deep cleaning and sanitation', 2, 5, 3, 24, 12, TRUE),
+    ('Service', '0', 'Web Development', 'Professional website development services', 500.00, 50.00, TRUE, TRUE, FALSE, NOW(), 2, 1, 'Frontend and backend development', 5, 10, 7, 72, 48, FALSE),
+    ('Service', '0', 'Personal Training', 'Fitness training with personalized plans', 70.00, 10.00, TRUE, TRUE, FALSE, NOW(), 2, 2, 'Strength and cardio training', 1, 2, 1, 24, 12, TRUE),
+    ('Service', '0', 'Photography Session', 'Professional photo sessions for events', 150.00, 0.00, TRUE, TRUE, FALSE, NOW(), 2, 3, 'Event and portrait photography', 2, 4, 3, 48, 24, TRUE),
+    ('Service', '0', 'Plumbing Service', 'Quick and reliable plumbing repairs', 90.00, 10.00, TRUE, TRUE, FALSE, NOW(), 2, 2, 'Leak repairs and installations', 1, 3, 2, 24, 12, FALSE),
+    ('Service', '0', 'Legal Consultation', 'Expert legal advice and consultation', 200.00, 25.00, TRUE, TRUE, FALSE, NOW(), 2, 1, 'Family and corporate law', 1, 2, 1, 24, 12, FALSE),
+    ('Service', '0', 'Car Detailing', 'Comprehensive car cleaning and detailing', 120.00, 15.00, TRUE, TRUE, FALSE, NOW(), 2, 1, 'Exterior and interior detailing', 2, 3, 2, 36, 18, TRUE),
+    ('Service', '0', 'Event Planning', 'Full-service event planning and coordination', 1000.00, 100.00, TRUE, TRUE, FALSE, NOW(), 2, 3, 'Weddings, conferences, and parties', 5, 15, 10, 168, 72, FALSE),
+    ('Service', '0', 'Massage Therapy', 'Relaxing massage therapy sessions', 80.00, 10.00, TRUE, TRUE, FALSE, NOW(), 2, 2, 'Swedish and deep tissue massage', 1, 2, 1, 24, 12, TRUE);
+INSERT INTO offers (
+    offer_type, status, name, description, price, sale, is_visible, is_available, is_deleted, last_changed, 
+    category_id, provider_id
+) VALUES
+    -- Product 1
+    ('Product', '0', 'Gaming Laptop', 'High-performance gaming laptop with the latest GPU', 1500.00, 100.00, TRUE, TRUE, FALSE, NOW(), 1, 1),
+
+    -- Product 2
+    ('Product', '0', 'Wireless Headphones', 'Noise-cancelling wireless headphones with long battery life', 200.00, 20.00, TRUE, TRUE, FALSE, NOW(), 1, 2),
+
+    -- Product 3
+    ('Product', '0', 'Office Chair', 'Ergonomic office chair with lumbar support', 250.00, 25.00, TRUE, TRUE, FALSE, NOW(), 3, 3),
+
+    -- Product 4
+    ('Product', '0', 'Smartphone', 'Latest smartphone with high-resolution camera', 999.00, 50.00, TRUE, TRUE, FALSE, NOW(), 1, 1),
+
+    -- Product 5
+    ('Product', '0', 'Coffee Table', 'Modern wooden coffee table', 120.00, 10.00, TRUE, TRUE, FALSE, NOW(), 3, 2),
+
+    -- Product 6
+    ('Product', '0', 'Electric Kettle', 'Stainless steel electric kettle with temperature control', 80.00, 5.00, TRUE, TRUE, FALSE, NOW(), 1, 3),
+
+    -- Product 7
+    ('Product', '0', 'Fitness Tracker', 'Wearable fitness tracker with heart rate monitor', 150.00, 15.00, TRUE, TRUE, FALSE, NOW(), 1, 3),
+
+    -- Product 8
+    ('Product', '0', '4K Monitor', 'Ultra HD 4K monitor for professional use', 500.00, 30.00, TRUE, TRUE, FALSE, NOW(), 1, 3),
+
+    -- Product 9
+    ('Product', '0', 'Bookshelf', 'Spacious wooden bookshelf for home or office', 180.00, 20.00, TRUE, TRUE, FALSE, NOW(), 3, 2),
+
+    -- Product 10
+    ('Product', '0', 'Bluetooth Speaker', 'Portable Bluetooth speaker with waterproof design', 75.00, 10.00, TRUE, TRUE, FALSE, NOW(), 1, 1),
+
+    -- Product 11
+    ('Product', '0', 'Desk Lamp', 'LED desk lamp with adjustable brightness', 40.00, 5.00, TRUE, TRUE, FALSE, NOW(), 3, 2),
+
+    -- Product 12
+    ('Product', '0', 'Digital Camera', 'DSLR camera with 24MP sensor', 700.00, 50.00, TRUE, TRUE, FALSE, NOW(), 1, 3);
+
+-- Insert photos for the 24 offers with real image links
+INSERT INTO offer_photos (offer_id, photo_url) VALUES
+    -- Photos for Services (IDs 1 to 12)
+    (1, 'https://d21dfqs8hl0txa.cloudfront.net/services/main/trusted_local_gardeners_gardening_service.webp.1200x630_q85_crop-smart.jpg'),
+    (1, 'https://www.pexels.com/photo/lawn-mowing-5675678/'),
+    (2, 'https://cms-tc.pbskids.org/parents/articles/When-to-Get-a-Math-Tutor-for-Your-Child.jpg'),
+    (2, 'https://www.pexels.com/photo/online-tutoring-session-6786789/'),
+    (3, 'https://cdn.prod.website-files.com/60ff934f6ded2d17563ab9dd/61392e6b85cca9544875c7d2_shutterstock_589490129.jpeg'),
+    (3, 'https://www.pexels.com/photo/cleaning-supplies-7897890/'),
+    (4, 'https://admin.12grids.com/uploads/blogs/original_cover_images/top-11-web-development-technologies-you-must-know-in-2024-12grids-compressed.jpg'),
+    (4, 'https://www.pexels.com/photo/website-design-8908901/'),
+    (5, 'https://cvlifestyles.co.uk/wp-content/uploads/2019/02/personal-training.jpg'),
+    (5, 'https://www.pexels.com/photo/fitness-training-session-1231234/'),
+    (6, 'https://www.signupgenius.com/cms/images/business/appointment-scheduling-tips-photographers-article-600x400.jpg'),
+    (6, 'https://www.pexels.com/photo/photography-studio-setup-6786789/'),
+    (7, 'https://procrewschedule.com/wp-content/uploads/2020/06/plumber-at-work-in-a-bathroom-1024x683-1.jpg'),
+    (7, 'https://www.pexels.com/photo/plumbing-tools-7897890/'),
+    (8, 'https://www.crowe.com/-/media/crowe/llp/sc10-media/services/advisory/content-2000x1125/content_as2301-006g_03-legal-consulting-services_1316107530.jpg?rev=58c6ad5ce5db43859deb2f64da4d856c'),
+    (8, 'https://www.pexels.com/photo/legal-documents-8908901/'),
+    (9, 'https://miocommerce.b-cdn.net//wp-content/uploads/2023/11/Car-detailing-software.-Auto-cleaning-and-polish.-compressor-1024x683-1.jpg'),
+    (9, 'https://www.pexels.com/photo/polished-car-1231234/'),
+    (10, 'https://www.mononaterrace.com/wp-content/uploads/2022/03/event-managment.jpg'),
+    (10, 'https://www.pexels.com/photo/event-setup-6786789/'),
+    (11, 'https://smb.ibsrv.net/imageresizer/image/article_manager/1200x1200/12604/252831/heroimage0.299455001609434486.jpg'),
+    (11, 'https://www.pexels.com/photo/massage-therapy-room-7897890/'),
+
+    -- Photos for Products (IDs 13 to 24)
+    (12, 'https://i.pcmag.com/imagery/reviews/043DROGFihmSgG7S6LUb006-1..v1709854231.jpg'),
+    (12, 'https://www.pexels.com/photo/high-performance-laptop-1231234/'),
+    (13, 'https://media.wired.com/photos/66abec9ccb172c2e5de763bf/master/w_960,c_limit/Edifier-Stax-Spirit-S5-Headphones-Offwhite-Background-SOURCE-Amazon.jpg'),
+    (13, 'https://www.pexels.com/photo/person-wearing-headphones-6786789/'),
+    (14, 'https://www.greensoul.online/cdn/shop/files/yoga_black_pdp_lifestyle.jpg?v=1704884089&width=1080'),
+    (14, 'https://www.pexels.com/photo/modern-office-setup-7897890/'),
+    (15, 'https://cdn.thewirecutter.com/wp-content/media/2024/05/smartphone-2048px-1013.jpg'),
+    (15, 'https://www.pexels.com/photo/smartphone-in-hand-8908901/'),
+    (16, 'https://assets.weimgs.com/weimgs/rk/images/wcm/products/202437/0064/reeve-coffee-table-48-m.jpg'),
+    (16, 'https://www.pexels.com/photo/living-room-setup-1231234/'),
+    (17, 'https://geepas.co.uk/cdn/shop/files/GEEPASGK54661.8LStainlessSteelKettle_02_Hero_1080x.jpg?v=1712588583'),
+    (17, 'https://www.pexels.com/photo/pouring-hot-water-6786789/'),
+    (18, 'https://cdn.mos.cms.futurecdn.net/Pk5ydxYo6ty2Q4SX9vznP6.jpg'),
+    (18, 'https://www.pexels.com/photo/tracking-workout-7897890/'),
+    (19, 'https://cdn.thewirecutter.com/wp-content/media/2023/06/4kmonitors-2048px-9794.jpg'),
+    (19, 'https://www.pexels.com/photo/professional-4k-monitor-8908901/'),
+    (20, 'https://www.worldmarket.com/dw/image/v2/BJWT_PRD/on/demandware.static/-/Sites-wm-master-catalog/default/dwe4c872d0/images/large/25117_XXX_v2.jpg?sw=768&sh=768&sm=fit&sfrm=tif&q=80'),
+    (20, 'https://www.pexels.com/photo/home-bookshelf-1231234/'),
+    (21, 'https://snapbuy.uk/cdn/shop/products/iEqVpXwWBh_8e1fca9f-dd5b-4127-a98c-fcbdb83e90db.jpg?v=1709633416'),
+    (21, 'https://www.pexels.com/photo/waterproof-bluetooth-speaker-6786789/'),
+    (22, 'https://m.media-amazon.com/images/I/713iJYS8jDL.jpg'),
+    (22, 'https://www.pexels.com/photo/adjustable-desk-lamp-7897890/'),
+    (23, 'https://img4.dhresource.com/webp/m/0x0/f3/albu/jc/l/05/fab651be-ab4a-47b6-85e2-461433ebd810.jpg'),
+    (23, 'https://www.pexels.com/photo/photographer-with-camera-8908901/');
+
+
+-- Insert event types for the 24 offers
+INSERT INTO offer_event_types (offer_id, event_type_id) VALUES
+    -- Event Types for Services (IDs 1 to 12)
+    (1, 1), (1, 2),
+    (2, 2), (2, 3),
+    (3, 1), (3, 3),
+    (4, 2), (4, 1),
+    (5, 3), (5, 2),
+    (6, 1), (6, 3),
+    (7, 2), (7, 3),
+    (8, 1), (8, 2),
+    (9, 3), (9, 1),
+    (10, 2), (10, 3),
+    (11, 1), (11, 3),
+    (12, 2), (12, 1),
+
+    -- Event Types for Products (IDs 13 to 24)
+    (13, 1), (13, 2),
+    (14, 2), (14, 3),
+    (15, 1), (15, 3),
+    (16, 3), (16, 2),
+    (17, 2), (17, 1),
+    (18, 3), (18, 2),
+    (19, 1), (19, 3),
+    (20, 2), (20, 1),
+    (21, 3), (21, 2),
+    (22, 1), (22, 3),
+    (23, 2), (23, 1);

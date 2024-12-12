@@ -4,6 +4,8 @@ import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.entity.Organizer;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,7 +13,7 @@ import java.util.List;
 public interface EventService {
 
     List<Event> findAll();
-    //Page<Event> findAll(Pageable page);
+    Page<Event> findAll(Pageable page);
     Event findById(Integer eventId);
     List<Event> findByOrganizer(Organizer organizer);
 

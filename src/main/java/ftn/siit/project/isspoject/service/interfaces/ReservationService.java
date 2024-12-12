@@ -4,7 +4,6 @@ import ftn.siit.project.isspoject.dto.offer.NewReservationDTO;
 import ftn.siit.project.isspoject.dto.offer.ReservationDTO;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.Reservation;
-import ftn.siit.project.isspoject.entity.OfferService;
 
 import java.util.List;
 

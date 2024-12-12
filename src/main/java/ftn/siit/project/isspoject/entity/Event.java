@@ -23,6 +23,10 @@ public class Event {
     private Boolean isPublic;
     private String place;
     private LocalDateTime date;
+    @ElementCollection
+    @CollectionTable(name = "event_photos", joinColumns = @JoinColumn(name = "event_id"))
+    @Column(name = "photo_url")
+    private List<String> photos;
     @ManyToOne
     @JoinColumn(name = "event_type_id", nullable = false)
     private EventType eventType;
@@ -30,7 +34,7 @@ public class Event {
     @JoinColumn(name = "event_id")
     private List<Activity> eventActivities;
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "event_id", referencedColumnName = "id")
+    @JoinColumn(name = "budget_id", referencedColumnName = "id")
     private Budget budget;
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(

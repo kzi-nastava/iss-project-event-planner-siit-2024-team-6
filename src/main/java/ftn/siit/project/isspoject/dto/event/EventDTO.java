@@ -5,6 +5,7 @@ import ftn.siit.project.isspoject.entity.EventType;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class EventDTO {
@@ -17,6 +18,7 @@ public class EventDTO {
     private String place;
     private LocalDateTime date;
     private Integer eventTypeId;
+    private List<String> photos;
 
     public EventDTO() {}
     public EventDTO(Event event) {
@@ -31,5 +33,6 @@ public class EventDTO {
         this.isPublic = event.getIsPublic();
         this.place = event.getPlace();
         this.date = event.getDate();
+        this.photos = event.getPhotos();
     }
 }

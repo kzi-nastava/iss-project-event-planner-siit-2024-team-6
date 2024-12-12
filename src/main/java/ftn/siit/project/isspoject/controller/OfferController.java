@@ -3,6 +3,7 @@ package ftn.siit.project.isspoject.controller;
 import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.dto.offer.PriceListOfferDTO;
+import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.implementations.OfferServiceImpl;
@@ -11,6 +12,9 @@ import ftn.siit.project.isspoject.service.interfaces.OfferHistoryService;
 import ftn.siit.project.isspoject.service.interfaces.OfferService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +24,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/offers/")
+@CrossOrigin(origins = "http://localhost:4200")
 public class OfferController {
 
     @Autowired
@@ -55,23 +60,23 @@ public class OfferController {
 //        return ResponseEntity.ok(offerDTOs);
 //    }
 
-//    @GetMapping(value = "/all_elements")
-//    public ResponseEntity<PagedResponse<OfferDTO>> getOffersPageAllElements(Pageable page) {
-//
-//        Page<Offer> offersPage = offerService.findAll(page);
-//
-//        List<OfferDTO> offerDTOs = offersPage.stream()
-//                .map(OfferDTO::new)
-//                .toList();
-//
-//        PagedResponse<OfferDTO> response = new PagedResponse<>(
-//                offerDTOs,
-//                offersPage.getTotalPages(),
-//                offersPage.getTotalElements()
-//        );
-//
-//        return new ResponseEntity<>(response, HttpStatus.OK);
-//    }
+    @GetMapping(value = "/all-elements")
+    public ResponseEntity<PagedResponse<OfferDTO>> getOffersPageAllElements(Pageable page) {
+
+        Page<Offer> offersPage = offerService.findAll(page);
+
+        List<OfferDTO> offerDTOs = offersPage.stream()
+                .map(OfferDTO::new)
+                .toList();
+
+        PagedResponse<OfferDTO> response = new PagedResponse<>(
+                offerDTOs,
+                offersPage.getTotalPages(),
+                offersPage.getTotalElements()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
 
     @GetMapping("top-five")

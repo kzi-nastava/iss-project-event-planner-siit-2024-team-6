@@ -5,6 +5,8 @@ import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.dto.offer.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,6 +16,7 @@ public interface OfferService {
     List<PriceListOfferDTO> getPriceList(Provider p);
     Offer updatePrice(int offerId, NewPriceListOfferDTO dto);
     List<Offer> findAll();
+    Page<Offer> findAll(Pageable page);
     Offer findById(Integer id);
     List<Offer> findTopFive();
 

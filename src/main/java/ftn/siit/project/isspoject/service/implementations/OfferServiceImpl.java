@@ -10,6 +10,8 @@ import ftn.siit.project.isspoject.repository.OfferRepository;
 import ftn.siit.project.isspoject.repository.ServiceRepository;
 import ftn.siit.project.isspoject.service.interfaces.OfferService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -55,7 +57,10 @@ public class OfferServiceImpl implements OfferService {
     public List<Offer> findAll() {
         return offerRepository.findByIsDeletedFalseOrIsDeletedIsNull();
     }
-
+    @Override
+    public Page<Offer> findAll(Pageable page) {
+        return offerRepository.findAll(page);
+    }
     @Override
     public Offer findById(Integer offerId) {
         Offer o = offerRepository.findById(offerId).orElseThrow(() -> new NotFoundException("Offer not found"));
