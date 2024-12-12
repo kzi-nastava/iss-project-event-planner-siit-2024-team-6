@@ -51,21 +51,11 @@ public class TokenUtils {
 
     }
 
-    /**
-     * Функция для определения типа устройства, для которого создаётся JWT.
-     *
-     * @return Тип устройства.
-     */
     private String generateAudience() {
         // Можно использовать объект org.springframework.mobile.device.Device для определения устройства.
         return AUDIENCE_WEB;
     }
 
-    /**
-     * Функция генерирует дату истечения срока действия JWT токена.
-     *
-     * @return Дата истечения срока действия токена.
-     */
     private Date generateExpirationDate() {
         return new Date(new Date().getTime() + EXPIRES_IN);
     }
