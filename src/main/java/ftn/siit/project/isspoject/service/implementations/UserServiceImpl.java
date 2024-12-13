@@ -9,6 +9,9 @@ import ftn.siit.project.isspoject.repository.UserRepository;
 import ftn.siit.project.isspoject.service.interfaces.BlockService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -180,4 +183,5 @@ public Block blockUser(Integer blockerId, Integer blockedId) {
     public String getUserRole(Integer userId) {
         return userRepository.findUserTypeById(userId);
     }
+
 }
