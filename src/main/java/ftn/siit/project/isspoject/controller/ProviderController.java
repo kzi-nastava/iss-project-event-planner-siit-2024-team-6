@@ -4,16 +4,20 @@ import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
 import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
 import ftn.siit.project.isspoject.dto.category.CategorySuggestionDTO;
 import ftn.siit.project.isspoject.dto.category.NewCategorySuggestionDTO;
+import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
+import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
 import ftn.siit.project.isspoject.entity.*;
-import ftn.siit.project.isspoject.entity.OfferService;
+import ftn.siit.project.isspoject.entity.Service;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.interfaces.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -32,30 +36,44 @@ public class ProviderController {
     private ServiceService serviceService;
 
     @GetMapping("{providerId}")
-    public ResponseEntity<List<OfferDTO>> getAllOffers(@PathVariable int providerId) {
-        //List<OfferDTO> dtos = offerService.find.stream().map(OfferDTO::new).toList();
-        //return ResponseEntity.ok(dtos);
-        return null;
+    public ResponseEntity<List<OfferDTO>> getAllServices(@PathVariable int providerId) {
+        Provider provider = providerService.findById(providerId);
+        List<OfferDTO> dtos = serviceService.findByProvider(provider).stream().map(OfferDTO::new).toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("{providerId}/my-services")
+    public ResponseEntity<PagedResponse<OfferDTO>> getAllPageServices(@PathVariable int providerId, Pageable page) {
+        Provider provider = providerService.findById(providerId);
+        Page<Service> services = serviceService.findByProvider(provider, page);
+
+        List<OfferDTO> dtos = services.stream()
+                .map(OfferDTO::new)
+                .toList();
+
+        PagedResponse<OfferDTO> response = new PagedResponse<>(
+                dtos,
+                services.getTotalPages(),
+                services.getTotalElements()
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("{providerId}")
     public ResponseEntity<OfferDTO> createOffer(@PathVariable int providerId, @RequestBody NewOfferDTO dto) {
         Provider provider = providerService.findById(providerId);
-        //Offer saved = offerService.save(dto, provider);
-        Offer saved = new Offer();
+        Offer saved = serviceService.save(dto, provider);
         return ResponseEntity.status(HttpStatus.CREATED).body(new OfferDTO(saved));
     }
 
     @PutMapping("{providerId}/{offerId}")
     public ResponseEntity<OfferDTO> updateOffer(@PathVariable int providerId, @PathVariable int offerId, @RequestBody NewOfferDTO dto) {
         Provider provider = providerService.findById(providerId);
-        if(provider == null) {throw new NotFoundException("Provider not found."); }
-        Offer oldOffer = offerService.findById(offerId);
-        if(oldOffer == null) {throw new NotFoundException("Offer not found."); }
-        //Offer updated = offerService.update(dto);
-        providerService.update(provider);
-        //return ResponseEntity.ok().body(new OfferDTO(updated));
-        return ResponseEntity.ok(new OfferDTO(oldOffer));
+        if (provider == null) {
+            throw new NotFoundException("Provider not found.");
+        }
+        Offer updated = serviceService.update(offerId, dto);
+        return ResponseEntity.ok(new OfferDTO(updated));
     }
 
     @DeleteMapping("{offerId}")
@@ -66,21 +84,21 @@ public class ProviderController {
     }
 
     @GetMapping("{providerId}/filter")
-    public ResponseEntity<List<OfferDTO>> getFilteredServices( @PathVariable int providerId, @RequestParam(required = false) String name,
-        @RequestParam(required = false) String category,
-        @RequestParam(required = false) String eventType,
-        @RequestParam(required = false) Double price,
-        @RequestParam(required = false) Boolean isAvailable){
+    public ResponseEntity<List<OfferDTO>> getFilteredServices(@PathVariable int providerId, @RequestParam(required = false) String name,
+                                                              @RequestParam(required = false) String category,
+                                                              @RequestParam(required = false) String eventType,
+                                                              @RequestParam(required = false) Double price,
+                                                              @RequestParam(required = false) Boolean isAvailable) {
         Provider provider = providerService.findById(providerId);
-        List<OfferService> filteredOfferServices = serviceService.getFilteredServices(provider, name, category, eventType, price, isAvailable);
+        List<Service> filteredOfferServices = serviceService.getFilteredServices(provider, name, category, eventType, price, isAvailable);
         List<OfferDTO> dtos = filteredOfferServices.stream().map(OfferDTO::new).toList();
         return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("{providerId}/search")
-    public ResponseEntity<List<OfferDTO>> getFilteredServices( @PathVariable int providerId, @RequestParam(required = true) String name){
+    public ResponseEntity<List<OfferDTO>> getFilteredServices(@PathVariable int providerId, @RequestParam(required = true) String name) {
         Provider provider = providerService.findById(providerId);
-        List<OfferService> filteredOfferServices = serviceService.getFilteredServices(provider, name, null, null, null, null);
+        List<Service> filteredOfferServices = serviceService.getFilteredServices(provider, name, null, null, null, null);
         List<OfferDTO> dtos = filteredOfferServices.stream().map(OfferDTO::new).toList();
         return ResponseEntity.ok(dtos);
     }
@@ -88,14 +106,16 @@ public class ProviderController {
     @GetMapping("{id}/budget")
     public ResponseEntity<BudgetDTO> getBudget(@PathVariable int id) {
         Budget budget = budgetService.findById(id);
-        if(budget == null) throw  new NotFoundException("Budget not found");
+        if (budget == null) throw new NotFoundException("Budget not found");
         return ResponseEntity.ok(new BudgetDTO(budget));
     }
 
     @PostMapping
     public ResponseEntity<BudgetDTO> createBudget(@RequestBody NewBudgetDTO dto) {
         Budget budget = new Budget();
-        if(budget == null){ throw new IllegalArgumentException("Budget is null"); }
+        if (budget == null) {
+            throw new IllegalArgumentException("Budget is null");
+        }
         Budget created = budgetService.save(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(new BudgetDTO(created));
     }

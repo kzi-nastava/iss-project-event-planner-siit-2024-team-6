@@ -18,7 +18,7 @@ public class Reservation {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "service_id", nullable = false)
-    private OfferService offerService;
+    private Service offerService;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "event_id", nullable = false)

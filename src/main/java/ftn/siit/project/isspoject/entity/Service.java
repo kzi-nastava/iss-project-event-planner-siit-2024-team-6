@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @Entity
 @DiscriminatorValue("Service")
-public class OfferService extends Offer{
+public class Service extends Offer{
     private String specifics;
     private Integer minDuration;
     private Integer maxDuration;
@@ -22,9 +22,9 @@ public class OfferService extends Offer{
     private Integer latestCancelation;
     private Boolean isReservationAutoApproved;
 
-    public OfferService(){}
+    public Service(){}
 
-    public OfferService(OfferDTO dto, Category category){
+    public Service(OfferDTO dto, Category category){
         super(dto, category);
         this.specifics = dto.getSpecifics();
         this.minDuration = dto.getMinDuration();
@@ -35,11 +35,11 @@ public class OfferService extends Offer{
         this.isReservationAutoApproved = dto.isReservationAutoApproved();
     }
 
-    public OfferService(Integer id, Status status, String name, String description, Double price, Double sale,
-                        List<String> photos, Boolean isVisible, Boolean isAvailable, Boolean isDeleted,
-                        LocalDateTime lastChanged, Category category, List<EventType> eventTypes,
-                        String specifics, int minDuration, int maxDuration, int preciseDuration,
-                        int latestReservation, int latestCancelation, boolean isReservationAutoApproved) {
+    public Service(Integer id, Status status, String name, String description, Double price, Double sale,
+                   List<String> photos, Boolean isVisible, Boolean isAvailable, Boolean isDeleted,
+                   LocalDateTime lastChanged, Category category, List<EventType> eventTypes,
+                   String specifics, int minDuration, int maxDuration, int preciseDuration,
+                   int latestReservation, int latestCancelation, boolean isReservationAutoApproved) {
         super(id, status, name, description, price, sale, photos, isVisible, isAvailable, isDeleted, lastChanged, category, eventTypes);
         this.specifics = specifics;
         this.minDuration = minDuration;

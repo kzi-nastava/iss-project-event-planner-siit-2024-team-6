@@ -30,8 +30,8 @@ public interface OfferRepository extends JpaRepository<Offer, Integer> {
             "AND (:endDate IS NULL OR o.lastChanged <= :endDate) " +
             "AND (:category IS NULL OR o.category.name = :category) " +
             "AND (:isService IS NULL OR " +
-            "     (:isService = TRUE AND TYPE(o) = ftn.siit.project.isspoject.entity.OfferService) OR " +
-            "     (:isService = FALSE AND TYPE(o) <> ftn.siit.project.isspoject.entity.OfferService))")
+            "     (:isService = TRUE AND TYPE(o) = ftn.siit.project.isspoject.entity.Service) OR " +
+            "     (:isService = FALSE AND TYPE(o) <> ftn.siit.project.isspoject.entity.Service))")
     List<Offer> searchItems(
             @Param("name") String name,
             @Param("description") String description,
