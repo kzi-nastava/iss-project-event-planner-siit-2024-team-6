@@ -1,11 +1,11 @@
 package ftn.siit.project.isspoject.dto.offer;
 
+import ftn.siit.project.isspoject.dto.category.NewCategorySuggestionDTO;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.entity.*;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -19,8 +19,8 @@ public class NewOfferDTO {
     private Boolean isVisible;
     private Boolean isAvailable;
     private Boolean isDeleted;
-    private LocalDateTime lastChanged;
     private String category;
+    private NewCategorySuggestionDTO categorySuggestion;
     private List<EventTypeDTO> eventTypes;
     private String type; // product or service
 
@@ -47,14 +47,13 @@ public class NewOfferDTO {
             this.isVisible = offer.getIsVisible();
             this.isAvailable = offer.getIsAvailable();
             this.isDeleted = offer.getIsDeleted();
-            this.lastChanged = offer.getLastChanged();
             this.category = offer.getCategory() != null ? offer.getCategory().getName() : null;
 
             if (offer instanceof Product) {
                 this.type = "Product";
-            } else if (offer instanceof OfferService) {
+            } else if (offer instanceof Service) {
                 this.type = "Service";
-                OfferService offerService = (OfferService) offer;
+                Service offerService = (Service) offer;
                 this.specifics = offerService.getSpecifics();
                 this.minDuration = offerService.getMinDuration();
                 this.maxDuration = offerService.getMaxDuration();
