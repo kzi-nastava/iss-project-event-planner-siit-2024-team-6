@@ -18,7 +18,7 @@ import java.util.Date;
 @Component
 public class TokenUtils {
 
-    @Value("spring-security-example")
+    @Value("Eventure")
     private String APP_NAME;
 
     // JWT https://jwt.io/
