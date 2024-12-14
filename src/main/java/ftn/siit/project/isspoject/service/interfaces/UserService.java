@@ -26,4 +26,5 @@ public interface UserService {
     void updateRole(Integer userId, String newRole);
     Block blockUser(Integer blockerId, Integer blockedId);
     User suspendUser(Integer userId);
+    String getUserRole(Integer userId);
 }
