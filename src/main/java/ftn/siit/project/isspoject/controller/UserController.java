@@ -1,14 +1,23 @@
 package ftn.siit.project.isspoject.controller;
 
+import ftn.siit.project.isspoject.dto.TokenDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.user.*;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.service.interfaces.EventService;
 import ftn.siit.project.isspoject.service.interfaces.ReportService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
+import ftn.siit.project.isspoject.util.TokenUtils;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,13 +33,25 @@ public class UserController {
     private EventService eventService;
     @Autowired
     private ReportService reportService;
-
+    @Autowired
+    private UserDetailsService userDetailsService;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private TokenUtils tokenUtils;
     @PostMapping()
     public ResponseEntity<UserDTO> registerUser(@RequestBody RegistrationRequestDTO registrationRequestDTO) {
         if (registrationRequestDTO.getEmail() == null || registrationRequestDTO.getRole() == null) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
 
+        // Получаем шифровщик паролей
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+        // Зашифровываем пароль
+        registrationRequestDTO.setPassword(passwordEncoder.encode(registrationRequestDTO.getPassword()));
+
+        // Сохраняем пользователя
         User savedUser = userService.save(registrationRequestDTO);
 
         // Преобразуем сохранённого пользователя в соответствующий DTO
@@ -152,20 +173,30 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserDTO> loginUser(@RequestBody LoginRequestDTO loginRequest) {
+    public ResponseEntity loginUser(@RequestBody LoginRequestDTO loginRequest) throws BadRequestException {
         User user = userService.findByEmail(loginRequest.getEmail());
 
-        if (user == null || !user.getPassword().equals(loginRequest.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // Неверные данные для входа
-        }
+//        if (user == null || !user.getPassword().equals(loginRequest.getPassword())) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // Неверные данные для входа
+//        }
 
         if (!user.getIsActive()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Аккаунт неактивен
         }
 
-        // Успешный вход, преобразуем в DTO
-        UserDTO userDTO = toDTO(user);
-        return ResponseEntity.ok(userDTO);
+        try {
+            TokenDTO token = new TokenDTO();
+
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(loginRequest.getEmail());
+            this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+
+            String tokenValue = this.tokenUtils.generateToken((User) userDetails);
+            token.setToken(tokenValue);
+
+            return new ResponseEntity<>(token, HttpStatus.OK);
+        } catch (BadCredentialsException e) {
+            throw new BadRequestException("Wrong password!");
+        }
     }
 
 

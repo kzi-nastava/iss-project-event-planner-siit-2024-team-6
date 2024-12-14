@@ -181,7 +181,7 @@ public Block blockUser(Integer blockerId, Integer blockedId) {
 
     @Override
     public String getUserRole(Integer userId) {
-        return userRepository.findUserTypeById(userId);
+        return "ROLE" + userRepository.findUserTypeById(userId).toUpperCase();
     }
 
 }

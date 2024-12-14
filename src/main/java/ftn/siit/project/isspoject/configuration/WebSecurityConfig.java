@@ -97,8 +97,8 @@ public class WebSecurityConfig{
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(restAuthenticationEntryPoint));
         http.authorizeHttpRequests(request -> {
-            request.requestMatchers(new AntPathRequestMatcher("/auth/login")).permitAll()
-                    .requestMatchers(new AntPathRequestMatcher("/api/foo")).permitAll()
+            request.requestMatchers(new AntPathRequestMatcher("/api/users/login")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/users")).permitAll()
                     // Разрешаем доступ к маршруту /error для более удобных сообщений об ошибках.
                     .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
                     //.requestMatchers(new AntPathRequestMatcher("/api/whoami")).hasRole("USER")
