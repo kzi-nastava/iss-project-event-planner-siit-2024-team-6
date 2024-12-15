@@ -5,6 +5,7 @@ import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
 import ftn.siit.project.isspoject.dto.category.CategorySuggestionDTO;
 import ftn.siit.project.isspoject.dto.category.NewCategorySuggestionDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
+import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
@@ -12,6 +13,7 @@ import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.entity.Service;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.interfaces.*;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -34,6 +37,10 @@ public class ProviderController {
     private CategorySuggestionService categorySuggestionService;
     @Autowired
     private ServiceService serviceService;
+    @Autowired
+    private CategoryService categoryService;
+    @Autowired
+    private EventTypeService eventTypeService;
 
     @GetMapping("{providerId}")
     public ResponseEntity<List<OfferDTO>> getAllServices(@PathVariable int providerId) {
@@ -62,17 +69,32 @@ public class ProviderController {
     @PostMapping("{providerId}")
     public ResponseEntity<OfferDTO> createOffer(@PathVariable int providerId, @RequestBody NewOfferDTO dto) {
         Provider provider = providerService.findById(providerId);
-        Offer saved = serviceService.save(dto, provider);
+        List<EventType> eventTypes = new ArrayList<>();
+        for(EventTypeDTO eventType : dto.getEventTypes()) {
+            eventTypes.add(eventTypeService.findByName(eventType.getName()));
+        }
+        Offer saved;
+        if(dto.getCategorySuggestion() == null){
+            saved = serviceService.save(dto, provider, eventTypes, categoryService.findByName(dto.getCategory()));
+        }else{
+            saved = serviceService.save(dto, provider, eventTypes, null);
+        }
+        if(dto.getCategorySuggestion() != null){
+            CategorySuggestion categorySuggestion = new CategorySuggestion(dto.getCategorySuggestion().getSuggestion(), Status.PENDING, saved);
+            categorySuggestionService.save(categorySuggestion);
+        }
+
         return ResponseEntity.status(HttpStatus.CREATED).body(new OfferDTO(saved));
     }
 
     @PutMapping("{providerId}/{offerId}")
     public ResponseEntity<OfferDTO> updateOffer(@PathVariable int providerId, @PathVariable int offerId, @RequestBody NewOfferDTO dto) {
         Provider provider = providerService.findById(providerId);
-        if (provider == null) {
-            throw new NotFoundException("Provider not found.");
+        List<EventType> eventTypes = new ArrayList<>();
+        for(EventTypeDTO eventType : dto.getEventTypes()) {
+            eventTypes.add(eventTypeService.findByName(eventType.getName()));
         }
-        Offer updated = serviceService.update(offerId, dto);
+        Offer updated = serviceService.update(offerId, dto, eventTypes);
         return ResponseEntity.ok(new OfferDTO(updated));
     }
 
@@ -132,9 +154,12 @@ public class ProviderController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("suggestion")
-    public ResponseEntity<CategorySuggestionDTO> createCategorySuggestion(NewCategorySuggestionDTO dto) {
-        CategorySuggestion created = categorySuggestionService.save(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new CategorySuggestionDTO(created));
+    @GetMapping("categories")
+    public ResponseEntity<List<Category>> getAllCategories() {
+        List<Category> categories = categoryService.findAll();
+        if (categories.isEmpty()) {
+          return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(categories);
     }
 }
