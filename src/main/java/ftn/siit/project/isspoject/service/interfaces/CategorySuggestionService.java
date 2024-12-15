@@ -8,7 +8,7 @@ import java.util.List;
 public interface CategorySuggestionService {
     List<CategorySuggestion> getPending();
     CategorySuggestion findById(int id);
-    CategorySuggestion create(CategorySuggestion categorySuggestion);
+    CategorySuggestion save(CategorySuggestion categorySuggestion);
     CategorySuggestion save(NewCategorySuggestionDTO dto);
     CategorySuggestion update(CategorySuggestion categorySuggestion);
     void delete(CategorySuggestion categorySuggestion);
