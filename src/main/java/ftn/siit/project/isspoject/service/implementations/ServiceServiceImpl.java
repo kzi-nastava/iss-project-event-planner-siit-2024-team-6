@@ -64,6 +64,7 @@ public class ServiceServiceImpl implements ServiceService {
         if(c != null){
             existingService.setCategory(c);
         }
+        existingService.setStatus(dto.getStatus());
         existingService.setDescription(dto.getDescription());
         existingService.setPrice(dto.getPrice());
         existingService.setIsAvailable(dto.getIsAvailable());
@@ -80,6 +81,7 @@ public class ServiceServiceImpl implements ServiceService {
         existingService.setLatestCancelation(dto.getLatestCancelation());
         existingService.setLatestReservation(dto.getLatestReservation());
         existingService.setLastChanged(LocalDateTime.now());
+        existingService.setIsReservationAutoApproved(dto.isReservationAutoApproved());
         return serviceRepository.save(existingService);
     }
 
@@ -89,6 +91,7 @@ public class ServiceServiceImpl implements ServiceService {
             throw new NotFoundException("Service with id " + service.getId() + " not found and cannot be updated");
         }
         Service existingService = this.findById(service.getId());
+        existingService.setStatus(service.getStatus());
         existingService.setName(service.getName());
         existingService.setDescription(service.getDescription());
         existingService.setPrice(service.getPrice());
@@ -106,6 +109,7 @@ public class ServiceServiceImpl implements ServiceService {
         existingService.setLatestCancelation(service.getLatestCancelation());
         existingService.setLatestReservation(service.getLatestReservation());
         existingService.setLastChanged(LocalDateTime.now());
+        existingService.setIsReservationAutoApproved(service.getIsReservationAutoApproved());
         return serviceRepository.save(existingService);
     }
 
@@ -113,6 +117,7 @@ public class ServiceServiceImpl implements ServiceService {
     public Service update(int id, NewOfferDTO dto, List<EventType> eventTypes) {
         Service existingService = this.findById(id);
         existingService.setName(dto.getName());
+        existingService.setStatus(dto.getStatus());
         existingService.setDescription(dto.getDescription());
         existingService.setPrice(dto.getPrice());
         existingService.setIsAvailable(dto.getIsAvailable());
@@ -128,11 +133,13 @@ public class ServiceServiceImpl implements ServiceService {
         existingService.setLatestCancelation(dto.getLatestCancelation());
         existingService.setLatestReservation(dto.getLatestReservation());
         existingService.setLastChanged(LocalDateTime.now());
+        existingService.setIsReservationAutoApproved(dto.isReservationAutoApproved());
         return serviceRepository.save(existingService);
     }
 
     @Override
     public void delete(Service s) {
+        findById(s.getId());
         s.setIsDeleted(true);
         serviceRepository.save(s);
     }
