@@ -55,7 +55,15 @@ public class ProviderController {
         Page<Service> services = serviceService.findByProvider(provider, page);
 
         List<OfferDTO> dtos = services.stream()
-                .map(OfferDTO::new)
+                .map(service -> {
+                    try {
+                        return new OfferDTO(service);
+                    } catch (Exception e) {
+                        System.err.println("Error converting service to DTO: " + e.getMessage());
+                        return null;
+                    }
+                })
+                .filter(dto -> dto != null)
                 .toList();
 
         PagedResponse<OfferDTO> response = new PagedResponse<>(
@@ -63,23 +71,25 @@ public class ProviderController {
                 services.getTotalPages(),
                 services.getTotalElements()
         );
+
         return ResponseEntity.ok(response);
     }
+
 
     @PostMapping("{providerId}")
     public ResponseEntity<OfferDTO> createOffer(@PathVariable int providerId, @RequestBody NewOfferDTO dto) {
         Provider provider = providerService.findById(providerId);
         List<EventType> eventTypes = new ArrayList<>();
-        for(EventTypeDTO eventType : dto.getEventTypes()) {
+        for (EventTypeDTO eventType : dto.getEventTypes()) {
             eventTypes.add(eventTypeService.findByName(eventType.getName()));
         }
         Offer saved;
-        if(dto.getCategorySuggestion() == null){
+        if (dto.getCategorySuggestion() == null) {
             saved = serviceService.save(dto, provider, eventTypes, categoryService.findByName(dto.getCategory()));
-        }else{
+        } else {
             saved = serviceService.save(dto, provider, eventTypes, null);
         }
-        if(dto.getCategorySuggestion() != null){
+        if (dto.getCategorySuggestion() != null) {
             CategorySuggestion categorySuggestion = new CategorySuggestion(dto.getCategorySuggestion().getSuggestion(), Status.PENDING, saved);
             categorySuggestionService.save(categorySuggestion);
         }
@@ -91,7 +101,7 @@ public class ProviderController {
     public ResponseEntity<OfferDTO> updateOffer(@PathVariable int providerId, @PathVariable int offerId, @RequestBody NewOfferDTO dto) {
         Provider provider = providerService.findById(providerId);
         List<EventType> eventTypes = new ArrayList<>();
-        for(EventTypeDTO eventType : dto.getEventTypes()) {
+        for (EventTypeDTO eventType : dto.getEventTypes()) {
             eventTypes.add(eventTypeService.findByName(eventType.getName()));
         }
         Offer updated = serviceService.update(offerId, dto, eventTypes);
@@ -148,7 +158,7 @@ public class ProviderController {
         return ResponseEntity.ok(new BudgetDTO(updatedBudget));
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/budget/{id}")
     public ResponseEntity<Void> deleteBudget(@PathVariable int id) {
         budgetService.delete(id);
         return ResponseEntity.noContent().build();
@@ -158,7 +168,7 @@ public class ProviderController {
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = categoryService.findAll();
         if (categories.isEmpty()) {
-          return ResponseEntity.noContent().build();
+            return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(categories);
     }
