@@ -1,6 +1,8 @@
 package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
+import ftn.siit.project.isspoject.entity.Category;
+import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.entity.Provider;
 import ftn.siit.project.isspoject.entity.Service;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
@@ -56,9 +58,12 @@ public class ServiceServiceImpl implements ServiceService {
     }
 
     @Override
-    public Service save(NewOfferDTO dto, Provider p) {
+    public Service save(NewOfferDTO dto, Provider p, List<EventType> eventTypes, Category c) {
         Service existingService = new Service();
         existingService.setName(dto.getName());
+        if(c != null){
+            existingService.setCategory(c);
+        }
         existingService.setDescription(dto.getDescription());
         existingService.setPrice(dto.getPrice());
         existingService.setIsAvailable(dto.getIsAvailable());
@@ -71,6 +76,7 @@ public class ServiceServiceImpl implements ServiceService {
         existingService.setPreciseDuration(dto.getPreciseDuration());
         existingService.setMaxDuration(dto.getMaxDuration());
         existingService.setMinDuration(dto.getMinDuration());
+        existingService.setEventTypes(eventTypes);
         existingService.setLatestCancelation(dto.getLatestCancelation());
         existingService.setLatestReservation(dto.getLatestReservation());
         existingService.setLastChanged(LocalDateTime.now());
@@ -91,6 +97,7 @@ public class ServiceServiceImpl implements ServiceService {
         existingService.setSale(service.getSale());
         existingService.setPhotos(service.getPhotos());
         existingService.setIsDeleted(false);
+        existingService.setEventTypes(service.getEventTypes());
         existingService.setProvider(service.getProvider());
         existingService.setIsVisible(service.getIsVisible());
         existingService.setPreciseDuration(service.getPreciseDuration());
@@ -103,7 +110,7 @@ public class ServiceServiceImpl implements ServiceService {
     }
 
     @Override
-    public Service update(int id, NewOfferDTO dto) {
+    public Service update(int id, NewOfferDTO dto, List<EventType> eventTypes) {
         Service existingService = this.findById(id);
         existingService.setName(dto.getName());
         existingService.setDescription(dto.getDescription());
@@ -115,6 +122,7 @@ public class ServiceServiceImpl implements ServiceService {
         existingService.setIsDeleted(false);
         existingService.setIsVisible(dto.getIsVisible());
         existingService.setPreciseDuration(dto.getPreciseDuration());
+        existingService.setEventTypes(eventTypes);
         existingService.setMaxDuration(dto.getMaxDuration());
         existingService.setMinDuration(dto.getMinDuration());
         existingService.setLatestCancelation(dto.getLatestCancelation());

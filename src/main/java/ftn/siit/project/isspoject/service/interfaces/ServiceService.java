@@ -1,6 +1,8 @@
 package ftn.siit.project.isspoject.service.interfaces;
 
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
+import ftn.siit.project.isspoject.entity.Category;
+import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.entity.Provider;
 import ftn.siit.project.isspoject.entity.Service;
 import org.springframework.data.domain.Page;
@@ -15,8 +17,8 @@ public interface ServiceService {
     List<Service> getFilteredServices(Provider p, String name, String category, String eventType, Double price, Boolean isAvailable);
     Service findById(Integer id);
     Service save(Service service);
-    Service save(NewOfferDTO offerDTO, Provider p);
+    Service save(NewOfferDTO offerDTO, Provider p, List<EventType> eventTypes, Category c);
     Service update(Service service);
-    Service update(int id, NewOfferDTO dto);
+    Service update(int id, NewOfferDTO dto, List<EventType> eventTypes);
     void delete(Service service);
 }
