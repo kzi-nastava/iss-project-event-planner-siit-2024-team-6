@@ -44,6 +44,24 @@ public class ServiceServiceImpl implements ServiceService {
     }
 
     @Override
+    public Page<Service> getFilteredServices(Provider p, String name, List<String> category, List<String> eventType, Double price, Boolean isAvailable, Pageable page) {
+        Page<Service> s = serviceRepository.findServicesByFilters(p.getId(), category, eventType, isAvailable, price, page);
+        if(s.isEmpty()){
+            throw new NotFoundException("No service are found under given filters");
+        }
+        return s;
+    }
+
+    @Override
+    public Page<Service> searchByName(Provider p, String name, Pageable pageable) {
+        Page<Service> s = serviceRepository.searchByName(p.getId(), name, pageable);
+        if(s.isEmpty()){
+            throw new NotFoundException("No service are found under given filters");
+        }
+        return s;
+    }
+
+    @Override
     public Service findById(Integer id) {
         Service s = serviceRepository.findById(id).orElseThrow(() -> new NotFoundException("Service with id " + id + " not found"));
         if(s.getIsDeleted()){

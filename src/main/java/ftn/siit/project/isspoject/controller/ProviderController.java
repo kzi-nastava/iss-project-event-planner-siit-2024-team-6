@@ -115,24 +115,59 @@ public class ProviderController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("{providerId}/filter")
-    public ResponseEntity<List<OfferDTO>> getFilteredServices(@PathVariable int providerId, @RequestParam(required = false) String name,
-                                                              @RequestParam(required = false) String category,
-                                                              @RequestParam(required = false) String eventType,
+    @GetMapping("{providerId}/services-filter")
+    public ResponseEntity<PagedResponse<OfferDTO>> getFilteredServices(@PathVariable int providerId, @RequestParam(required = false) String name,
+                                                              @RequestParam(required = false) List<String> category,
+                                                              @RequestParam(required = false) List<String> eventType,
                                                               @RequestParam(required = false) Double price,
-                                                              @RequestParam(required = false) Boolean isAvailable) {
+                                                              @RequestParam(required = false) Boolean isAvailable, Pageable pageable) {
         Provider provider = providerService.findById(providerId);
-        List<Service> filteredOfferServices = serviceService.getFilteredServices(provider, name, category, eventType, price, isAvailable);
-        List<OfferDTO> dtos = filteredOfferServices.stream().map(OfferDTO::new).toList();
-        return ResponseEntity.ok(dtos);
+        Page<Service> filteredOfferServices = serviceService.getFilteredServices(provider, name, category, eventType, price, isAvailable, pageable);
+        List<OfferDTO> dtos = filteredOfferServices.stream()
+                .map(service -> {
+                    try {
+                        return new OfferDTO(service);
+                    } catch (Exception e) {
+                        System.err.println("Error converting service to DTO: " + e.getMessage());
+                        return null;
+                    }
+                })
+                .filter(dto -> dto != null)
+                .toList();
+
+        PagedResponse<OfferDTO> response = new PagedResponse<>(
+                dtos,
+                filteredOfferServices.getTotalPages(),
+                filteredOfferServices.getTotalElements()
+        );
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("{providerId}/search")
-    public ResponseEntity<List<OfferDTO>> getFilteredServices(@PathVariable int providerId, @RequestParam(required = true) String name) {
+    public ResponseEntity<PagedResponse<OfferDTO>> getFilteredServices(@PathVariable int providerId, @RequestParam() String name, Pageable page) {
         Provider provider = providerService.findById(providerId);
-        List<Service> filteredOfferServices = serviceService.getFilteredServices(provider, name, null, null, null, null);
-        List<OfferDTO> dtos = filteredOfferServices.stream().map(OfferDTO::new).toList();
-        return ResponseEntity.ok(dtos);
+        if (name != null && name.isEmpty()) {
+            name = null; // Treat empty strings as null
+        }
+        Page<Service> filteredOfferServices = serviceService.searchByName(provider, name, page);
+        List<OfferDTO> dtos = filteredOfferServices.stream()
+                .map(service -> {
+                    try {
+                        return new OfferDTO(service);
+                    } catch (Exception e) {
+                        System.err.println("Error converting service to DTO: " + e.getMessage());
+                        return null;
+                    }
+                })
+                .filter(dto -> dto != null)
+                .toList();
+
+        PagedResponse<OfferDTO> response = new PagedResponse<>(
+                dtos,
+                filteredOfferServices.getTotalPages(),
+                filteredOfferServices.getTotalElements()
+        );
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("{id}/budget")
@@ -158,18 +193,27 @@ public class ProviderController {
         return ResponseEntity.ok(new BudgetDTO(updatedBudget));
     }
 
-    @DeleteMapping("/budget/{id}")
+    @DeleteMapping("budget/{id}")
     public ResponseEntity<Void> deleteBudget(@PathVariable int id) {
         budgetService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("categories")
-    public ResponseEntity<List<Category>> getAllCategories() {
-        List<Category> categories = categoryService.findAll();
+    public ResponseEntity<List<String>> getAllCategories() {
+        List<String> categories = categoryService.findAllNames();
         if (categories.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("event-types")
+    public ResponseEntity<List<String>> getAllEventTypes() {
+        List<String> eventTypes = eventTypeService.findAllNames();
+        if (eventTypes.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(eventTypes);
     }
 }

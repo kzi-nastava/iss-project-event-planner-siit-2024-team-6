@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +33,55 @@ public interface ServiceRepository extends JpaRepository<Service, Integer> {
             @Param("price") Double price,
             @Param("isAvailable") Boolean isAvailable);
 
+    @Query(value = "SELECT DISTINCT o.* FROM offers o " +
+            "JOIN categories c ON c.id = o.category_id " +
+            "LEFT JOIN offer_event_types et ON et.offer_id = o.id " +
+            "LEFT JOIN event_types e ON e.id = et.event_type_id " +
+            "WHERE (:providerId IS NULL OR o.provider_id = :providerId) " +
+            "AND (:categories IS NULL OR c.name IN :categories) " +
+            "AND (:eventTypes IS NULL OR e.name IN :eventTypes) " +
+            "AND (:isAvailable IS NULL OR o.is_available = :isAvailable) " +
+            "AND (:price IS NULL OR o.price <= :price) " +
+            "AND (o.is_deleted IS NULL OR o.is_deleted = FALSE) " +
+            "AND o.offer_type = 'Service'",
+            countQuery = "SELECT COUNT(DISTINCT o.id) FROM offers o " +
+                    "JOIN categories c ON c.id = o.category_id " +
+                    "LEFT JOIN offer_event_types et ON et.offer_id = o.id " +
+                    "LEFT JOIN event_types e ON e.id = et.event_type_id " +
+                    "WHERE (:providerId IS NULL OR o.provider_id = :providerId) " +
+                    "AND (:categories IS NULL OR c.name IN :categories) " +
+                    "AND (:eventTypes IS NULL OR e.name IN :eventTypes) " +
+                    "AND (:isAvailable IS NULL OR o.is_available = :isAvailable) " +
+                    "AND (:price IS NULL OR o.price <= :price) " +
+                    "AND (o.is_deleted IS NULL OR o.is_deleted = FALSE) " +
+                    "AND o.offer_type = 'Service'",
+            nativeQuery = true)
+    Page<Service> findServicesByFilters(
+            @Param("providerId") Integer providerId,
+            @Param("categories") List<String> categories,
+            @Param("eventTypes") List<String> eventTypes,
+            @Param("isAvailable") Boolean isAvailable,
+            @Param("price") Double price,
+            Pageable pageable);
+
+
+    @Query(value = "SELECT o.* FROM offers o " +
+            "WHERE (:providerId IS NULL OR o.provider_id = :providerId) " +
+            "AND (:name IS NULL OR LOWER(CAST(o.name AS TEXT)) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+            "AND (o.is_deleted IS NULL OR o.is_deleted = FALSE) " +
+            "AND o.offer_type = 'Service'",
+            countQuery = "SELECT COUNT(*) FROM offers o " +
+                    "WHERE (:providerId IS NULL OR o.provider_id = :providerId) " +
+                    "AND (:name IS NULL OR LOWER(CAST(o.name AS TEXT)) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+                    "AND (o.is_deleted IS NULL OR o.is_deleted = FALSE) " +
+                    "AND o.offer_type = 'Service'",
+            nativeQuery = true)
+    Page<Service> searchByName(@Param("providerId") Integer providerId,
+                               @Param("name") String name, Pageable page);
+
+
     List<Service> findAllByProviderIdAndIsDeletedFalseOrIsDeletedIsNull(int providerId);
+
     Page<Service> findAllByProviderIdAndIsDeletedFalseOrIsDeletedIsNull(int providerId, Pageable pageable);
 
 }
