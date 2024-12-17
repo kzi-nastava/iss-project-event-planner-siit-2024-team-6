@@ -100,6 +100,9 @@ public class WebSecurityConfig{
             request.requestMatchers(new AntPathRequestMatcher("/api/users/login")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/users")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/users/**")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/events/**")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/offers/**")).permitAll()
                     // Разрешаем доступ к маршруту /error для более удобных сообщений об ошибках.
                     .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
                     //.requestMatchers(new AntPathRequestMatcher("/api/whoami")).hasRole("USER")
