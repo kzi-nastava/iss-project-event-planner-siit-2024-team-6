@@ -94,7 +94,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(User user) {
         if (userRepository.existsById(user.getId())) {
-            userRepository.delete(user);
+            user.setIsActive(false);
+            userRepository.save(user); // Logical deleting
         } else {
             throw new IllegalArgumentException("User with ID " + user.getId() + " does not exist");
         }

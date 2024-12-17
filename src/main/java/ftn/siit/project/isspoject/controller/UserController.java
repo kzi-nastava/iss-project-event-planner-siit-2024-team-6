@@ -8,6 +8,7 @@ import ftn.siit.project.isspoject.service.interfaces.EventService;
 import ftn.siit.project.isspoject.service.interfaces.ReportService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
 import ftn.siit.project.isspoject.util.TokenUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -76,68 +78,96 @@ public class UserController {
         return new ResponseEntity<>("User was quickly registered, check out the activation code", HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getProfile(@PathVariable Integer id) {
-        User user = userService.findById(id);
+    @GetMapping("/profile")
+    public ResponseEntity<UserDTO> getProfile(HttpServletRequest request) {
+        // Извлекаем токен из заголовка с помощью getToken
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        UserDTO dto = null;
-        if(user instanceof Organizer){
-             dto = new OrganizerDTO((Organizer) user);
-        }else{
-            if(user instanceof Provider){
-                dto = new ProviderDTO((Provider) user);
-                ((ProviderDTO) dto).setCompanyEmail(((Provider) user).getCompanyEmail());
-                ((ProviderDTO) dto).setCompanyName(((Provider) user).getCompanyName());
-                ((ProviderDTO) dto).setDescription(((Provider) user).getDescription());
-                ((ProviderDTO) dto).setOpeningTime(((Provider) user).getOpeningTime());
-                ((ProviderDTO) dto).setClosingTime(((Provider) user).getClosingTime());
-            }else {
-                 dto = new UserDTO();
-            }
+        String userType = user.getUserType();
+        UserDTO userDTO = null;
+        if(userType.equals("Provider")){
+            userDTO = new ProviderDTO((Provider) user);
+        } else if (userType.equals("Organizer")) {
+            userDTO = new OrganizerDTO((Organizer) user);
+        } else if (userType.equals("Admin")) {
+            userDTO = new OrganizerDTO((Organizer) user); // temporary
         }
-        dto.setEmail(user.getEmail());
-        dto.setName(user.getName());
-        dto.setLastname(user.getLastname());
-        dto.setAddress(user.getAddress());
-        dto.setPhoneNumber(user.getPhoneNumber());
-        dto.setPhotoUrl(user.getPhotoUrl());
-        dto.setActive(user.getIsActive());
-        dto.setSuspendedSince(user.getSuspendedSince());
 
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+//        UserDTO dto = null;
+//        if(user instanceof Organizer){
+//             dto = new OrganizerDTO((Organizer) user);
+//        }else{
+//            if(user instanceof Provider){
+//                dto = new ProviderDTO((Provider) user);
+//                ((ProviderDTO) dto).setCompanyEmail(((Provider) user).getCompanyEmail());
+//                ((ProviderDTO) dto).setCompanyName(((Provider) user).getCompanyName());
+//                ((ProviderDTO) dto).setDescription(((Provider) user).getDescription());
+//                ((ProviderDTO) dto).setOpeningTime(((Provider) user).getOpeningTime());
+//                ((ProviderDTO) dto).setClosingTime(((Provider) user).getClosingTime());
+//            }else {
+//                 dto = new UserDTO(user);
+//            }
+//        }
+
+        return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> updateProfile(@PathVariable Integer id, @RequestBody UserDTO updatedUser) {
-        User user = userService.findById(id);
+    @PutMapping("/profile")
+    public ResponseEntity<UserDTO> updateProfile(@RequestBody Object updatedUser, HttpServletRequest request) {
+        // Извлекаем токен из заголовка с помощью getToken
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
         if (user == null) {
             return ResponseEntity.notFound().build();
         }
 
-        user.setName(updatedUser.getName());
-        user.setLastname(updatedUser.getLastname());
-        user.setAddress(updatedUser.getAddress());
-        user.setPhoneNumber(updatedUser.getPhoneNumber());
-        user.setPhotoUrl(updatedUser.getPhotoUrl());
+        String userType = user.getUserType();
 
-
-        if (user instanceof Organizer) {
-//            Organizer organizer = (Organizer) user;
-
-        } else if (user instanceof Provider) {
-//            Provider provider = (Provider) user;
-            if (updatedUser instanceof ProviderDTO) {
-                ProviderDTO providerDTO = (ProviderDTO) updatedUser;
-                ((Provider) user).setDescription(providerDTO.getDescription());
-                ((Provider) user).setOpeningTime(providerDTO.getOpeningTime());
-                ((Provider) user).setClosingTime(providerDTO.getClosingTime());
-            }
+        if(userType.equals("Provider")){
+            ((Provider) user).updateFromObject((Map<String, Object>) updatedUser);
+        } else if (userType.equals("Organizer")) {
+            ((Organizer) user).updateFromObject((Map<String, Object>) updatedUser);
+        } else if (userType.equals("Admin")) {
+            ((Admin) user).updateFromObject((Map<String, Object>) updatedUser);
         }
 
+
+//
+//        user.setName(updatedUser.getName());
+//        user.setLastname(updatedUser.getLastname());
+//        user.setAddress(updatedUser.getAddress());
+//        user.setPhoneNumber(updatedUser.getPhoneNumber());
+//        user.setPhotoUrl(updatedUser.getPhotoUrl());
+
+
+//        if (user instanceof Organizer) {
+////            Organizer organizer = (Organizer) user;
+//
+//        } else if (user instanceof Provider) {
+////            Provider provider = (Provider) user;
+//            if (updatedUser instanceof ProviderDTO) {
+//                ProviderDTO providerDTO = (ProviderDTO) updatedUser;
+//                ((Provider) user).setDescription(providerDTO.getDescription());
+//                ((Provider) user).setOpeningTime(providerDTO.getOpeningTime());
+//                ((Provider) user).setClosingTime(providerDTO.getClosingTime());
+//            }
+//        }
+        UserDTO userDTO = new UserDTO(user);
         userService.save(user);
-        return ResponseEntity.ok(updatedUser);
+        return ResponseEntity.ok(userDTO);
     }
   
     @PutMapping("/{id}/password")
@@ -240,30 +270,58 @@ public class UserController {
 
         return new ResponseEntity<>(userDTOs, HttpStatus.OK);
     }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<UserDTO> deleteUser(@PathVariable Integer id) {
-        User user = userService.findById(id);
+    @DeleteMapping("/profile")
+    public ResponseEntity<UserDTO> deleteUser(HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
 
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Пользователь не найден
+            return ResponseEntity.notFound().build();
         }
 
-        if (user instanceof Organizer organizer && organizer.hasFutureEvents()) {
+
+        if (user.getUserType().equals("Organizer") && ((Organizer) user).hasFutureEvents()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(null); // Организатор с будущими событиями
         }
 
-        if (user instanceof Provider provider && provider.hasActiveServices()) {
+        if (user.getUserType().equals("Provider") && ((Provider) user).hasActiveServices()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(null); // Провайдер с активными услугами
         }
 
         userService.delete(user);
-        UserDTO userDTO = toDTO(user);
+        UserDTO userDTO = new UserDTO(user);
 
         return ResponseEntity.ok(userDTO); // Возвращаем удалённого пользователя
     }
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<UserDTO> deleteUser(@PathVariable Integer id) {
+//        User user = userService.findById(id);
+//
+//        if (user == null) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Пользователь не найден
+//        }
+//
+//        if (user instanceof Organizer organizer && organizer.hasFutureEvents()) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                    .body(null); // Организатор с будущими событиями
+//        }
+//
+//        if (user instanceof Provider provider && provider.hasActiveServices()) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                    .body(null); // Провайдер с активными услугами
+//        }
+//
+//        userService.delete(user);
+//        UserDTO userDTO = toDTO(user);
+//
+//        return ResponseEntity.ok(userDTO); // Возвращаем удалённого пользователя
+//    }
 
 
     @PutMapping("/{id}/role")
