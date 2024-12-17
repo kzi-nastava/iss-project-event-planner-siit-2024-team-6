@@ -2,9 +2,14 @@ package ftn.siit.project.isspoject.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static jakarta.persistence.DiscriminatorType.STRING;
@@ -15,7 +20,7 @@ import static jakarta.persistence.DiscriminatorType.STRING;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type", discriminatorType=STRING)
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,6 +49,12 @@ public class User {
 
     private String phoneNumber;
 
+    @Column(name = "last_password_reset_date")
+    private Timestamp lastPasswordResetDate;
+
+    @Column(name = "user_type", insertable = false, updatable = false)  //without insert
+    private String userType;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_favourite_offers",
@@ -70,6 +81,26 @@ public class User {
 
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Notification> notifications = new ArrayList<>();
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + userType.toUpperCase()));
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return UserDetails.super.isAccountNonLocked();
+    }
 }
 
 
