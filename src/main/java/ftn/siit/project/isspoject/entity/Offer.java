@@ -83,7 +83,6 @@ public class Offer {
         this.photos = dto.getPhotos();
         this.isVisible = dto.getIsVisible();
         this.isDeleted = dto.getIsDeleted();
-        this.lastChanged = dto.getLastChanged();
         this.category = category;
     }
     public Offer(NewOfferDTO dto, Category category) {
@@ -94,7 +93,6 @@ public class Offer {
         this.photos = dto.getPhotos();
         this.isVisible = dto.getIsVisible();
         this.isDeleted = dto.getIsDeleted();
-        this.lastChanged = dto.getLastChanged();
         this.category = category;
     }
     public Offer toOffer(OfferDTO dto, Category category) {
@@ -102,7 +100,7 @@ public class Offer {
         if (dto.getType().equals("Product")){
             return new Product(dto, category);
         }else{
-            return new OfferService(dto, category);
+            return new Service(dto, category);
         }
     }
 }

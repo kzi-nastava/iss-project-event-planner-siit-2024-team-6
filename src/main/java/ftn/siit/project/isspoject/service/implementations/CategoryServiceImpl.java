@@ -55,6 +55,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public List<String> findAllNames() {
+        return categoryRepository.findAllNames();
+    }
+
+    @Override
     public List<Category> findAllByNames(List<String> names) {
         List<Category> categories = categoryRepository.findAll().stream()
                 .filter(category -> names.contains(category.getName()))

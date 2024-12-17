@@ -5,7 +5,7 @@ import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.entity.Offer;
 import ftn.siit.project.isspoject.entity.Product;
-import ftn.siit.project.isspoject.entity.OfferService;
+import ftn.siit.project.isspoject.entity.Service;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -24,8 +24,8 @@ public class OfferDTO {
     private Boolean isVisible;
     private Boolean isAvailable;
     private Boolean isDeleted;
+    private String category;
     private LocalDateTime lastChanged;
-    private NewCategoryDTO category;
     private List<EventTypeDTO> eventTypes;
 
     private String type; // product or service
@@ -40,7 +40,8 @@ public class OfferDTO {
     private int latestCancelation;
     private boolean isReservationAutoApproved;
 
-    public OfferDTO() {}
+    public OfferDTO() {
+    }
 
     public OfferDTO(Offer offer) {
         if (offer != null) {
@@ -52,16 +53,16 @@ public class OfferDTO {
             this.sale = offer.getSale();
             this.photos = offer.getPhotos();
 
-//            this.isVisible = offer.getIsVisible();
-//            this.isAvailable = offer.getIsAvailable();
-//            this.isDeleted = offer.getIsDeleted();
-//            this.lastChanged = offer.getLastChanged();
-            this.category = new NewCategoryDTO(offer.getCategory());
+            this.isVisible = offer.getIsVisible();
+            this.isAvailable = offer.getIsAvailable();
+            this.isDeleted = offer.getIsDeleted();
+            this.eventTypes = offer.getEventTypes().stream().map(EventTypeDTO::new).toList();
+            this.category = offer.getCategory().getName();
             if (offer instanceof Product) {
                 this.type = "Product";
-            } else if (offer instanceof OfferService) {
+            } else if (offer instanceof Service) {
                 this.type = "Service";
-                OfferService offerService = (OfferService) offer;
+                Service offerService = (Service) offer;
                 this.specifics = offerService.getSpecifics();
                 this.minDuration = offerService.getMinDuration();
                 this.maxDuration = offerService.getMaxDuration();

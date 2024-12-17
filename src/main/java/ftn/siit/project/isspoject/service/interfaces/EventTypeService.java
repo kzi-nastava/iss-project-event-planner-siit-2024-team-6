@@ -10,4 +10,8 @@ public interface EventTypeService {
     List<EventType> findAll();
 
     EventType findById(Integer id);
+
+    EventType findByName(String name);
+
+    List<String> findAllNames();
 }

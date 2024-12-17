@@ -1,6 +1,7 @@
 package ftn.siit.project.isspoject.controller;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
+import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.user.UserDTO;
 import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
@@ -263,5 +264,16 @@ public class EventController {
 
         List<Event> filteredEvents = eventService.searchEvents(name, description, place, eventType, isPublic, startDate, endDate);
         return ResponseEntity.ok(filteredEvents);
+    }
+
+    @GetMapping("{name}/event-type")
+    public ResponseEntity<EventTypeDTO> getEventType(@PathVariable String name) {
+        EventType eventType = eventTypeService.findByName(name);
+        return ResponseEntity.ok(new EventTypeDTO(eventType));
+    }
+    @GetMapping("event-types")
+    public ResponseEntity<List<EventTypeDTO>> getAllEventTypes() {
+        List<EventType> eventTypes = eventTypeService.findAll();
+        return ResponseEntity.ok(eventTypes.stream().map(EventTypeDTO::new).toList());
     }
 }

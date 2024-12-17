@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/products/")
+
 public class ProductController {
 
     @Autowired
@@ -67,7 +68,7 @@ public class ProductController {
         productDTO.setPhotos(product.getPhotos());
         productDTO.setIsVisible(product.getIsVisible());
         productDTO.setIsAvailable(product.getIsAvailable());
-        productDTO.setCategory(new NewCategoryDTO(product.getCategory()));
+        productDTO.setCategory(product.getCategory().getName());
         return productDTO;
     }
 

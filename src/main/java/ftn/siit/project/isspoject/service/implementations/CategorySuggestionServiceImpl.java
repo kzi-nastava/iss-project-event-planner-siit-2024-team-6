@@ -28,7 +28,7 @@ public class CategorySuggestionServiceImpl implements CategorySuggestionService 
     }
 
     @Override
-    public CategorySuggestion create(CategorySuggestion categorySuggestion) {
+    public CategorySuggestion save(CategorySuggestion categorySuggestion) {
         return categorySuggestionRepository.save(categorySuggestion);
     }
 
