@@ -7,6 +7,7 @@ public interface CategoryService {
     Category findById(Integer id);
     Category findByName(String name);
     List<Category> findAll();
+    List<String> findAllNames();
     List<Category> findAllByNames(List<String> names);
     void createPendingCategory(String category);
 
