@@ -116,13 +116,15 @@ public class ProviderController {
     }
 
     @GetMapping("{providerId}/services-filter")
-    public ResponseEntity<PagedResponse<OfferDTO>> getFilteredServices(@PathVariable int providerId, @RequestParam(required = false) String name,
-                                                              @RequestParam(required = false) List<String> category,
-                                                              @RequestParam(required = false) List<String> eventType,
-                                                              @RequestParam(required = false) Double price,
-                                                              @RequestParam(required = false) Boolean isAvailable, Pageable pageable) {
+    public ResponseEntity<PagedResponse<OfferDTO>> getFilteredServices(@PathVariable int providerId,
+                                                                       @RequestParam(required = false) List<String> categories,
+                                                                       @RequestParam(required = false) List<String> eventTypes,
+                                                                       @RequestParam(required = false) Double price,
+                                                                       @RequestParam(required = false) Boolean isAvailable, Pageable pageable) {
+        System.out.println(" Recieved Categories: " + categories);
+        System.out.println("Event Types: " + eventTypes);
         Provider provider = providerService.findById(providerId);
-        Page<Service> filteredOfferServices = serviceService.getFilteredServices(provider, name, category, eventType, price, isAvailable, pageable);
+        Page<Service> filteredOfferServices = serviceService.getFilteredServices(provider, categories, eventTypes, price, isAvailable, pageable);
         List<OfferDTO> dtos = filteredOfferServices.stream()
                 .map(service -> {
                     try {
