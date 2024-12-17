@@ -12,4 +12,6 @@ public interface EventTypeService {
     EventType findById(Integer id);
 
     EventType findByName(String name);
+
+    List<String> findAllNames();
 }

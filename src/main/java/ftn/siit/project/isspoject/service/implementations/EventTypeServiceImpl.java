@@ -44,6 +44,11 @@ public class EventTypeServiceImpl implements EventTypeService {
                 .orElseThrow(() -> new NotFoundException("EventType not found with name: " + name));
     }
 
+    @Override
+    public List<String> findAllNames() {
+        return eventTypeRepository.findAllNames();
+    }
+
 //    @Override
 //    public Page<EventType> findAll(Pageable pageable) {
 //        return eventTypeRepository.findAll(pageable);
