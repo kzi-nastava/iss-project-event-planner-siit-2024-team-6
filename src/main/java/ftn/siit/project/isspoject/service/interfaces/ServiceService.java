@@ -15,7 +15,7 @@ public interface ServiceService {
     List<Service> findByProvider(Provider provider);
     Page<Service> findByProvider(Provider provider, Pageable pageable);
     List<Service> getFilteredServices(Provider p, String name, String category, String eventType, Double price, Boolean isAvailable);
-    Page<Service> getFilteredServices(Provider p, String name, List<String> category, List<String> eventType, Double price, Boolean isAvailable, Pageable page);
+    Page<Service> getFilteredServices(Provider p, List<String> category, List<String> eventType, Double price, Boolean isAvailable, Pageable page);
     Page<Service> searchByName(Provider p, String name, Pageable pageable);
     Service findById(Integer id);
     Service save(Service service);

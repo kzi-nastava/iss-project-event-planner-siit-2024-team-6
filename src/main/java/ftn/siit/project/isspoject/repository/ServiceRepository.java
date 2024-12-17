@@ -38,10 +38,10 @@ public interface ServiceRepository extends JpaRepository<Service, Integer> {
             "LEFT JOIN offer_event_types et ON et.offer_id = o.id " +
             "LEFT JOIN event_types e ON e.id = et.event_type_id " +
             "WHERE (:providerId IS NULL OR o.provider_id = :providerId) " +
-            "AND (:categories IS NULL OR c.name IN :categories) " +
-            "AND (:eventTypes IS NULL OR e.name IN :eventTypes) " +
+            "AND (:categories IS NULL OR c.name = ANY (CAST(:categories AS TEXT[]))) " +
+            "AND (:eventTypes IS NULL OR e.name = ANY (CAST(:eventTypes AS TEXT[]))) " +
             "AND (:isAvailable IS NULL OR o.is_available = :isAvailable) " +
-            "AND (:price IS NULL OR o.price <= :price) " +
+            "AND (:price IS NULL OR :price IS 0.0 OR o.price <= :price) " +
             "AND (o.is_deleted IS NULL OR o.is_deleted = FALSE) " +
             "AND o.offer_type = 'Service'",
             countQuery = "SELECT COUNT(DISTINCT o.id) FROM offers o " +
@@ -49,17 +49,17 @@ public interface ServiceRepository extends JpaRepository<Service, Integer> {
                     "LEFT JOIN offer_event_types et ON et.offer_id = o.id " +
                     "LEFT JOIN event_types e ON e.id = et.event_type_id " +
                     "WHERE (:providerId IS NULL OR o.provider_id = :providerId) " +
-                    "AND (:categories IS NULL OR c.name IN :categories) " +
-                    "AND (:eventTypes IS NULL OR e.name IN :eventTypes) " +
+                    "AND (:categories IS NULL OR c.name = ANY (CAST(:categories AS TEXT[]))) " +
+                    "AND (:eventTypes IS NULL OR e.name = ANY (CAST(:eventTypes AS TEXT[]))) " +
                     "AND (:isAvailable IS NULL OR o.is_available = :isAvailable) " +
-                    "AND (:price IS NULL OR o.price <= :price) " +
+                    "AND (:price IS NULL OR :price IS 0.0 OR o.price <= :price) " +
                     "AND (o.is_deleted IS NULL OR o.is_deleted = FALSE) " +
                     "AND o.offer_type = 'Service'",
             nativeQuery = true)
     Page<Service> findServicesByFilters(
             @Param("providerId") Integer providerId,
-            @Param("categories") List<String> categories,
-            @Param("eventTypes") List<String> eventTypes,
+            @Param("categories") String[] categories,
+            @Param("eventTypes") String[] eventTypes,
             @Param("isAvailable") Boolean isAvailable,
             @Param("price") Double price,
             Pageable pageable);

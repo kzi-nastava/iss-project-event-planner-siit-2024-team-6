@@ -23,7 +23,7 @@ public class ServiceServiceImpl implements ServiceService {
     @Override
     public List<Service> findByProvider(Provider provider) {
         List<Service> s = serviceRepository.findAllByProviderIdAndIsDeletedFalseOrIsDeletedIsNull(provider.getId());
-        if(s.isEmpty()){
+        if (s.isEmpty()) {
             throw new NotFoundException("Provider has no services");
         }
         return s;
@@ -37,25 +37,37 @@ public class ServiceServiceImpl implements ServiceService {
     @Override
     public List<Service> getFilteredServices(Provider p, String name, String category, String eventType, Double price, Boolean isAvailable) {
         List<Service> s = serviceRepository.findFilteredServices(p.getId(), name, category, eventType, price, isAvailable);
-        if(s.isEmpty()){
+        if (s.isEmpty()) {
             throw new NotFoundException("No service are found under given filters");
         }
         return s;
     }
 
     @Override
-    public Page<Service> getFilteredServices(Provider p, String name, List<String> category, List<String> eventType, Double price, Boolean isAvailable, Pageable page) {
-        Page<Service> s = serviceRepository.findServicesByFilters(p.getId(), category, eventType, isAvailable, price, page);
-        if(s.isEmpty()){
-            throw new NotFoundException("No service are found under given filters");
+    public Page<Service> getFilteredServices(Provider p, List<String> category, List<String> eventType, Double price, Boolean isAvailable, Pageable page) {
+        // Log the input parameters for debugging purposes
+        System.out.println("Provider ID: " + p.getId());
+        System.out.println("Categories: " + category);
+        System.out.println("Event Types: " + eventType);
+        System.out.println("Price: " + price);
+        System.out.println("Is Available: " + isAvailable);
+        System.out.println("Page Request: " + page);
+        // Call the repository method and handle potential exceptions
+        Page<Service> services = serviceRepository.findServicesByFilters(p.getId(), category != null ? category.toArray(new String[0]) : null, eventType != null ? eventType.toArray(new String[0]) : null, isAvailable, price, page);
+
+        // Check if the result is empty and throw a custom exception
+        if (services.isEmpty()) {
+            throw new NotFoundException("No services are found under the given filters");
         }
-        return s;
+
+        return services;
     }
+
 
     @Override
     public Page<Service> searchByName(Provider p, String name, Pageable pageable) {
         Page<Service> s = serviceRepository.searchByName(p.getId(), name, pageable);
-        if(s.isEmpty()){
+        if (s.isEmpty()) {
             throw new NotFoundException("No service are found under given filters");
         }
         return s;
@@ -64,7 +76,7 @@ public class ServiceServiceImpl implements ServiceService {
     @Override
     public Service findById(Integer id) {
         Service s = serviceRepository.findById(id).orElseThrow(() -> new NotFoundException("Service with id " + id + " not found"));
-        if(s.getIsDeleted()){
+        if (s.getIsDeleted()) {
             throw new NotFoundException("Service with id " + id + " not found");
         }
         return s;
@@ -79,7 +91,7 @@ public class ServiceServiceImpl implements ServiceService {
     public Service save(NewOfferDTO dto, Provider p, List<EventType> eventTypes, Category c) {
         Service existingService = new Service();
         existingService.setName(dto.getName());
-        if(c != null){
+        if (c != null) {
             existingService.setCategory(c);
         }
         existingService.setStatus(dto.getStatus());
@@ -105,7 +117,7 @@ public class ServiceServiceImpl implements ServiceService {
 
     @Override
     public Service update(Service service) {
-        if(service == null || service.getId() == null){
+        if (service == null || service.getId() == null) {
             throw new NotFoundException("Service with id " + service.getId() + " not found and cannot be updated");
         }
         Service existingService = this.findById(service.getId());
