@@ -41,6 +41,7 @@ public class UserController {
     private AuthenticationManager authenticationManager;
     @Autowired
     private TokenUtils tokenUtils;
+    public static BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @PostMapping()
     public ResponseEntity<UserDTO> registerUser(@RequestBody RegistrationRequestDTO registrationRequestDTO) {
         if (registrationRequestDTO.getEmail() == null || registrationRequestDTO.getRole() == null) {
@@ -48,7 +49,7 @@ public class UserController {
         }
 
         // Получаем шифровщик паролей
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 
         // Зашифровываем пароль
         registrationRequestDTO.setPassword(passwordEncoder.encode(registrationRequestDTO.getPassword()));
@@ -170,25 +171,39 @@ public class UserController {
         return ResponseEntity.ok(userDTO);
     }
   
-    @PutMapping("/{id}/password")
-    public ResponseEntity<String> changePassword(@PathVariable Integer id, @RequestBody PasswordChangeDTO passwordChangeDTO) {
-        User user = userService.findById(id);
+    @PutMapping("/profile/password-change")
+    public ResponseEntity<String> changePassword(@RequestBody PasswordChangeDTO passwordChangeDTO, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
         if (user == null) {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
         }
-        if (!user.getPassword().equals(passwordChangeDTO.getOldPassword())) {
+
+        // Проверка старого пароля
+        if (!passwordEncoder.matches(passwordChangeDTO.getOldPassword(), user.getPassword())) {
             return new ResponseEntity<>("Wrong password", HttpStatus.FORBIDDEN);
         }
-        if (!passwordChangeDTO.getNewPasswordFirst().equals(passwordChangeDTO.getOldPassword())) {
+
+        // Проверка на совпадение нового пароля со старым
+        if (passwordEncoder.matches(passwordChangeDTO.getNewPasswordFirst(), user.getPassword())) {
             return new ResponseEntity<>("New password matches the old one!", HttpStatus.FORBIDDEN);
         }
+
+        // Проверка подтверждения нового пароля
         if (!passwordChangeDTO.getNewPasswordFirst().equals(passwordChangeDTO.getNewPasswordSecond())) {
             return new ResponseEntity<>("Bad new-password confirmation", HttpStatus.FORBIDDEN);
         }
-        user.setPassword(passwordChangeDTO.getNewPasswordFirst());
+
+        // Установка нового пароля (хэширование перед сохранением)
+        user.setPassword(passwordEncoder.encode(passwordChangeDTO.getNewPasswordFirst()));
 
         userService.save(user);
-        return new ResponseEntity<>("Password changed successfully", HttpStatus.OK);
+        return ResponseEntity.ok("Password changed successfully");
     }
 
 
