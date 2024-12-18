@@ -29,7 +29,7 @@ public class TokenUtils {
     @Value("1800000")
     private int EXPIRES_IN;
 
-    @Value("Authorization")
+    @Value("X-Auth-Token")
     private String AUTH_HEADER;
 
     @Autowired

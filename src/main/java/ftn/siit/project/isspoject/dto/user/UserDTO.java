@@ -20,6 +20,7 @@ public class UserDTO {
     private String name;
     private String lastname;
     private String address;
+    private String userType;
     private String phoneNumber;
     private String photoUrl;
     private boolean isActive;
@@ -34,6 +35,7 @@ public class UserDTO {
     public UserDTO() {}
     public UserDTO(User user) {
         if (user != null) {
+            this.userType = user.getUserType();
             this.id = user.getId();
             this.email = user.getEmail();
             this.name = user.getName();

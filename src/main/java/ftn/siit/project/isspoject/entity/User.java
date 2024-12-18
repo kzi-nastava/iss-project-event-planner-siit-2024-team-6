@@ -37,7 +37,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Boolean isActive = true; // Значение по умолчанию для новых пользователей
 
-    private LocalDateTime suspendedSince;
+    private LocalDateTime suspendedSince = LocalDateTime.now();
 
     @Column(nullable = false)
     private String name;
