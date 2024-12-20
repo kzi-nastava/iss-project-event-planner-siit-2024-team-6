@@ -14,7 +14,7 @@ public class EventTypeDTO {
     private String name;
     private String description;
     private Boolean isDeleted;
-
+    private List<Category> categories;
     public EventTypeDTO(){}
     public EventTypeDTO(EventType eventType) {
         this.id = eventType.getId();

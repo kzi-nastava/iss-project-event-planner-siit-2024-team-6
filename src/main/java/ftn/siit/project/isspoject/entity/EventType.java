@@ -16,6 +16,14 @@ public class EventType {
     private String name;
     private String description;
     private Boolean isDeleted;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "eventtype_categories",
+            joinColumns = @JoinColumn(name = "eventtype_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private List<Category> categories;
     public EventType (){}
     public EventType(int i, String corporate, String professionalCorporateEvents, boolean b) {
         this.id = i;

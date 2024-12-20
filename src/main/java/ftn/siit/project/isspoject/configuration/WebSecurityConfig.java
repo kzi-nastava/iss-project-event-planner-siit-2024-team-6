@@ -101,9 +101,13 @@ public class WebSecurityConfig{
                     .requestMatchers(new AntPathRequestMatcher("/api/users/profile")).authenticated()
                     .requestMatchers(new AntPathRequestMatcher("/api/users")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/users/profile/password-change")).authenticated()
+                    .requestMatchers(new AntPathRequestMatcher("/api/admins/event-types")).hasRole("ADMIN")
+                    .requestMatchers(new AntPathRequestMatcher("/api/admins/event-types/**")).hasRole("ADMIN")
+                    .requestMatchers(new AntPathRequestMatcher("/api/admins/categories")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/admins/event-types/**/**")).hasRole("ADMIN")
 //                    .requestMatchers(new AntPathRequestMatcher("/api/users")).permitAll()
 //                    .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll()
-                    // Разрешаем доступ к маршруту /error для более удобных сообщений об ошибках.
+                    // Разрешаем доступ к маршруту /error для более удобных сообщений об ошибках.""admin@a.a"
                     .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
 //                    .requestMatchers(new AntPathRequestMatcher("/api/whoami")).hasRole("USER")
                     .anyRequest().authenticated();

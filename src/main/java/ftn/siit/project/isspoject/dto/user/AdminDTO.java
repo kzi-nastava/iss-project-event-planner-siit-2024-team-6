@@ -1,4 +1,9 @@
 package ftn.siit.project.isspoject.dto.user;
 
-public class AdminDTO {
+import ftn.siit.project.isspoject.entity.Admin;
+
+public class AdminDTO extends UserDTO{
+    public AdminDTO(Admin user) {
+        super(user);
+    }
 }
