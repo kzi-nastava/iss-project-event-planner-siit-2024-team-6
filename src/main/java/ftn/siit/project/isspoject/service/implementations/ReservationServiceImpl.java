@@ -10,6 +10,7 @@ import ftn.siit.project.isspoject.service.interfaces.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 @Service
 public class ReservationServiceImpl implements ReservationService {
@@ -67,5 +68,20 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setStartTime(reservationDTO.getStart());
         reservation.setEndTime(reservationDTO.getEnd());
         return reservationRepository.save(reservation);
+    }
+
+    public boolean isAvailable(Integer serviceId, LocalDateTime start, LocalDateTime end) {
+        List<Reservation> reservations = this.findByServiceId(serviceId);
+
+        // Checkss for overlaps
+        for (Reservation reservation : reservations) {
+            if (overlaps(start, end, reservation.getStartTime(), reservation.getEndTime())) {
+                return false;
+            }
+        }
+        return true;
+    }
+    private boolean overlaps(LocalDateTime start1, LocalDateTime end1, LocalDateTime start2, LocalDateTime end2) {
+        return start1.isBefore(end2) && end1.isAfter(start2);
     }
 }

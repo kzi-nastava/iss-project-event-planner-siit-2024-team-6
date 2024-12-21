@@ -5,6 +5,7 @@ import ftn.siit.project.isspoject.dto.offer.ReservationDTO;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.Reservation;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ReservationService {
@@ -14,4 +15,6 @@ public interface ReservationService {
     List<Reservation> findByServiceId(Integer serviceId);
     Reservation save(Reservation reservation);
     Reservation save(NewReservationDTO reservationDTO);
+
+    boolean isAvailable(Integer serviceId, LocalDateTime start, LocalDateTime end);
 }
