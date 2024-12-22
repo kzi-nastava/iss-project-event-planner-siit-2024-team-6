@@ -258,7 +258,6 @@ public class AdminController {
             throw new NotFoundException("CategorySuggestion with id " + id + " not found, can't be updated");
         }
         cs.setSuggestion(dto.getSuggestion());
-        cs.setStatus(Status.valueOf(dto.getStatus()));
         CategorySuggestion updated = categorySuggestionService.update(cs);
         return ResponseEntity.ok(new CategorySuggestionDTO(updated));
     }
