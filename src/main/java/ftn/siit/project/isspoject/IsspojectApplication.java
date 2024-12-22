@@ -12,19 +12,4 @@ public class IsspojectApplication {
     public static void main(String[] args) {
         SpringApplication.run(IsspojectApplication.class, args);
     }
-
-    // CORS configuration
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // Allow all paths
-                        .allowedOrigins("http://10.0.2.2:8080", "") // Frontend URL (e.g., Angular app)
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .allowCredentials(true); // Allow credentials like cookies
-            }
-        };
-    }
 }
