@@ -2,6 +2,8 @@ package ftn.siit.project.isspoject.service.external;
 import ftn.siit.project.isspoject.dto.EmailDetails;
 
 import java.io.File;
+
+import ftn.siit.project.isspoject.entity.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,15 @@ public class EmailServiceImpl implements EmailService {
         catch (Exception e) {
             return "Error while Sending Mail";
         }
+    }
+    public String sendMail(User recipient, String subject, String text){
+        EmailDetails details = new EmailDetails();
+        //details.setRecipient(recipient.getEmail());
+        //details.setRecipient("dusicapesich@gmail.com");
+        details.setSubject(subject);
+        details.setMsgBody(text);
+        String status = this.sendSimpleMail(details);
+        return status;
     }
 
     // Method 2
