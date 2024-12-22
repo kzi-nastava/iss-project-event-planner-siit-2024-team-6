@@ -7,8 +7,9 @@ import java.time.LocalDateTime;
 
 @Data
 public class NewReservationDTO {
-    private Service service;
-    private LocalDateTime start;
-    private LocalDateTime end;
+    private Integer serviceId;
+    private Integer eventId;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
 
 }

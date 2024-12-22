@@ -2,12 +2,8 @@ package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.offer.NewReservationDTO;
 import ftn.siit.project.isspoject.dto.offer.ReservationDTO;
-import ftn.siit.project.isspoject.entity.Provider;
-import ftn.siit.project.isspoject.entity.Reservation;
-import ftn.siit.project.isspoject.entity.Service;
-import ftn.siit.project.isspoject.service.interfaces.ReservationService;
-import ftn.siit.project.isspoject.service.interfaces.ServiceService;
-import ftn.siit.project.isspoject.service.interfaces.UserService;
+import ftn.siit.project.isspoject.entity.*;
+import ftn.siit.project.isspoject.service.interfaces.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,53 +22,41 @@ public class ReservationController {
     private UserService userService;
     @Autowired
     private ServiceService serviceService;
+    @Autowired
+    private EventService eventService;
+    @Autowired
+    private OrganizerService organizerService;
+
     @PostMapping()
     public ResponseEntity<ReservationDTO> addReservation(@RequestBody NewReservationDTO dto) {
-        Provider provider = (Provider) userService.findById(dto.getService().getProvider().getId());
-        System.out.println(provider.getOpeningTime());
-        System.out.println(provider.getClosingTime());
-        checkIfClosed(dto.getStart(), dto.getEnd(), provider);
-
-        Service service = serviceService.findById(dto.getService().getId());
-        checkReservationDuration(dto.getStart(), dto.getEnd(), service);
-        checkAvailability(dto.getService().getId(), dto.getStart(), dto.getEnd());
-
-        Reservation reservation = reservationService.save(dto);
-        sendConfirmations(reservation);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ReservationDTO(reservation));
-    }
-
-    private void checkIfClosed(LocalDateTime start, LocalDateTime end, Provider provider) {
-        boolean companyIsClosed = userService.overlapsWithClosedHours(start, end, provider.getOpeningTime(), provider.getClosingTime());
-        if (companyIsClosed) {
-            throw new IllegalArgumentException("Reservation time overlaps with provider's closed hours.");
+        Service service = serviceService.findById(dto.getServiceId());
+        if (service == null) {
+            throw new IllegalArgumentException("Service not found while creating reservation");
         }
+        Event event = eventService.findById(dto.getEventId());
+        if (event == null) {
+            throw new IllegalArgumentException("Event not found while creating reservation");
+        }
+        Provider provider = (Provider) userService.findById(service.getProvider().getId());
+        if (provider == null) {
+            throw new IllegalArgumentException("Provider of service not found while creating reservation");
+        }
+        Organizer organizer = organizerService.findByEventId(dto.getEventId());
+        if (organizer == null) {
+            throw new IllegalArgumentException("Organizer of event not found while creating reservation");
+        }
+        Reservation created = reservationService.addReservation(event,service,provider,organizer,dto,userService);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ReservationDTO(created));
     }
 
-    private void checkReservationDuration(LocalDateTime start, LocalDateTime end, Service service) {
-        long reservationDurationMinutes = Duration.between(start, end).toMinutes();
-        int minDuration = service.getMinDuration();
-        int maxDuration = service.getMaxDuration();
-
-        if (reservationDurationMinutes < minDuration || reservationDurationMinutes > maxDuration) {
-            throw new IllegalArgumentException("Reservation duration must be between "
-                    + minDuration + " and " + maxDuration + " minutes.");
-        }
-    }
-    private void checkAvailability(Integer serviceId, LocalDateTime start, LocalDateTime end) {
-        boolean isAvailable = reservationService.isAvailable(serviceId, start, end);
-        if (!isAvailable) {
-            throw new IllegalArgumentException("Service isn't available at given reservation time.");
-        }
-    }
 
 
     @PutMapping("{id}")
     public ResponseEntity<ReservationDTO> updateReservation(@PathVariable Integer id, @RequestBody NewReservationDTO dto) {
         Reservation existingReservation = reservationService.findById(id);
 
-        existingReservation.setStartTime(dto.getStart());
-        existingReservation.setEndTime(dto.getEnd());
+        existingReservation.setStartTime(dto.getStartTime());
+        existingReservation.setEndTime(dto.getEndTime());
         Reservation updated = reservationService.save(existingReservation);
 
         return ResponseEntity.ok(new ReservationDTO(updated));
@@ -102,7 +86,4 @@ public class ReservationController {
         return ResponseEntity.ok(new ReservationDTO(reservation));
     }
 
-    private void sendConfirmations(Reservation reservation) {
-
-    }
 }

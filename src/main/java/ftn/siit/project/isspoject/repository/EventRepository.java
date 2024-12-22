@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.repository;
 
+import ftn.siit.project.isspoject.dto.event.OrganizersEventDTO;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.entity.Organizer;
@@ -13,8 +14,8 @@ import java.util.List;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Integer>{
-    @Query("SELECT e FROM Event e WHERE e.id IN (SELECT ev.id FROM Organizer o JOIN o.myEvents ev WHERE o = :organizer)")
-    List<Event> findByOrganizer(Organizer organizer);
+    @Query(value = "SELECT id, name, place, date FROM events WHERE organizer_id = :organizerId", nativeQuery = true)
+    List<Object[]> findByOrganizerId(Integer organizerId);
 
     List<Event> findTop5ByOrderByDateAsc();
 
