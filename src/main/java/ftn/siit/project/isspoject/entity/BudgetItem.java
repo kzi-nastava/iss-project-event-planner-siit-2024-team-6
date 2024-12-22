@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,7 +16,8 @@ public class BudgetItem {
     @ManyToOne(optional = false)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "budget_id", nullable = false)
-    private Budget budget;
+//    @ManyToOne(optional = false)
+//    @JoinColumn(name = "budget_id", nullable = false)
+//    @JsonIgnore
+//    private Budget budget;
 }
