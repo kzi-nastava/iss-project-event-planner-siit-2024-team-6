@@ -69,7 +69,11 @@ public class OfferDTO {
                 this.preciseDuration = offerService.getPreciseDuration();
                 this.latestReservation = offerService.getLatestReservation();
                 this.latestCancelation = offerService.getLatestCancelation();
-                this.isReservationAutoApproved = offerService.getIsReservationAutoApproved();
+                if(offerService.getIsReservationAutoApproved() == null){
+                    this.isReservationAutoApproved = false;
+                }else{
+                    this.isReservationAutoApproved = offerService.getIsReservationAutoApproved();
+                }
             }
         }
     }
