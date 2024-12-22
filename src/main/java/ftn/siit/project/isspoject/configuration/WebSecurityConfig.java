@@ -98,9 +98,13 @@ public class WebSecurityConfig{
         http.exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(restAuthenticationEntryPoint));
         http.authorizeHttpRequests(request -> {
             request.requestMatchers(new AntPathRequestMatcher("/api/users/login")).permitAll()
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/users/profile")).authenticated()
                     .requestMatchers(new AntPathRequestMatcher("/api/users")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/events/event-types")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("api/events/**/event-type")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/users/profile/password-change")).authenticated()
+                    .requestMatchers(new AntPathRequestMatcher("/api/providers/**/my-services")).authenticated()
 //                    .requestMatchers(new AntPathRequestMatcher("/api/users")).permitAll()
 //                    .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll()
                     // Разрешаем доступ к маршруту /error для более удобных сообщений об ошибках.

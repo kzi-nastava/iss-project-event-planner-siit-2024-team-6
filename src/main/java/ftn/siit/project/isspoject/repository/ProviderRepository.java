@@ -11,4 +11,5 @@ import java.util.Optional;
 
 @Repository
 public interface ProviderRepository extends JpaRepository<Provider, Integer> {
+    Provider findByEmailAndIsActiveIsTrue(String email);
 }
