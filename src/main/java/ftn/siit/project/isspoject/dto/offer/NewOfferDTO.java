@@ -20,7 +20,7 @@ public class NewOfferDTO {
     private Boolean isAvailable;
     private Boolean isDeleted;
     private String category;
-    private NewCategorySuggestionDTO categorySuggestion;
+    private String categorySuggestion;
     private List<EventTypeDTO> eventTypes;
     private String type; // product or service
 
@@ -38,7 +38,6 @@ public class NewOfferDTO {
 
     public NewOfferDTO(Offer offer) {
         if (offer != null) {
-            this.status = offer.getStatus() != null ? Status.valueOf(offer.getStatus().toString()) : null;
             this.name = offer.getName();
             this.description = offer.getDescription();
             this.price = offer.getPrice();
