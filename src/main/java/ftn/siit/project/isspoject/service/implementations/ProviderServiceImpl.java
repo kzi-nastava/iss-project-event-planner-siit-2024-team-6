@@ -30,4 +30,13 @@ public class ProviderServiceImpl implements ProviderService {
         }
         return providerRepository.save(provider);
     }
+
+    @Override
+    public Provider findByEmail(String email) {
+        Provider p = providerRepository.findByEmailAndIsActiveIsTrue(email);
+        if (p == null) {
+            throw new IllegalArgumentException("Provider with email " + email + " not found");
+        }
+        return p;
+    }
 }
