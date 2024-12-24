@@ -5,4 +5,6 @@ import ftn.siit.project.isspoject.entity.Organizer;
 public interface OrganizerService {
 
     Organizer findById(Integer organizerId);
+
+    void save(Organizer organizer);
 }

@@ -3,22 +3,25 @@ package ftn.siit.project.isspoject.controller;
 import ftn.siit.project.isspoject.dto.activity.NewActivityDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
-import ftn.siit.project.isspoject.entity.Activity;
-import ftn.siit.project.isspoject.entity.Event;
-import ftn.siit.project.isspoject.entity.Organizer;
+import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.service.interfaces.EventService;
+import ftn.siit.project.isspoject.service.interfaces.EventTypeService;
 import ftn.siit.project.isspoject.service.interfaces.OrganizerService;
 import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
+import ftn.siit.project.isspoject.service.interfaces.UserService;
+import ftn.siit.project.isspoject.util.TokenUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "/api/organizers/")
+@RequestMapping(value = "/api/organizers")
 public class OrganizerController {
     @Autowired
     private EventService eventService;
@@ -27,14 +30,33 @@ public class OrganizerController {
     private OrganizerService organizerService;
     @Autowired
     private PDFGeneratorService pdfGeneratorService;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private TokenUtils tokenUtils;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private EventTypeService eventTypeService;
 
-    @PostMapping("events")
-    public ResponseEntity<EventDTO> createEvent(@RequestParam Integer organizerId, @RequestBody NewEventDTO eventDTO) {
-        // Проверка наличия организатора
-        Organizer organizer = organizerService.findById(organizerId);
-        if (organizer == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Организатор не найден
+    @PostMapping("/events")
+    public ResponseEntity<EventDTO> createEvent(@RequestBody NewEventDTO eventDTO, HttpServletRequest request) {
+
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer organizer = (Organizer) userService.findByEmail(email);
+
+        if (organizer == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+//        Organizer organizer = organizerService.findById(organizerId);
+//        if (organizer == null) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Организатор не найден
+//        }
 
         // Создание нового события
         Event event = new Event();
@@ -44,15 +66,19 @@ public class OrganizerController {
         event.setIsPublic(eventDTO.getIsPublic());
         event.setPlace(eventDTO.getPlace());
         event.setDate(eventDTO.getDate());
-        //event.setEventType(eventDTO.getEventType());
+        event.setEventType(eventTypeService.findByName(eventDTO.getEventType().getName()));
         event.setParticipants(0);
+        event.setPhotos(eventDTO.getPhotos());
 
+        List<Event> myEvents = organizer.getMyEvents();
+        myEvents.add(event);
+        organizer.setMyEvents(myEvents);
 //        // Устанавливаем организатора
 //        event.setOrganizer(organizer);
 
         // Сохраняем событие
         Event savedEvent = eventService.save(event);
-
+        userService.save(organizer);
         // Преобразование в DTO
         EventDTO responseDTO = toEventDTO(savedEvent);
 

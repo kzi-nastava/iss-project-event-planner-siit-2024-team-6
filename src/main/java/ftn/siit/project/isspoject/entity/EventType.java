@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.entity;
 
+import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import jakarta.persistence.*;
 import ftn.siit.project.isspoject.dto.event.NewEventTypeDTO;
 import lombok.Data;
@@ -30,5 +31,9 @@ public class EventType {
         this.name = corporate;
         this.description = professionalCorporateEvents;
         this.isDeleted = b;
+    }
+
+    public EventType(EventTypeDTO eventType) {
+
     }
 }
