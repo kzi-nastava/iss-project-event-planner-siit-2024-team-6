@@ -6,11 +6,9 @@ import lombok.Data;
 @Data
 public class NewCategorySuggestionDTO {
     String suggestion;
-    String status;
 
     NewCategorySuggestionDTO(){}
     NewCategorySuggestionDTO(CategorySuggestion categorySuggestion) {
         this.suggestion = categorySuggestion.getSuggestion();
-        this.status = categorySuggestion.getStatus().toString();
     }
 }

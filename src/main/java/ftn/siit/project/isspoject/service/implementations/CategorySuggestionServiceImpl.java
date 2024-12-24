@@ -33,14 +33,6 @@ public class CategorySuggestionServiceImpl implements CategorySuggestionService 
     }
 
     @Override
-    public CategorySuggestion save(NewCategorySuggestionDTO dto) {
-        CategorySuggestion categorySuggestion = new CategorySuggestion();
-        categorySuggestion.setSuggestion(dto.getSuggestion());
-        categorySuggestion.setStatus(Status.valueOf(dto.getStatus()));
-        return categorySuggestionRepository.save(categorySuggestion);
-    }
-
-    @Override
     public CategorySuggestion update(CategorySuggestion categorySuggestion) {
         CategorySuggestion existingCategorySuggestion = findById(categorySuggestion.getId());
         if (existingCategorySuggestion == null) {

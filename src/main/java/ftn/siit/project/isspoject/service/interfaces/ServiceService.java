@@ -1,10 +1,7 @@
 package ftn.siit.project.isspoject.service.interfaces;
 
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
-import ftn.siit.project.isspoject.entity.Category;
-import ftn.siit.project.isspoject.entity.EventType;
-import ftn.siit.project.isspoject.entity.Provider;
-import ftn.siit.project.isspoject.entity.Service;
+import ftn.siit.project.isspoject.entity.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable; // Make sure this is the correct import
@@ -19,7 +16,7 @@ public interface ServiceService {
     Page<Service> searchByName(Provider p, String name, Pageable pageable);
     Service findById(Integer id);
     Service save(Service service);
-    Service save(NewOfferDTO offerDTO, Provider p, List<EventType> eventTypes, Category c);
+    Service save(NewOfferDTO offerDTO, Provider p, List<EventType> eventTypes, Category c, Status s);
     Service update(Service service);
     Service update(int id, NewOfferDTO dto, List<EventType> eventTypes);
     void delete(Service service);

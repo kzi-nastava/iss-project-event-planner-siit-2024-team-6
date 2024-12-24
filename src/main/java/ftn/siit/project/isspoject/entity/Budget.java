@@ -1,5 +1,7 @@
 package ftn.siit.project.isspoject.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -16,7 +18,8 @@ public class Budget {
     private Integer id;
     private double total;
     private double available;
-    @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "budget_id")
     private List<BudgetItem> budgetItems = new ArrayList<>();
 
     public Budget() {

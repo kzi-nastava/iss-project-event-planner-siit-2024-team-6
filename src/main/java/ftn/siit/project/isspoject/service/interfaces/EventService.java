@@ -1,6 +1,7 @@
 package ftn.siit.project.isspoject.service.interfaces;
 
 import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
+import ftn.siit.project.isspoject.dto.event.OrganizersEventDTO;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.entity.Organizer;
@@ -15,7 +16,7 @@ public interface EventService {
     List<Event> findAll();
     Page<Event> findAll(Pageable page);
     Event findById(Integer eventId);
-    List<Event> findByOrganizer(Organizer organizer);
+    List<OrganizersEventDTO> findByOrganizerId(Integer organizerId);
 
     List<Event> findTopFive();
 

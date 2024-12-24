@@ -271,9 +271,13 @@ public class EventController {
         EventType eventType = eventTypeService.findByName(name);
         return ResponseEntity.ok(new EventTypeDTO(eventType));
     }
+
     @GetMapping("event-types")
-    public ResponseEntity<List<EventTypeDTO>> getAllEventTypes() {
-        List<EventType> eventTypes = eventTypeService.findAll();
-        return ResponseEntity.ok(eventTypes.stream().map(EventTypeDTO::new).toList());
+    public ResponseEntity<List<String>> getAllEventTypes() {
+        List<String> eventTypes = eventTypeService.findAllNames();
+        if (eventTypes.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(eventTypes);
     }
 }

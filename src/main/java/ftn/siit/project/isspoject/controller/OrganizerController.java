@@ -4,6 +4,10 @@ import ftn.siit.project.isspoject.dto.activity.NewActivityDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
 import ftn.siit.project.isspoject.entity.*;
+import ftn.siit.project.isspoject.dto.event.OrganizersEventDTO;
+import ftn.siit.project.isspoject.entity.Activity;
+import ftn.siit.project.isspoject.entity.Event;
+import ftn.siit.project.isspoject.entity.Organizer;
 import ftn.siit.project.isspoject.service.interfaces.EventService;
 import ftn.siit.project.isspoject.service.interfaces.EventTypeService;
 import ftn.siit.project.isspoject.service.interfaces.OrganizerService;
@@ -86,27 +90,15 @@ public class OrganizerController {
     }
 
     @GetMapping("events/{organizerId}")
-    public ResponseEntity<List<EventDTO>> getOrganizerEvents(@PathVariable Integer organizerId) {
-        Organizer organizer = organizerService.findById(organizerId);
-        if (organizer == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<List<OrganizersEventDTO>> getOrganizerEvents(@PathVariable Integer organizerId) {
+
+        List<OrganizersEventDTO> events = eventService.findByOrganizerId(organizerId);
+
+        for (OrganizersEventDTO event : events) {
+            System.out.println(event);
         }
 
-        List<Event> events = eventService.findByOrganizer(organizer);
-        List<EventDTO> eventDTOs = events.stream().map(event -> {
-            EventDTO dto = new EventDTO();
-            dto.setId(event.getId());
-            dto.setName(event.getName());
-            dto.setDescription(event.getDescription());
-            dto.setMaxParticipants(event.getMaxParticipants());
-            dto.setIsPublic(event.getIsPublic());
-            dto.setPlace(event.getPlace());
-            dto.setDate(event.getDate());
-            //dto.setEventType(event.getEventType());
-            return dto;
-        }).collect(Collectors.toList());
-
-        return new ResponseEntity<>(eventDTOs, HttpStatus.OK);
+        return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
     @PutMapping("events/{organizerId}/{eventId}")

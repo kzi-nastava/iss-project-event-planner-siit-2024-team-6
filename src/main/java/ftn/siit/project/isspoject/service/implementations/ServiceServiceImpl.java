@@ -1,10 +1,7 @@
 package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
-import ftn.siit.project.isspoject.entity.Category;
-import ftn.siit.project.isspoject.entity.EventType;
-import ftn.siit.project.isspoject.entity.Provider;
-import ftn.siit.project.isspoject.entity.Service;
+import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.ServiceRepository;
 import ftn.siit.project.isspoject.service.interfaces.ServiceService;
@@ -88,13 +85,13 @@ public class ServiceServiceImpl implements ServiceService {
     }
 
     @Override
-    public Service save(NewOfferDTO dto, Provider p, List<EventType> eventTypes, Category c) {
+    public Service save(NewOfferDTO dto, Provider p, List<EventType> eventTypes, Category c, Status s) {
         Service existingService = new Service();
         existingService.setName(dto.getName());
         if (c != null) {
             existingService.setCategory(c);
         }
-        existingService.setStatus(dto.getStatus());
+        existingService.setStatus(s);
         existingService.setDescription(dto.getDescription());
         existingService.setPrice(dto.getPrice());
         existingService.setIsAvailable(dto.getIsAvailable());
@@ -147,7 +144,6 @@ public class ServiceServiceImpl implements ServiceService {
     public Service update(int id, NewOfferDTO dto, List<EventType> eventTypes) {
         Service existingService = this.findById(id);
         existingService.setName(dto.getName());
-        existingService.setStatus(dto.getStatus());
         existingService.setDescription(dto.getDescription());
         existingService.setPrice(dto.getPrice());
         existingService.setIsAvailable(dto.getIsAvailable());
