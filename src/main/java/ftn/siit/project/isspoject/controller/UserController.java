@@ -99,7 +99,9 @@ public class UserController {
         } else if (userType.equals("Organizer")) {
             userDTO = new OrganizerDTO((Organizer) user);
         } else if (userType.equals("Admin")) {
-            userDTO = new OrganizerDTO((Organizer) user); // temporary
+            userDTO = new AdminDTO((Admin) user);
+        } else if (userType.equals("User")) {
+            userDTO = new UserDTO(user);
         }
 
 //        UserDTO dto = null;

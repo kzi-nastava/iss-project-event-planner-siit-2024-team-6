@@ -13,13 +13,17 @@ import ftn.siit.project.isspoject.service.interfaces.*;
 import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
 import ftn.siit.project.isspoject.dto.category.CategorySuggestionDTO;
 import ftn.siit.project.isspoject.service.interfaces.OfferService;
+import ftn.siit.project.isspoject.util.TokenUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,12 +47,26 @@ public class AdminController {
     private ReportService reportService;
     @Autowired
     private CategorySuggestionService categorySuggestionService;
-
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private TokenUtils tokenUtils;
     @PostMapping("event-types")
-    public ResponseEntity<EventTypeDTO> addEventType(@RequestBody NewEventTypeDTO eventTypeDTO) {
-        // Проверка валидности входных данных
-        if (eventTypeDTO == null || eventTypeDTO.getName() == null || eventTypeDTO.getDescription() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Некорректные данные
+    public ResponseEntity<EventTypeDTO> addEventType(@RequestBody NewEventTypeDTO eventTypeDTO, HttpServletRequest request) {
+
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        if (!user.getUserType().equals("Admin") || eventTypeDTO == null || eventTypeDTO.getName() == null || eventTypeDTO.getDescription() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
         // Создание нового типа события
@@ -56,7 +74,13 @@ public class AdminController {
         eventType.setName(eventTypeDTO.getName());
         eventType.setDescription(eventTypeDTO.getDescription());
         eventType.setIsDeleted(false);
+        List<Category> categories = new ArrayList<>();
+        for(Category c: eventTypeDTO.getCategories()){
+            categories.add(categoryService.findById(c.getId()));
+        }
+        eventType.setCategories(categories);
 
+//        eventType.setCategories(categoryService.findById(eventTypeDTO.getCategories()));
         // Сохранение типа события
         EventType savedEventType = eventTypeService.save(eventType);
 
@@ -82,9 +106,11 @@ public class AdminController {
         }
         List<EventTypeDTO> eventTypeDTOs = eventTypes.stream().map(eventType -> {
             EventTypeDTO dto = new EventTypeDTO();
+            dto.setId(eventType.getId());
             dto.setName(eventType.getName());
             dto.setDescription(eventType.getDescription());
             dto.setIsDeleted(eventType.getIsDeleted());
+            dto.setCategories(eventType.getCategories());
             return dto;
         }).collect(Collectors.toList());
 
@@ -102,6 +128,7 @@ public class AdminController {
 
         // Обновление полей типа события
         eventType.setDescription(eventTypeDTO.getDescription());
+        eventType.setCategories(eventTypeDTO.getCategories());
         EventType updatedEventType = eventTypeService.save(eventType);
 
         // Преобразование в DTO
@@ -127,7 +154,22 @@ public class AdminController {
 
         return ResponseEntity.ok(responseDTO); // Возвращаем активированный тип события
     }
+    @PutMapping("event-types/{id}/change-status")
+    public ResponseEntity<EventTypeDTO> changeStatus(@PathVariable Integer id) {
+        EventType eventType = eventTypeService.findById(id);
+        if (eventType == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Тип события не найден
+        }
 
+        // Активация типа события
+        eventType.setIsDeleted(!eventType.getIsDeleted());
+        EventType activatedEventType = eventTypeService.save(eventType);
+
+        // Преобразование в DTO
+        EventTypeDTO responseDTO = toEventTypeDTO(activatedEventType);
+
+        return ResponseEntity.ok(responseDTO); // Возвращаем активированный тип события
+    }
 //    @GetMapping
 //    public ResponseEntity<PagedResponse<EventTypeDTO>> getEventTypesPage(Pageable pageable) {
 //        Page<EventType> eventTypePage = eventTypeService.findAll(pageable);

@@ -124,7 +124,7 @@ public class EventController {
         eventDTO.setIsPublic(event.getIsPublic());
         eventDTO.setPlace(event.getPlace());
         eventDTO.setDate(event.getDate());
-        eventDTO.setEventTypeId(event.getEventType().getId());
+        eventDTO.setEventType(new EventTypeDTO(event.getEventType()));
         eventDTO.setParticipants(event.getParticipants());
         return eventDTO;
     }
@@ -217,7 +217,7 @@ public class EventController {
     @PostMapping
     public ResponseEntity<EventDTO> addEvent(@RequestBody NewEventDTO dto) {
         Event event = new Event();
-        EventType type = eventTypeService.findById(dto.getEventTypeId());
+        EventType type = eventTypeService.findById(dto.getEventType().getId());
         event.setEventType(type);
         Event savedEvent = eventService.save(event);
         EventDTO responseDto = new EventDTO(savedEvent);
