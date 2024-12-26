@@ -21,4 +21,9 @@ public class OrganizerServiceImpl implements OrganizerService {
         return organizerRepository.findById(organizerId)
                 .orElseThrow(() -> new IllegalArgumentException("Organizer with ID " + organizerId + " not found"));
     }
+
+    @Override
+    public Organizer findOrganizerByEventId(Integer eventId) {
+        return organizerRepository.findOrganizerByEventId(eventId);
+    }
 }

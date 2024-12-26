@@ -85,14 +85,23 @@ public class OrganizerController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO); // Возвращаем созданное событие
     }
 
-    @GetMapping("events/{organizerId}")
-    public ResponseEntity<List<EventDTO>> getOrganizerEvents(@PathVariable Integer organizerId) {
-        Organizer organizer = organizerService.findById(organizerId);
-        if (organizer == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    @GetMapping("events")
+    public ResponseEntity<List<EventDTO>> getOrganizerEvents(HttpServletRequest request) {
+//        Organizer organizer = organizerService.findById(organizerId);
+//        if (organizer == null) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer user = (Organizer) userService.findByEmail(email);
 
-        List<Event> events = eventService.findByOrganizer(organizer);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        List<Event> events = eventService.findByOrganizer(user);
         List<EventDTO> eventDTOs = events.stream().map(event -> {
             EventDTO dto = new EventDTO();
             dto.setId(event.getId());
