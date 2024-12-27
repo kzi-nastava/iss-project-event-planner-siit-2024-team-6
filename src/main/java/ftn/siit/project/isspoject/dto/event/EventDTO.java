@@ -19,7 +19,7 @@ public class EventDTO {
     private LocalDateTime date;
     private EventTypeDTO eventType;
     private List<String> photos;
-
+    private Boolean isDeleted;
 
     public EventDTO() {}
     public EventDTO(Event event) {
@@ -35,6 +35,8 @@ public class EventDTO {
         this.place = event.getPlace();
         this.date = event.getDate();
         this.photos = event.getPhotos();
+        this.eventType = new EventTypeDTO(event.getEventType());
+        this.isDeleted = event.getIsDeleted();
 //        this.eventType = event.getEventType();
     }
 }

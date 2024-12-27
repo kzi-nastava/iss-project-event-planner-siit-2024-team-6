@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -53,6 +54,12 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<Event> findByOrganizer(Organizer organizer) {
         List<Event> events = eventRepository.findByOrganizer(organizer);
+//        List<Event> onlyActiveEvents = new ArrayList<>();
+//        for(Event e: events){
+//            if(!e.getIsDeleted()){
+//                onlyActiveEvents.add()
+//            }
+//        }
         if (events.isEmpty()) {
             throw new NotFoundException("No events found for organizer: " + organizer.getName());
         }
@@ -81,7 +88,8 @@ public class EventServiceImpl implements EventService {
         if (event == null || !eventRepository.existsById(event.getId())) {
             throw new NotFoundException("Event not found or already deleted with ID: " + (event != null ? event.getId() : "null"));
         }
-        eventRepository.delete(event);
+        event.setIsDeleted(!event.getIsDeleted());
+        eventRepository.save(event);
     }
 
     @Override

@@ -107,6 +107,7 @@ public class WebSecurityConfig{
                     .requestMatchers(new AntPathRequestMatcher("/api/admins/event-types/**/**")).hasRole("ADMIN")
                     .requestMatchers(new AntPathRequestMatcher("/api/organizers/**")).hasRole("ORGANIZER")
                     .requestMatchers(new AntPathRequestMatcher("/api/organizers/events")).hasRole("ORGANIZER")
+                    .requestMatchers(new AntPathRequestMatcher("/api/organizers/events/**")).hasRole("ORGANIZER")
                     .requestMatchers(new AntPathRequestMatcher("/api/events/**")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/events/**/getOrganizer")).permitAll()
 //                    .requestMatchers(new AntPathRequestMatcher("/api/users")).permitAll()
