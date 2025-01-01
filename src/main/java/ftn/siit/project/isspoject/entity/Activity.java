@@ -1,7 +1,7 @@
 package ftn.siit.project.isspoject.entity;
 
+import ftn.siit.project.isspoject.dto.activity.NewActivityDTO;
 import jakarta.persistence.*;
-import jdk.jfr.Enabled;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -18,4 +18,16 @@ public class Activity {
     private String location;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+
+    public Activity(NewActivityDTO activityDTO) {
+        this.name = activityDTO.getName();
+        this.description = activityDTO.getDescription();
+        this.location = activityDTO.getLocation();
+        this.startTime = activityDTO.getStartTime();
+        this.endTime = activityDTO.getEndTime();
+    }
+
+    public Activity() {
+
+    }
 }

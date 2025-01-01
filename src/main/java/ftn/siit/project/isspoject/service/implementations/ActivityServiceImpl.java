@@ -1,5 +1,7 @@
 package ftn.siit.project.isspoject.service.implementations;
 
+import ftn.siit.project.isspoject.dto.activity.ActivityDTO;
+import ftn.siit.project.isspoject.dto.activity.NewActivityDTO;
 import ftn.siit.project.isspoject.entity.Activity;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.ActivityRepository;
@@ -43,5 +45,16 @@ public class ActivityServiceImpl implements ActivityService {
             throw new NotFoundException("Activity not found or already deleted with ID: " + activity.getId());
         }
         activityRepository.delete(activity);
+    }
+
+    @Override
+    public Activity update(Activity activity, NewActivityDTO activityDTO) {
+        activity.setDescription(activityDTO.getDescription());
+        activity.setName(activityDTO.getName());
+        activity.setLocation(activityDTO.getLocation());
+        activity.setStartTime(activityDTO.getStartTime());
+        activity.setEndTime(activityDTO.getEndTime());
+
+        return activityRepository.save(activity);
     }
 }
