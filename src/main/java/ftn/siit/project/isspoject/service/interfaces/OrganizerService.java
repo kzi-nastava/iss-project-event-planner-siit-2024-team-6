@@ -7,6 +7,5 @@ public interface OrganizerService {
 
     Organizer findById(Integer organizerId);
     Organizer findOrganizerByEventId(Integer eventId);
-    void save(Organizer organizer);
     Organizer findByEventId(Integer eventId);
 }

@@ -13,6 +13,4 @@ public interface OrganizerRepository extends JpaRepository<Organizer, Integer> {
     @Query("SELECT o FROM Organizer o JOIN o.myEvents e WHERE e.id = :eventId")
     Organizer findOrganizerByEventId(@Param("eventId") Integer eventId);
 
-    Organizer findByEventId(Integer eventId);
-
 }

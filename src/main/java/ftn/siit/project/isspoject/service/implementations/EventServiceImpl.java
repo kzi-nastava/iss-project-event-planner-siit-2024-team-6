@@ -1,11 +1,9 @@
 package ftn.siit.project.isspoject.service.implementations;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 import ftn.siit.project.isspoject.dto.EmailDetails;
 import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
-import ftn.siit.project.isspoject.dto.event.OrganizersEventDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.EventRepository;
@@ -20,9 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class EventServiceImpl implements EventService {
@@ -64,25 +60,8 @@ public class EventServiceImpl implements EventService {
 //                onlyActiveEvents.add()
 //            }
 //        }
-// =======
-//     public List<OrganizersEventDTO> findByOrganizerId(Integer organizerId) {
-//         List<Object[]> results = eventRepository.findByOrganizerId(organizerId);
-//         for (Object[] row : results) {
-//             System.out.println(Arrays.toString(row));
-//         }
-//         List<OrganizersEventDTO> events = results.stream()
-//                 .map(row -> new OrganizersEventDTO(
-//                         (Integer) row[0],  // id
-//                         (String) row[1],   // name
-//                         (String) row[2],   // place
-//                         ((java.sql.Timestamp) row[3]).toString()   // date
-//                 ))
-//                 .collect(Collectors.toList());
-
-//         // Debugging or Logging (use a loop if you need more control)
-//         events.forEach(event -> System.out.println(event.toString()));
         if (events.isEmpty()) {
-            throw new NotFoundException("No events found for organizer with id : " + organizerId);
+            throw new NotFoundException("No events found for organizer: " + organizer.getName());
         }
         return events;
     }

@@ -6,13 +6,6 @@ import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.service.interfaces.*;
-import ftn.siit.project.isspoject.dto.event.OrganizersEventDTO;
-import ftn.siit.project.isspoject.entity.Activity;
-import ftn.siit.project.isspoject.entity.Event;
-import ftn.siit.project.isspoject.entity.Organizer;
-import ftn.siit.project.isspoject.service.interfaces.EventService;
-import ftn.siit.project.isspoject.service.interfaces.EventTypeService;
-import ftn.siit.project.isspoject.service.interfaces.OrganizerService;
 import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
 import ftn.siit.project.isspoject.util.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -93,7 +86,6 @@ public class OrganizerController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO); // Возвращаем созданное событие
     }
 
-
     @GetMapping("events")
     public ResponseEntity<List<EventDTO>> getOrganizerEvents(HttpServletRequest request) {
 //        Organizer organizer = organizerService.findById(organizerId);
@@ -114,18 +106,9 @@ public class OrganizerController {
         List<EventDTO> eventDTOs = new ArrayList<>();
         for(Event e: events){
             eventDTOs.add(new EventDTO(e));
-
-    @GetMapping("events/{organizerId}")
-    public ResponseEntity<List<OrganizersEventDTO>> getOrganizerEvents(@PathVariable Integer organizerId) {
-
-        List<OrganizersEventDTO> events = eventService.findByOrganizerId(organizerId);
-
-        for (OrganizersEventDTO event : events) {
-            System.out.println(event);
-          
         }
 
-        return new ResponseEntity<>(events, HttpStatus.OK);
+        return new ResponseEntity<>(eventDTOs, HttpStatus.OK);
     }
 
     @PutMapping("events/{eventId}")
@@ -210,8 +193,8 @@ public class OrganizerController {
     }
     @PostMapping("events/{eventId}/activity")
     public ResponseEntity<ActivityDTO> addActivity(@PathVariable Integer eventId,
-                                                @RequestBody NewActivityDTO activityDTO,
-                                                HttpServletRequest request) {
+                                                   @RequestBody NewActivityDTO activityDTO,
+                                                   HttpServletRequest request) {
 
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null) {
@@ -249,9 +232,9 @@ public class OrganizerController {
     }
     @PutMapping("events/{eventId}/activity/{activityId}")
     public ResponseEntity<ActivityDTO> updateActivity(@PathVariable Integer eventId,
-                                                   @PathVariable Integer activityId,
-                                                   @RequestBody NewActivityDTO activityDTO,
-                                                   HttpServletRequest request) {
+                                                      @PathVariable Integer activityId,
+                                                      @RequestBody NewActivityDTO activityDTO,
+                                                      HttpServletRequest request) {
 
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null) {
