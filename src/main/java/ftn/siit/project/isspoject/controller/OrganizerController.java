@@ -1,9 +1,11 @@
 package ftn.siit.project.isspoject.controller;
 
+import ftn.siit.project.isspoject.dto.activity.ActivityDTO;
 import ftn.siit.project.isspoject.dto.activity.NewActivityDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
 import ftn.siit.project.isspoject.entity.*;
+import ftn.siit.project.isspoject.service.interfaces.*;
 import ftn.siit.project.isspoject.dto.event.OrganizersEventDTO;
 import ftn.siit.project.isspoject.entity.Activity;
 import ftn.siit.project.isspoject.entity.Event;
@@ -12,7 +14,6 @@ import ftn.siit.project.isspoject.service.interfaces.EventService;
 import ftn.siit.project.isspoject.service.interfaces.EventTypeService;
 import ftn.siit.project.isspoject.service.interfaces.OrganizerService;
 import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
-import ftn.siit.project.isspoject.service.interfaces.UserService;
 import ftn.siit.project.isspoject.util.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,6 +44,8 @@ public class OrganizerController {
     private UserService userService;
     @Autowired
     private EventTypeService eventTypeService;
+    @Autowired
+    private ActivityService activityService;
 
     @PostMapping("/events")
     public ResponseEntity<EventDTO> createEvent(@RequestBody NewEventDTO eventDTO, HttpServletRequest request) {
@@ -89,6 +93,28 @@ public class OrganizerController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO); // Возвращаем созданное событие
     }
 
+
+    @GetMapping("events")
+    public ResponseEntity<List<EventDTO>> getOrganizerEvents(HttpServletRequest request) {
+//        Organizer organizer = organizerService.findById(organizerId);
+//        if (organizer == null) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer user = (Organizer) userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        List<Event> events = eventService.findByOrganizer(user);
+        List<EventDTO> eventDTOs = new ArrayList<>();
+        for(Event e: events){
+            eventDTOs.add(new EventDTO(e));
+
     @GetMapping("events/{organizerId}")
     public ResponseEntity<List<OrganizersEventDTO>> getOrganizerEvents(@PathVariable Integer organizerId) {
 
@@ -96,25 +122,31 @@ public class OrganizerController {
 
         for (OrganizersEventDTO event : events) {
             System.out.println(event);
+          
         }
 
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
-    @PutMapping("events/{organizerId}/{eventId}")
+    @PutMapping("events/{eventId}")
     public ResponseEntity<EventDTO> updateEvent(
-            @PathVariable Integer organizerId,
             @PathVariable Integer eventId,
-            @RequestBody EventDTO eventDTO) {
+            @RequestBody EventDTO eventDTO,
+            HttpServletRequest request) {
 
-        // Проверка наличия организатора
-        Organizer organizer = organizerService.findById(organizerId);
-        if (organizer == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Организатор не найден
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer user = (Organizer) userService.findByEmail(email);
+
 
         // Проверка наличия события и его принадлежности организатору
         Event event = eventService.findById(eventId);
+        if(! user.getMyEvents().contains(event)){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
 //        if (event == null || !event.getOrganizer().equals(organizer)) {
 //            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Событие не найдено или не принадлежит организатору
 //        }
@@ -123,14 +155,13 @@ public class OrganizerController {
         event.setName(eventDTO.getName());
         event.setDescription(eventDTO.getDescription());
         event.setMaxParticipants(eventDTO.getMaxParticipants());
-        event.setIsPublic(eventDTO.getIsPublic());
         event.setPlace(eventDTO.getPlace());
         event.setDate(eventDTO.getDate());
-
+        event.setIsDeleted(eventDTO.getIsDeleted());
         Event updatedEvent = eventService.save(event);
 
         // Преобразование в DTO
-        EventDTO updatedEventDTO = toEventDTO(updatedEvent);
+        EventDTO updatedEventDTO = new EventDTO(updatedEvent);
 
         return ResponseEntity.ok(updatedEventDTO); // Возвращаем обновлённое событие
     }
@@ -146,16 +177,25 @@ public class OrganizerController {
         return eventDTO;
     }
 
-    @DeleteMapping("events/{organizerId}/{eventId}")
-    public ResponseEntity<EventDTO> deleteEvent(@PathVariable Integer organizerId, @PathVariable Integer eventId) {
+    @DeleteMapping("events/{eventId}")
+    public ResponseEntity<EventDTO> deleteEvent(@PathVariable Integer eventId,
+                                                HttpServletRequest request) {
 
-        Organizer organizer = organizerService.findById(organizerId);
-        if (organizer == null) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer user = (Organizer) userService.findByEmail(email);
+
+
+        // Проверка наличия события и его принадлежности организатору
+        Event event = eventService.findById(eventId);
+        if(! user.getMyEvents().contains(event)){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
 
-        Event event = eventService.findById(eventId);
 //        if (event == null || !event.getOrganizer().equals(organizer)) {
 //            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 //        }
@@ -168,65 +208,181 @@ public class OrganizerController {
 
         return ResponseEntity.ok(deletedEventDTO);
     }
+    @PostMapping("events/{eventId}/activity")
+    public ResponseEntity<ActivityDTO> addActivity(@PathVariable Integer eventId,
+                                                @RequestBody NewActivityDTO activityDTO,
+                                                HttpServletRequest request) {
 
-    @PostMapping("events/{organizerId}/{eventId}/add-agenda")
-    public ResponseEntity<EventDTO> addAgenda(
-            @PathVariable Integer organizerId,
-            @PathVariable Integer eventId,
-            @RequestBody List<NewActivityDTO> activities) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer user = (Organizer) userService.findByEmail(email);
 
-        Organizer organizer = organizerService.findById(organizerId);
-        if (organizer == null) {
+
+        // Проверка наличия события и его принадлежности организатору
+        Event event = eventService.findById(eventId);
+        if(! user.getMyEvents().contains(event)){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        Event event = eventService.findById(eventId);
-//        if (event == null || !event.getOrganizer().equals(organizer)) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-//        }
+        List<Activity> activities = event.getEventActivities();
 
-        List<Activity> agenda = activities.stream().map(activityDTO -> {
-            Activity activity = new Activity();
-            activity.setName(activityDTO.getName());
-            activity.setDescription(activityDTO.getDescription());
-            activity.setStartTime(activityDTO.getStart());
-            activity.setEndTime(activityDTO.getEnd());
-            activity.setLocation(activityDTO.getLocation());
-            return activity;
-        }).collect(Collectors.toList());
+        Activity activity = activityService.save(new Activity(activityDTO));
 
-        event.setEventActivities(agenda);
-        Event updatedEvent = eventService.save(event);
+        activities.add(activity);
+        event.setEventActivities(activities);
 
-        EventDTO updatedEventDTO = toEventDTO(updatedEvent);
+        eventService.save(event);
 
-        return ResponseEntity.ok(updatedEventDTO);
+        return ResponseEntity.ok(new ActivityDTO(activity));
     }
+    @GetMapping("events/{eventId}/activity/{activityId}")
+    public ResponseEntity<ActivityDTO> getActivity(@PathVariable Integer eventId,
+                                                   @PathVariable Integer activityId,
+                                                   HttpServletRequest request) {
+
+        Activity activity = activityService.findById(activityId);
+
+        return ResponseEntity.ok(new ActivityDTO(activity));
+    }
+    @PutMapping("events/{eventId}/activity/{activityId}")
+    public ResponseEntity<ActivityDTO> updateActivity(@PathVariable Integer eventId,
+                                                   @PathVariable Integer activityId,
+                                                   @RequestBody NewActivityDTO activityDTO,
+                                                   HttpServletRequest request) {
+
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer user = (Organizer) userService.findByEmail(email);
 
 
-    @GetMapping("events/{organizerId}/{eventId}/agenda")
-    public ResponseEntity<List<NewActivityDTO>> getAgenda(
-            @PathVariable Integer organizerId,
-            @PathVariable Integer eventId) {
-        Organizer organizer = organizerService.findById(organizerId);
-        if (organizer == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        // Проверка наличия события и его принадлежности организатору
+        Event event = eventService.findById(eventId);
+        if(! user.getMyEvents().contains(event)){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        Event event = eventService.findById(eventId);
-//        if (event == null || !event.getOrganizer().equals(organizer)) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
+        List<Activity> activities = event.getEventActivities();
 
-        List<NewActivityDTO> agenda = event.getEventActivities().stream().map(activity -> {
-            NewActivityDTO dto = new NewActivityDTO();
-            dto.setName(activity.getName());
-            dto.setDescription(activity.getDescription());
-            dto.setStart(activity.getStartTime());
-            dto.setEnd(activity.getEndTime());
-            dto.setLocation(activity.getLocation());
-            return dto;
-        }).collect(Collectors.toList());
+        Activity activity = null;
+
+        for(Activity a: activities){
+            if(a.getId().equals(activityId)){
+                activity = a;
+            }
+        }
+
+        activity = activityService.update(activity, activityDTO);
+
+        activities.add(activity);
+        event.setEventActivities(activities);
+
+        eventService.save(event);
+
+        return ResponseEntity.ok(new ActivityDTO(activity));
+    }
+
+    @DeleteMapping("events/{eventId}/activity/{activityId}")
+    public ResponseEntity<ActivityDTO> deleteActivity(@PathVariable Integer eventId,
+                                                      @PathVariable Integer activityId,
+                                                      HttpServletRequest request) {
+
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer user = (Organizer) userService.findByEmail(email);
+
+
+        // Проверка наличия события и его принадлежности организатору
+        Event event = eventService.findById(eventId);
+        if(! user.getMyEvents().contains(event)){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        List<Activity> activities = event.getEventActivities();
+
+        Activity activity = activityService.findById(activityId);
+
+        activities.remove(activity);
+
+        event.setEventActivities(activities);
+
+        eventService.save(event);
+        activityService.delete(activity);
+
+        return ResponseEntity.ok(new ActivityDTO(activity));
+    }
+
+//    @PostMapping("events/{organizerId}/{eventId}/add-agenda")
+//    public ResponseEntity<EventDTO> addAgenda(
+//            @PathVariable Integer organizerId,
+//            @PathVariable Integer eventId,
+//            @RequestBody List<NewActivityDTO> activities) {
+//
+//        Organizer organizer = organizerService.findById(organizerId);
+//        if (organizer == null) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+//        }
+//
+//        Event event = eventService.findById(eventId);
+////        if (event == null || !event.getOrganizer().equals(organizer)) {
+////            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+////        }
+//
+//        List<Activity> agenda = activities.stream().map(activityDTO -> {
+//            Activity activity = new Activity();
+//            activity.setName(activityDTO.getName());
+//            activity.setDescription(activityDTO.getDescription());
+//            activity.setStartTime(activityDTO.getStart());
+//            activity.setEndTime(activityDTO.getEnd());
+//            activity.setLocation(activityDTO.getLocation());
+//            return activity;
+//        }).collect(Collectors.toList());
+//
+//        event.setEventActivities(agenda);
+//        Event updatedEvent = eventService.save(event);
+//
+//        EventDTO updatedEventDTO = toEventDTO(updatedEvent);
+//
+//        return ResponseEntity.ok(updatedEventDTO);
+//    }
+
+
+    @GetMapping("events/{eventId}/agenda")
+    public ResponseEntity<List<ActivityDTO>> getAgenda(
+            @PathVariable Integer eventId,
+            HttpServletRequest request) {
+
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer user = (Organizer) userService.findByEmail(email);
+
+        Event event = eventService.findById(eventId);
+
+        boolean contains = false;
+
+        for(Event e: user.getMyEvents()){
+            if(e.getId().equals(eventId)){
+                contains = true;
+            }
+        }
+
+        if(!contains){
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
+        List<ActivityDTO> agenda = event.getEventActivities().stream().map(ActivityDTO::new).collect(Collectors.toList());
 
         return new ResponseEntity<>(agenda, HttpStatus.OK);
     }

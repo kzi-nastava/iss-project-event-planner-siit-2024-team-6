@@ -1,6 +1,7 @@
 package ftn.siit.project.isspoject.dto.activity;
 
-import ftn.siit.project.isspoject.entity.Event;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import ftn.siit.project.isspoject.entity.Activity;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -11,6 +12,17 @@ public class ActivityDTO {
     private String name;
     private String description;
     private String location;
-    private LocalDateTime start;
-    private LocalDateTime end;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    private LocalDateTime startTime;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    private LocalDateTime endTime;
+
+    public ActivityDTO(Activity activity) {
+        this.id = activity.getId();
+        this.name = activity.getName();
+        this.description = activity.getDescription();
+        this.location = activity.getLocation();
+        this.startTime = activity.getStartTime();
+        this.endTime = activity.getEndTime();
+    }
 }

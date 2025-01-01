@@ -23,7 +23,8 @@ public class OrganizerServiceImpl implements OrganizerService {
     }
 
     @Override
-    public Organizer findByEventId(Integer eventId) {
-        return organizerRepository.findByEventId(eventId);
+    public Organizer findOrganizerByEventId(Integer eventId) {
+        return organizerRepository.findOrganizerByEventId(eventId);
+
     }
 }

@@ -2,19 +2,18 @@ package ftn.siit.project.isspoject.controller;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
+import ftn.siit.project.isspoject.dto.user.OrganizerDTO;
 import ftn.siit.project.isspoject.dto.user.UserDTO;
 import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
 import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.EventType;
+import ftn.siit.project.isspoject.entity.Organizer;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.implementations.EventTypeServiceImpl;
-import ftn.siit.project.isspoject.service.interfaces.EventService;
+import ftn.siit.project.isspoject.service.interfaces.*;
 import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
-import ftn.siit.project.isspoject.service.interfaces.EventTypeService;
-import ftn.siit.project.isspoject.service.interfaces.NotificationService;
-import ftn.siit.project.isspoject.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +40,8 @@ public class EventController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private OrganizerService organizerService;
 
     @Autowired
     private EventTypeService eventTypeService;
@@ -49,15 +50,17 @@ public class EventController {
     public ResponseEntity<EventDTO> getEvent(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
 
-        EventDTO eventDTO = new EventDTO();
-        eventDTO.setName(event.getName());
-        eventDTO.setDescription(event.getDescription());
-        eventDTO.setPlace(event.getPlace());
-        eventDTO.setDate(event.getDate());
-        eventDTO.setMaxParticipants(event.getMaxParticipants());
-        eventDTO.setIsPublic(event.getIsPublic());
-
+        EventDTO eventDTO = new EventDTO(event);
+        
         return new ResponseEntity<>(eventDTO, HttpStatus.OK);
+    }
+    @GetMapping("{eventId}/getOrganizer")
+    public ResponseEntity<OrganizerDTO> getEventOrganizer(@PathVariable Integer eventId) {
+        User organizer = organizerService.findOrganizerByEventId(eventId);
+
+        OrganizerDTO organizerDTO = new OrganizerDTO((Organizer) organizer);
+
+        return new ResponseEntity<>(organizerDTO, HttpStatus.OK);
     }
     @GetMapping("{eventId}/generate-pdf")
     public ResponseEntity<byte[]> generateEventPDF(@PathVariable Integer eventId) {
@@ -155,13 +158,13 @@ public class EventController {
         return ResponseEntity.ok(updatedUserDTO); // Возвращаем обновлённого пользователя
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<EventDTO> getEvent(@PathVariable int id) {
-        Event event = eventService.findById(id);
-
-        EventDTO dto = new EventDTO(event);
-        return ResponseEntity.ok(dto);
-    }
+//    @GetMapping("{id}")
+//    public ResponseEntity<EventDTO> getEvent(@PathVariable int id) {
+//        Event event = eventService.findById(id);
+//
+//        EventDTO dto = new EventDTO(event);
+//        return ResponseEntity.ok(dto);
+//    }
 
 
     @GetMapping()
