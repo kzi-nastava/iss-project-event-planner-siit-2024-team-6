@@ -14,8 +14,8 @@ import java.util.List;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Integer>{
-    @Query(value = "SELECT id, name, place, date FROM events WHERE organizer_id = :organizerId", nativeQuery = true)
-    List<Object[]> findByOrganizerId(Integer organizerId);
+//    @Query(value = "SELECT id, name, place, date FROM events WHERE organizer_id = :organizerId", nativeQuery = true)
+//    List<Object[]> findByOrganizerId(Integer organizerId);
 
     List<Event> findTop5ByOrderByDateAsc();
 
@@ -30,4 +30,7 @@ public interface EventRepository extends JpaRepository<Event, Integer>{
             "(e.isPublic = :isPublic OR :isPublic IS NULL) AND " +
             "(e.date BETWEEN :startDate AND :endDate OR :startDate IS NULL OR :endDate IS NULL)")
     List<Event> searchEvents(String name, String description, String place, EventType eventType, Boolean isPublic, LocalDateTime startDate, LocalDateTime endDate);
+
+    @Query("SELECT e FROM Event e WHERE e.id IN (SELECT ev.id FROM Organizer o JOIN o.myEvents ev WHERE o = :organizer)")
+    List<Event> findByOrganizer(Organizer organizer);
 }

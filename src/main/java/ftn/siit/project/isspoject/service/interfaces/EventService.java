@@ -16,8 +16,6 @@ public interface EventService {
     List<Event> findAll();
     Page<Event> findAll(Pageable page);
     Event findById(Integer eventId);
-    List<OrganizersEventDTO> findByOrganizerId(Integer organizerId);
-
     List<Event> findTopFive();
 
     Event save(Event event);
@@ -25,4 +23,6 @@ public interface EventService {
     List<Event> getEventsUserAttends(Integer userId);
     Event addClosedEvent(NewClosedEventDTO eventDTO);
     List<Event> searchEvents(String name, String description, String place, EventType eventType, Boolean isPublic, LocalDateTime startDate, LocalDateTime endDate);
+
+    List<Event> findByOrganizer(Organizer organizer);
 }
