@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -183,6 +184,18 @@ public Block blockUser(Integer blockerId, Integer blockedId) {
     @Override
     public String getUserRole(Integer userId) {
         return "ROLE_" + userRepository.findUserTypeById(userId).toUpperCase();
+    }
+    public boolean overlapsWithClosedHours(LocalDateTime start, LocalDateTime end, String openingTime, String closingTime) {
+        LocalTime opening = LocalTime.parse(openingTime);
+        LocalTime closing = LocalTime.parse(closingTime);
+
+        LocalTime startTime = start.toLocalTime();
+        LocalTime endTime = end.toLocalTime();
+
+        boolean startsBeforeOpening = startTime.isBefore(opening);
+        boolean endsAfterClosing = endTime.isAfter(closing);
+
+        return startsBeforeOpening || endsAfterClosing;
     }
 
 }
