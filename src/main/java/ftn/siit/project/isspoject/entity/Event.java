@@ -23,6 +23,7 @@ public class Event {
     private Boolean isPublic;
     private String place;
     private LocalDateTime date;
+    private Double rating;
     @ElementCollection
     @CollectionTable(name = "event_photos", joinColumns = @JoinColumn(name = "event_id"))
     @Column(name = "photo_url")
@@ -73,6 +74,7 @@ public class Event {
         this.eventActivities = activities;
         this.budget = budget;
         this.products = products;
+        this.rating = 0.0;
     }
     public Event(EventDTO eventDTO) {
         if (eventDTO != null) {

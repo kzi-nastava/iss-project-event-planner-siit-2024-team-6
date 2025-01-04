@@ -19,7 +19,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
@@ -69,17 +71,36 @@ public class EventController {
 
         return new ResponseEntity<>(organizerDTO, HttpStatus.OK);
     }
-    @GetMapping("{eventId}/generate-pdf")
+    @GetMapping("{eventId}/getInfoPDF")
     public ResponseEntity<byte[]> generateEventPDF(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
 
-        byte[] pdf = pdfGeneratorService.generateEventPDF(event);
+        byte[] pdfContent = pdfGeneratorService.generateEventPDF(event);
+
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentDispositionFormData("attachment", "document.pdf");
 
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=event-details.pdf")
-                .body(pdf);
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfContent);
     }
+    @GetMapping("{eventId}/getEventStatisticsPDF")
+    public ResponseEntity<byte[]> downloadEventStatisticsPDF(@PathVariable Integer eventId) {
+        Event event = eventService.findById(eventId);
 
+        byte[] pdfContent = pdfGeneratorService.downloadEventStatisticsPDF(event);
+
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentDispositionFormData("attachment", "document.pdf");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfContent);
+    }
     @PostMapping("{eventId}/favorite")
     public ResponseEntity<UserDTO> addEventToFavorites(@PathVariable Integer eventId, HttpServletRequest request) {
         // Проверка существования пользователя

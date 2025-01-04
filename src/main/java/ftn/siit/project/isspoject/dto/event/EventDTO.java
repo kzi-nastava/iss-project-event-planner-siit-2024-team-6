@@ -20,7 +20,7 @@ public class EventDTO {
     private EventTypeDTO eventType;
     private List<String> photos;
     private Boolean isDeleted;
-
+    private Double rating;
     public EventDTO() {}
     public EventDTO(Event event) {
         if (event == null) {
@@ -37,6 +37,7 @@ public class EventDTO {
         this.photos = event.getPhotos();
         this.eventType = new EventTypeDTO(event.getEventType());
         this.isDeleted = event.getIsDeleted();
+        this.rating = event.getRating();
 //        this.eventType = event.getEventType();
     }
 }
