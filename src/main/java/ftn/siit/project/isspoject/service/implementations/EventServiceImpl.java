@@ -1,15 +1,19 @@
 package ftn.siit.project.isspoject.service.implementations;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 import ftn.siit.project.isspoject.dto.EmailDetails;
 import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
+import ftn.siit.project.isspoject.dto.event.NewEventDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.EventRepository;
 import ftn.siit.project.isspoject.repository.EventTypeRepository;
 import ftn.siit.project.isspoject.service.external.EmailService;
 import ftn.siit.project.isspoject.service.interfaces.EventService;
+import ftn.siit.project.isspoject.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +33,8 @@ public class EventServiceImpl implements EventService {
     private EventTypeRepository eventTypeRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private UserService userService;
 
     @Override
     public List<Event> findAll() {
@@ -101,19 +107,7 @@ public class EventServiceImpl implements EventService {
         return events;
     }
 
-    public Event addClosedEvent(NewClosedEventDTO eventDTO) {
-        EventType type = eventTypeRepository.findById(eventDTO.getEventTypeId())
-                .orElseThrow(() -> new NotFoundException("Event type not found with ID: " + eventDTO.getEventTypeId()+ "while creating closed event"));
-
-        Event event = new Event(eventDTO);
-        event.setEventType(type);
-        //Event savedEvent = eventRepository.save(event);
-        String invitation = generateInvitation(eventDTO);
-        sendInvitations(invitation, eventDTO.getEmails());
-        return event;
-    }
-
-    public String generateInvitation(NewClosedEventDTO dto) {
+    public String generateInvitation(NewEventDTO dto) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy 'at' hh:mm a");
 
         return String.format(
@@ -129,15 +123,30 @@ public class EventServiceImpl implements EventService {
                 dto.getDate() != null ? dto.getDate().format(formatter) : "Date not specified"
         );
     }
-    private void sendInvitations(String text, List<String> emails) {
-        for (String email : emails) {
+    public void sendInvitations(NewEventDTO dto) {
+        String invitation = generateInvitation(dto);
+        String userLink;
+        for (String email : dto.getEmails()) {
+            boolean userExists = userService.existsByEmail(email);
+            userLink = generateLink(userExists, email);
+            System.out.println(email);
             EmailDetails details = new EmailDetails();
             details.setRecipient(email);
             details.setSubject("You're Invited!");
-            details.setMsgBody(text);
+            details.setMsgBody(invitation+"\n"+userLink);
 
             String status = emailService.sendSimpleMail(details);
             System.out.println("Invitation sent to: " + email + " - Status: " + status);
+        }
+    }
+
+    private String generateLink(boolean exists, String email) {
+        String baseUrl = "http://localhost:4200";
+
+        if (exists) {
+            return baseUrl + "/login?email=" + URLEncoder.encode(email, StandardCharsets.UTF_8) + "&disableEmail=true";
+        } else {
+            return baseUrl + "/quick-registration?email=" + URLEncoder.encode(email, StandardCharsets.UTF_8) + "&disableEmail=true";
         }
     }
 
