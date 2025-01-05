@@ -1,6 +1,8 @@
 package ftn.siit.project.isspoject.repository;
 
 import ftn.siit.project.isspoject.entity.Category;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -13,4 +15,5 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
     Category findById(int id);
     @Query("SELECT c.name FROM Category c")
     List<String> findAllNames();
+    Page<Category> findAll(Pageable pageable);
 }

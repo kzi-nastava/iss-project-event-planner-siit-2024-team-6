@@ -29,7 +29,7 @@ public interface UserService {
     Block blockUser(Integer blockerId, Integer blockedId);
     User suspendUser(Integer userId);
     String getUserRole(Integer userId);
-
+    List<User> findByRole(String role);
 
     boolean overlapsWithClosedHours(LocalDateTime start, LocalDateTime end, String openingTime, String closingTime);
 }

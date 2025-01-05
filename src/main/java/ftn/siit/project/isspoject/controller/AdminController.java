@@ -5,6 +5,8 @@ import ftn.siit.project.isspoject.dto.category.NewCategorySuggestionDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventTypeDTO;
+import ftn.siit.project.isspoject.dto.offer.OfferDTO;
+import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
 import ftn.siit.project.isspoject.dto.user.UserDTO;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.entity.*;
@@ -16,8 +18,11 @@ import ftn.siit.project.isspoject.service.interfaces.OfferService;
 import ftn.siit.project.isspoject.util.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,9 +53,12 @@ public class AdminController {
     @Autowired
     private CategorySuggestionService categorySuggestionService;
     @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
     private TokenUtils tokenUtils;
+    @Autowired
+    private NotificationService notificationService;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
     @PostMapping("event-types")
     public ResponseEntity<EventTypeDTO> addEventType(@RequestBody NewEventTypeDTO eventTypeDTO, HttpServletRequest request) {
 
@@ -243,36 +251,69 @@ public class AdminController {
                 .body(pdf);
     }
     @GetMapping("categories")
-    public ResponseEntity<List<Category>> getAllCategories() {
-        List<Category> categories = categoryService.findAll();
-        if (categories.isEmpty()) {
-          return ResponseEntity.noContent().build();
+    public ResponseEntity<PagedResponse<Category>> getAllCategories(Pageable page, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        return ResponseEntity.ok(categories);
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User u = userService.findByEmail(email);
+        if(!userService.getUserRole(u.getId()).equals("ROLE_ADMIN")) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Page<Category> categories = categoryService.findAll(page);
+
+        PagedResponse<Category> response = new PagedResponse<>(
+                categories.stream().toList(),
+                categories.getTotalPages(),
+                categories.getTotalElements()
+        );
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping
-    public ResponseEntity<Category> addCategory(@RequestBody NewCategoryDTO dto) {
-        Category category = new Category();
-        // add transfer of data from dto
-        Category savedCategory = categoryService.save(category);
+    @PostMapping("category")
+    public ResponseEntity<Category> addCategory(@RequestBody NewCategoryDTO dto, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User u = userService.findByEmail(email);
+        if(!userService.getUserRole(u.getId()).equals("ROLE_ADMIN")) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Category savedCategory = categoryService.save(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
     }
 
     @PutMapping("category/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable int id, @RequestBody NewCategoryDTO dto) {
-        Category oldCategory = categoryService.findById(id);
-        if (oldCategory == null) {
-           throw new NotFoundException("Category with id " + id + " not found, can't be updated");
+    public ResponseEntity<Category> updateCategory(@PathVariable int id, @RequestBody NewCategoryDTO dto, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        oldCategory.setName(dto.getName());
-        oldCategory.setDescription(dto.getDescription());
-        Category updated = categoryService.update(oldCategory);
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User u = userService.findByEmail(email);
+        if(!userService.getUserRole(u.getId()).equals("ROLE_ADMIN")) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Category oldCategory = categoryService.findById(id);
+        Category updated = categoryService.update(id, dto);
+        notificationService.notifyUsers(userService.findByRole("Provider"), "Updated category\nOLD:\n"+oldCategory.getName()+"\n"+oldCategory.getDescription()+"\nNEW:\n"+updated.getName()+"\n"+updated.getDescription());
         return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("category/{id}")
-    public ResponseEntity<String> deleteCategory(@PathVariable int id) {
+    public ResponseEntity<String> deleteCategory(@PathVariable int id, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User u = userService.findByEmail(email);
+        if(!userService.getUserRole(u.getId()).equals("ROLE_ADMIN")) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         Category oldCategory = categoryService.findById(id);
         if (oldCategory == null) {
            throw new NotFoundException("Category with id " + id + " not found, can't be deleted");
@@ -281,7 +322,7 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The category must not have any offers using it.");
         }
         categoryService.delete(oldCategory);
-        return ResponseEntity.ok("Category deleted successfully");
+        return ResponseEntity.ok("{\"message\": \"Category deleted successfully\"}");
     }
 
     @GetMapping("suggestions")
