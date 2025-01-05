@@ -14,14 +14,20 @@ import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.implementations.EventTypeServiceImpl;
 import ftn.siit.project.isspoject.service.interfaces.*;
 import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
+import ftn.siit.project.isspoject.util.TokenUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,7 +51,10 @@ public class EventController {
 
     @Autowired
     private EventTypeService eventTypeService;
-
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private TokenUtils tokenUtils;
     @GetMapping("{eventId}")
     public ResponseEntity<EventDTO> getEvent(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
@@ -62,23 +71,48 @@ public class EventController {
 
         return new ResponseEntity<>(organizerDTO, HttpStatus.OK);
     }
-    @GetMapping("{eventId}/generate-pdf")
+    @GetMapping("{eventId}/getInfoPDF")
     public ResponseEntity<byte[]> generateEventPDF(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
 
-        byte[] pdf = pdfGeneratorService.generateEventPDF(event);
+        byte[] pdfContent = pdfGeneratorService.generateEventPDF(event);
+
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentDispositionFormData("attachment", "document.pdf");
 
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=event-details.pdf")
-                .body(pdf);
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfContent);
     }
+    @GetMapping("{eventId}/getEventStatisticsPDF")
+    public ResponseEntity<byte[]> downloadEventStatisticsPDF(@PathVariable Integer eventId) {
+        Event event = eventService.findById(eventId);
 
-    @PostMapping("{userId}/{eventId}/favorite")
-    public ResponseEntity<UserDTO> addEventToFavorites(@PathVariable Integer userId, @PathVariable Integer eventId) {
+        byte[] pdfContent = pdfGeneratorService.downloadEventStatisticsPDF(event);
+
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentDispositionFormData("attachment", "document.pdf");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfContent);
+    }
+    @PostMapping("{eventId}/favorite")
+    public ResponseEntity<UserDTO> addEventToFavorites(@PathVariable Integer eventId, HttpServletRequest request) {
         // Проверка существования пользователя
-        User user = userService.findById(userId);
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Пользователь не найден
+            return ResponseEntity.notFound().build();
         }
 
         // Проверка существования события
@@ -98,6 +132,32 @@ public class EventController {
 
         return ResponseEntity.ok(updatedUserDTO); // Возвращаем обновлённого пользователя
     }
+
+    @GetMapping("favorites")
+    public ResponseEntity<List<EventDTO>> getFavorites(HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<Event> events = user.getFavouriteEvents();
+
+        List<EventDTO> ed = new ArrayList<>();
+
+        for (Event e: events){
+            ed.add(new EventDTO(e));
+        }
+
+        return ResponseEntity.ok(ed);
+
+    }
+
     private UserDTO toUserDTO(User user) {
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
@@ -132,12 +192,18 @@ public class EventController {
         return eventDTO;
     }
 
-    @DeleteMapping("{userId}/{eventId}/favorite")
-    public ResponseEntity<UserDTO> removeEventFromFavorites(@PathVariable Integer userId, @PathVariable Integer eventId) {
-        // Проверка существования пользователя
-        User user = userService.findById(userId);
+    @DeleteMapping("{eventId}/favorite")
+    public ResponseEntity<UserDTO> removeEventFromFavorites( @PathVariable Integer eventId, HttpServletRequest request) {
+
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Пользователь не найден
+            return ResponseEntity.notFound().build();
         }
 
         // Проверка существования события

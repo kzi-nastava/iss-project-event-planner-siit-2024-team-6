@@ -17,7 +17,6 @@ public class NewEventDTO {
     private LocalDateTime date;
     private EventTypeDTO eventType;
     private List<String> photos;
-
     public NewEventDTO() {}
     public NewEventDTO(Event event) {
         if (event == null) {

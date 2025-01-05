@@ -1,9 +1,11 @@
 package ftn.siit.project.isspoject.controller;
 
+import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.dto.offer.PriceListOfferDTO;
 import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
+import ftn.siit.project.isspoject.dto.user.UserDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.implementations.OfferServiceImpl;
@@ -11,6 +13,8 @@ import ftn.siit.project.isspoject.service.interfaces.CategoryService;
 import ftn.siit.project.isspoject.service.interfaces.OfferHistoryService;
 import ftn.siit.project.isspoject.service.interfaces.OfferService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
+import ftn.siit.project.isspoject.util.TokenUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,7 +42,8 @@ public class OfferController {
     private CategoryService categoryService;
     @Autowired
     private OfferServiceImpl offerServiceImpl;
-
+    @Autowired
+    private TokenUtils tokenUtils;
     @GetMapping()
     public ResponseEntity<List<OfferDTO>> getAll() {
         List<Offer> offers = offerService.findAll();
@@ -125,5 +131,93 @@ public class OfferController {
 
         List<Offer> filteredItems = offerService.searchItems(name, description, minPrice, maxPrice, startDate, endDate, category, isService);
         return ResponseEntity.ok(filteredItems);
+    }
+
+    @PostMapping("{offerId}/favorite")
+    public ResponseEntity<UserDTO> addOfferToFavorites(@PathVariable Integer offerId, HttpServletRequest request) {
+        // Проверка существования пользователя
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Проверка существования события
+        Offer offer = offerService.findById(offerId);
+
+        // Проверка, что событие уже добавлено в избранное
+        if (user.getFavouriteOffers().contains(offer)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Событие уже в избранном
+        }
+
+        // Добавление события в избранное
+        user.getFavouriteOffers().add(offer);
+        User updatedUser = userService.save(user);
+
+        // Преобразование в DTO
+        UserDTO updatedUserDTO = new UserDTO(updatedUser);
+
+        return ResponseEntity.ok(updatedUserDTO); // Возвращаем обновлённого пользователя
+    }
+    @DeleteMapping("{offerId}/favorite")
+    public ResponseEntity<UserDTO> removeEOfferFromFavorites(@PathVariable Integer offerId, HttpServletRequest request) {
+        // Проверка существования пользователя
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Проверка существования события
+        Offer offer = offerService.findById(offerId);
+
+        // Проверка, что событие уже добавлено в избранное
+        if (user.getFavouriteOffers().contains(offer)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Событие уже в избранном
+        }
+
+        // Добавление события в избранное
+        user.getFavouriteOffers().remove(offer);
+        User updatedUser = userService.save(user);
+
+        // Преобразование в DTO
+        UserDTO updatedUserDTO = new UserDTO(updatedUser);
+
+        return ResponseEntity.ok(updatedUserDTO); // Возвращаем обновлённого пользователя
+    }
+
+    @GetMapping("favorites")
+    public ResponseEntity<List<OfferDTO>> getFavorites(HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<Offer> events = user.getFavouriteOffers();
+
+        List<OfferDTO> od = new ArrayList<>();
+
+        for (Offer o: events){
+            od.add(new OfferDTO(o));
+        }
+
+        return ResponseEntity.ok(od);
+
     }
 }

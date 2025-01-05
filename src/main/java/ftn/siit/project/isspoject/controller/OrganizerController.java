@@ -14,6 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -370,6 +373,25 @@ public class OrganizerController {
         return new ResponseEntity<>(agenda, HttpStatus.OK);
     }
 
+    @GetMapping("events/{eventId}/getAgendaPDF")
+    public ResponseEntity<byte[]> getAgendaPDF(
+            @PathVariable Integer eventId) {
+
+        Event event = eventService.findById(eventId);
+
+        byte[] pdfContent = pdfGeneratorService.generateAgendaPdf(event.getEventActivities());
+
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentDispositionFormData("attachment", "document.pdf");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfContent);
+
+    }
+
     @GetMapping("events/{organizerId}/{eventId}/generate-pdf")
     public ResponseEntity<byte[]> generateGuestListPDF(
             @PathVariable Integer organizerId,
@@ -384,7 +406,7 @@ public class OrganizerController {
 //            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 //        }
 
-        byte[] pdf = pdfGeneratorService.generateGuestListPDF(event);
+        byte[] pdf =null;
 
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename=guest-list.pdf")
