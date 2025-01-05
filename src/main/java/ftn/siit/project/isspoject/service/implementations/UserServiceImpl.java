@@ -185,6 +185,12 @@ public Block blockUser(Integer blockerId, Integer blockedId) {
     public String getUserRole(Integer userId) {
         return "ROLE_" + userRepository.findUserTypeById(userId).toUpperCase();
     }
+
+    @Override
+    public List<User> findByRole(String role) {
+        return userRepository.findAllByRoleAndIsActive(role);
+    }
+
     public boolean overlapsWithClosedHours(LocalDateTime start, LocalDateTime end, String openingTime, String closingTime) {
         LocalTime opening = LocalTime.parse(openingTime);
         LocalTime closing = LocalTime.parse(closingTime);
