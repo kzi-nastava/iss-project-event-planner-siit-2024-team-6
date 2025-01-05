@@ -4,6 +4,7 @@ import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.EventType;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -15,8 +16,9 @@ public class NewEventDTO {
     private Boolean isPublic;
     private String place;
     private LocalDateTime date;
-    private EventTypeDTO eventType;
+    private String eventType;
     private List<String> photos;
+    private List<String> emails = new ArrayList<>();
     public NewEventDTO() {}
     public NewEventDTO(Event event) {
         if (event == null) {
