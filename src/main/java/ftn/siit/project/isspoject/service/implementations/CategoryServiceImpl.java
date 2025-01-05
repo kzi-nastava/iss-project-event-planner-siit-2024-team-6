@@ -1,10 +1,14 @@
 package ftn.siit.project.isspoject.service.implementations;
 
+import ftn.siit.project.isspoject.dto.category.NewCategoryDTO;
+import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
 import ftn.siit.project.isspoject.entity.Category;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.CategoryRepository;
 import ftn.siit.project.isspoject.service.interfaces.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,8 +50,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<Category> findAll() {
-        List<Category> categories = categoryRepository.findAll();
+    public Page<Category> findAll(Pageable pageable) {
+        Page<Category> categories = categoryRepository.findAll(pageable);
         if (categories.isEmpty()) {
             throw new NotFoundException("No categories found.");
         }
@@ -80,6 +84,17 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public Category update(int id, NewCategoryDTO newCategoryDTO) {
+        Category oldCategory = findById(id);
+        if(oldCategory == null) {
+            throw new NotFoundException("Category not found with ID: " + id);
+        }
+        oldCategory.setName(newCategoryDTO.getName());
+        oldCategory.setDescription(newCategoryDTO.getDescription());
+        return categoryRepository.save(oldCategory);
+    }
+
+    @Override
     public Category update(Category category) {
         if (category == null || category.getId() == null) {
             throw new IllegalArgumentException("Category or Category ID cannot be null while updating.");
@@ -97,7 +112,24 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public Category save(NewCategoryDTO newCategoryDTO) {
+        Category category = new Category();
+        category.setName(newCategoryDTO.getName());
+        category.setDescription(newCategoryDTO.getDescription());
+        return categoryRepository.save(category);
+    }
+
+    @Override
     public void delete(Category category) {
-        throw new UnsupportedOperationException("Deleting categories is not supported in this implementation.");
+       delete(category.getId());
+    }
+
+    @Override
+    public void delete(Integer id) {
+        Category category = findById(id);
+        if (category == null) {
+            throw new NotFoundException("Category not found with ID: " + id);
+        }
+        categoryRepository.deleteById(id);
     }
 }
