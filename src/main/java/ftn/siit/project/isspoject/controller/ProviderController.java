@@ -6,6 +6,7 @@ import ftn.siit.project.isspoject.dto.category.CategorySuggestionDTO;
 import ftn.siit.project.isspoject.dto.category.NewCategorySuggestionDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
+import ftn.siit.project.isspoject.dto.event.NewEventTypeDTO;
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
@@ -109,7 +110,7 @@ public class ProviderController {
         String email = this.tokenUtils.getUsernameFromToken(jwtToken);
         Provider provider = providerService.findByEmail(email);
         List<EventType> eventTypes = new ArrayList<>();
-        for (EventTypeDTO eventType : dto.getEventTypes()) {
+        for (NewEventTypeDTO eventType : dto.getEventTypes()) {
             eventTypes.add(eventTypeService.findByName(eventType.getName()));
         }
         Offer saved;
@@ -132,7 +133,7 @@ public class ProviderController {
         String email = this.tokenUtils.getUsernameFromToken(jwtToken);
         providerService.findByEmail(email);
         List<EventType> eventTypes = new ArrayList<>();
-        for (EventTypeDTO eventType : dto.getEventTypes()) {
+        for (NewEventTypeDTO eventType : dto.getEventTypes()) {
             eventTypes.add(eventTypeService.findByName(eventType.getName()));
         }
         Offer updated = serviceService.update(offerId, dto, eventTypes);
