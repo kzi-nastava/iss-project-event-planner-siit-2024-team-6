@@ -27,7 +27,8 @@ import java.util.stream.Collectors;
 public class OrganizerController {
     @Autowired
     private EventService eventService;
-
+    @Autowired
+    private NotificationService notificationService;
     @Autowired
     private OrganizerService organizerService;
     @Autowired
@@ -70,7 +71,7 @@ public class OrganizerController {
         event.setIsPublic(eventDTO.getIsPublic());
         event.setPlace(eventDTO.getPlace());
         event.setDate(eventDTO.getDate());
-        event.setEventType(eventTypeService.findByName(eventDTO.getEventType().getName()));
+        event.setEventType(eventTypeService.findByName(eventDTO.getEventType()));
         event.setParticipants(0);
         event.setPhotos(eventDTO.getPhotos());
 
@@ -83,6 +84,12 @@ public class OrganizerController {
         // Сохраняем событие
         Event savedEvent = eventService.save(event);
         userService.save(organizer);
+
+        // invitations
+        if(eventDTO.getIsPublic() == false){
+            eventService.sendInvitations(eventDTO);
+        }
+
         // Преобразование в DTO
         EventDTO responseDTO = toEventDTO(savedEvent);
 
@@ -145,6 +152,10 @@ public class OrganizerController {
         event.setDate(eventDTO.getDate());
         event.setIsDeleted(eventDTO.getIsDeleted());
         Event updatedEvent = eventService.save(event);
+
+        List<User> attendees = userService.findEventAttendees(eventId);
+        String notificationMessage = "The event '" + updatedEvent.getName() + "' has been updated.";
+        notificationService.notifyUsers(attendees, notificationMessage);
 
         // Преобразование в DTO
         EventDTO updatedEventDTO = new EventDTO(updatedEvent);
