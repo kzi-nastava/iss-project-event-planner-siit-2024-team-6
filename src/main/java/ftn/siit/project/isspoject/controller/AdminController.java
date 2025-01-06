@@ -121,7 +121,6 @@ public class AdminController {
             dto.setCategories(eventType.getCategories());
             return dto;
         }).collect(Collectors.toList());
-
         return new ResponseEntity<>(eventTypeDTOs, HttpStatus.OK);
     }
 

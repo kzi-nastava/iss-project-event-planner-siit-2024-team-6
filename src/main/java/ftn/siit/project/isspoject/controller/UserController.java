@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -71,12 +72,19 @@ public class UserController {
     }
 
     @PostMapping("/quick-register")
-    public ResponseEntity<String> quicklyRegisterUser(@RequestBody QuickRegistrationDTO requestDTO) {
+    public  ResponseEntity<Map<String, String>> quicklyRegisterUser(@RequestBody QuickRegistrationDTO requestDTO) {
+        Map<String, String> response = new HashMap<>();
+
         if (requestDTO.getEmail() == null) {
-            return new ResponseEntity<>("Error, invalid user", HttpStatus.BAD_REQUEST);
+            response.put("message", "Error, invalid user");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
+
+        requestDTO.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
+
         userService.save(requestDTO.toUser());
-        return new ResponseEntity<>("User was quickly registered, check out the activation code", HttpStatus.CREATED);
+        response.put("message", "User was quickly registered, check out the activation code");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping("/profile")

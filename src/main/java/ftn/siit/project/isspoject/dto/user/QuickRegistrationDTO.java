@@ -15,6 +15,7 @@ public class QuickRegistrationDTO {
         user.setPassword(password);
         user.setName(name);
         user.setLastname(lastname);
+        user.setSuspendedSince(null);
         return user;
     }
 }

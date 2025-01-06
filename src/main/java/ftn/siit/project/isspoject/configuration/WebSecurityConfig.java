@@ -101,6 +101,7 @@ public class WebSecurityConfig{
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/users/profile")).authenticated()
                     .requestMatchers(new AntPathRequestMatcher("/api/users")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/users/quick-register")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/events/event-types")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("api/events/**/event-type")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/users/profile/password-change")).authenticated()

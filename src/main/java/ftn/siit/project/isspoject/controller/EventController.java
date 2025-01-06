@@ -38,8 +38,7 @@ public class EventController {
 
     @Autowired
     private EventService eventService;
-    @Autowired
-    private NotificationService notificationService;
+
 
     @Autowired
     private PDFGeneratorService pdfGeneratorService;
@@ -283,43 +282,7 @@ public class EventController {
                 .toList();
         return ResponseEntity.ok(dtos);
     }
-    @PostMapping
-    public ResponseEntity<EventDTO> addEvent(@RequestBody NewEventDTO dto) {
-        Event event = new Event();
-        EventType type = eventTypeService.findById(dto.getEventType().getId());
-        event.setEventType(type);
-        Event savedEvent = eventService.save(event);
-        EventDTO responseDto = new EventDTO(savedEvent);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
-    }
 
-    @PostMapping("closed")
-    public ResponseEntity<EventDTO> addClosed(@RequestBody NewClosedEventDTO eventDTO) {
-        Event event = eventService.addClosedEvent(eventDTO);
-        return ResponseEntity.ok(new EventDTO(event));
-    }
-
-    @PutMapping("{id}")
-    public ResponseEntity<EventDTO>  updateEvent(@PathVariable int id, @RequestBody NewEventDTO dto) {
-        Event existingEvent = eventService.findById(id);
-
-        existingEvent.setName(dto.getName());
-        existingEvent.setDescription(dto.getDescription());
-        existingEvent.setMaxParticipants(dto.getMaxParticipants());
-        existingEvent.setParticipants(dto.getParticipants());
-        existingEvent.setIsPublic(dto.getIsPublic());
-        existingEvent.setPlace(dto.getPlace());
-        existingEvent.setDate(dto.getDate());
-
-        Event updatedEvent = eventService.save(existingEvent);
-
-        List<User> attendees = userService.findEventAttendees(id);
-        String notificationMessage = "The event '" + updatedEvent.getName() + "' has been updated.";
-        notificationService.notifyUsers(attendees, notificationMessage);
-
-        return ResponseEntity.ok(new EventDTO(updatedEvent));
-
-    }
 
     @GetMapping("/search")
     public ResponseEntity<List<Event>> searchEvents(
