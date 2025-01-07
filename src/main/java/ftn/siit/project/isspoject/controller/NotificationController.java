@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/notifications/")
-
+@CrossOrigin(origins = "http://localhost:4200")
 public class NotificationController {
 
     @Autowired
@@ -49,13 +49,13 @@ public class NotificationController {
 
     @GetMapping("receiver/{receiverId}")
     public ResponseEntity<List<NotificationDTO>> getByReceiver(@PathVariable Integer receiverId) {
-
         List<Notification> notifications = notificationService.findByReceiverId(receiverId);
-
+        if (notifications.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         List<NotificationDTO> dtos = notifications.stream()
                 .map(NotificationDTO::new)
                 .toList();
-
         return ResponseEntity.ok(dtos);
     }
 

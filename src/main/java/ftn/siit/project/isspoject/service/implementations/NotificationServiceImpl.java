@@ -27,9 +27,6 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public List<Notification> findByReceiverId(Integer receiverId) {
         List<Notification> notifications = notificationRepository.findByReceiverId(receiverId);
-        if (notifications.isEmpty()) {
-            throw new NotFoundException("No notifications found for receiver with ID: " + receiverId);
-        }
         return notifications;
     }
 
