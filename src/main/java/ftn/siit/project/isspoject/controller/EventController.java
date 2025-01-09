@@ -18,6 +18,7 @@ import ftn.siit.project.isspoject.util.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -285,16 +286,22 @@ public class EventController {
 
 
     @GetMapping("/search")
-    public ResponseEntity<List<Event>> searchEvents(
+    public ResponseEntity<Page<Event>> searchEvents(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String description,
             @RequestParam(required = false) String place,
-            @RequestParam(required = false) EventType eventType,
+            @RequestParam(required = false) String eventType,
             @RequestParam(required = false) Boolean isPublic,
             @RequestParam(required = false) LocalDateTime startDate,
-            @RequestParam(required = false) LocalDateTime endDate) {
+            @RequestParam(required = false) LocalDateTime endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int pageSize) {
 
-        List<Event> filteredEvents = eventService.searchEvents(name, description, place, eventType, isPublic, startDate, endDate);
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<Event> filteredEvents = eventService.searchEvents(name, description, place, eventType, startDate, endDate, pageable);
+        if (filteredEvents.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(filteredEvents);
     }
 
