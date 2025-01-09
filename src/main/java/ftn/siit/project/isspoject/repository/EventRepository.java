@@ -22,15 +22,6 @@ public interface EventRepository extends JpaRepository<Event, Integer>{
     @Query("SELECT e FROM User u JOIN u.attends e WHERE u.id = :userId")
     List<Event> findEventsByUserId(@Param("userId") Integer userId);
 
-    @Query("SELECT e FROM Event e WHERE " +
-            "(LOWER(e.name) LIKE LOWER(CONCAT('%', :name, '%')) OR :name IS NULL) AND " +
-            "(LOWER(e.description) LIKE LOWER(CONCAT('%', :description, '%')) OR :description IS NULL) AND " +
-            "(LOWER(e.place) LIKE LOWER(CONCAT('%', :place, '%')) OR :place IS NULL) AND " +
-            "(e.eventType = :eventType OR :eventType IS NULL) AND " +
-            "(e.isPublic = :isPublic OR :isPublic IS NULL) AND " +
-            "(e.date BETWEEN :startDate AND :endDate OR :startDate IS NULL OR :endDate IS NULL)")
-    List<Event> searchEvents(String name, String description, String place, EventType eventType, Boolean isPublic, LocalDateTime startDate, LocalDateTime endDate);
-
     @Query("SELECT e FROM Event e WHERE e.id IN (SELECT ev.id FROM Organizer o JOIN o.myEvents ev WHERE o = :organizer)")
     List<Event> findByOrganizer(Organizer organizer);
 }

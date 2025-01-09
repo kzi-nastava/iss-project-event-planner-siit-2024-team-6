@@ -105,7 +105,7 @@ public class WebSecurityConfig{
                     .requestMatchers(new AntPathRequestMatcher("/api/events/event-types")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("api/events/**/event-type")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/users/profile/password-change")).authenticated()
-                    .requestMatchers(new AntPathRequestMatcher("/api/admins/event-types")).hasAnyRole("ADMIN","ORGANIZER")
+                    .requestMatchers(new AntPathRequestMatcher("/api/admins/event-types")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/admins/event-types/**")).hasRole("ADMIN")
                     .requestMatchers(new AntPathRequestMatcher("/api/admins/categories")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/admins/event-types/**/**")).hasRole("ADMIN")

@@ -16,6 +16,7 @@ import ftn.siit.project.isspoject.service.interfaces.EventService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EventServiceImpl implements EventService {
@@ -150,11 +152,34 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    public List<Event> searchEvents(String name, String description, String place, EventType eventType, Boolean isPublic, LocalDateTime startDate, LocalDateTime endDate) {
-        List<Event> events = eventRepository.searchEvents(name, description, place, eventType, isPublic, startDate, endDate);
-        if (events.isEmpty()) {
-            throw new NotFoundException("No events found matching the given criteria.");
-        }
-        return events;
+    public Page<Event> searchEvents(String name, String description, String place, String eventType, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+        System.out.println("Search Events called with parameters:");
+        System.out.println("Name: " + name);
+        System.out.println("Description: " + description);
+        System.out.println("Place: " + place);
+        System.out.println("Event Type: " + eventType);
+        System.out.println("Start Date: " + startDate);
+        System.out.println("End Date: " + endDate);
+        System.out.println("Page Number: " + pageable.getPageNumber());
+        System.out.println("Page Size: " + pageable.getPageSize());
+
+        List<Event> events = eventRepository.findAll();
+
+        List<Event> filteredEvents = events.stream()
+                .filter(event ->
+                        (name == null || name.isEmpty() || event.getName().toLowerCase().contains(name.toLowerCase())) ||
+                                (description == null || description.isEmpty() || event.getDescription().toLowerCase().contains(description.toLowerCase())) ||
+                                (place == null || place.isEmpty() || event.getPlace().toLowerCase().contains(place.toLowerCase())))
+                .filter(event -> eventType == null || eventType.isEmpty() || event.getEventType().getName().equals(eventType))
+                .filter(event -> (startDate == null || event.getDate().isAfter(startDate)) &&
+                        (endDate == null || event.getDate().isBefore(endDate)))
+                .collect(Collectors.toList());
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), filteredEvents.size());
+
+        List<Event> paginatedEvents = filteredEvents.subList(start, end);
+
+        return new PageImpl<>(paginatedEvents, pageable, filteredEvents.size());
+
     }
 }
