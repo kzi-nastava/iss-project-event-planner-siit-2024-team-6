@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.service.implementations;
 
+import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
@@ -127,7 +128,7 @@ public class OfferServiceImpl implements OfferService {
     }
 
     @Override
-    public Page<OfferDTO> searchOffers(String name, String description, Double maxPrice, Boolean isOnSale, LocalDateTime startDate, LocalDateTime endDate, List<String> categories, Boolean isService, Boolean isProduct, Pageable pageable) {
+    public Page<OfferDTO> searchOffers(String name, String description, Double maxPrice, Boolean isOnSale, LocalDateTime startDate, LocalDateTime endDate, String category, String eventType, Boolean isService, Boolean isProduct, Pageable pageable) {
         System.out.println("Search Offers called with parameters:");
         System.out.println("Name: " + name);
         System.out.println("Description: " + description);
@@ -135,7 +136,8 @@ public class OfferServiceImpl implements OfferService {
         System.out.println("Is On Sale: " + isOnSale);
         System.out.println("Start Date: " + startDate);
         System.out.println("End Date: " + endDate);
-        System.out.println("Categories: " + categories);
+        System.out.println("Category: " + category);
+        System.out.println("EventType: " + eventType);
         System.out.println("Is Service: " + isService);
         System.out.println("Is Product: " + isProduct);
         System.out.println("Page Number: " + pageable.getPageNumber());
@@ -147,13 +149,18 @@ public class OfferServiceImpl implements OfferService {
                 .filter(offer ->
                         (name == null || name.isEmpty() || offer.getName().toLowerCase().contains(name.toLowerCase())) ||
                                 (description == null || description.isEmpty() || offer.getDescription().toLowerCase().contains(description.toLowerCase())))
-                .filter(offer -> maxPrice == null || offer.getPrice() <= maxPrice)
-                .filter(offer -> isOnSale == null || offer.getSale().equals(isOnSale))
-                .filter(offer -> categories == null || categories.isEmpty() || categories.contains(offer.getCategory().getName()))
+                .filter(offer -> maxPrice == null ||
+                        (offer.getSale() != null && offer.getSale() > 0 ? offer.getSale() <= maxPrice : offer.getPrice() <= maxPrice)) //if it is on sale compare max price to sale price
+                .filter(offer -> isOnSale == null || (!isOnSale) || (isOnSale && offer.getSale() != null && offer.getSale() > 0)) //if isOnSale is false then return all
+                .filter(offer -> category == null || category.isEmpty() || category.toLowerCase().equals(offer.getCategory().getName().toLowerCase()))
 //                .filter(offer -> (startDate == null || offer.getDate().isAfter(startDate)) &&
 //                        (endDate == null || offer.getDate().isBefore(endDate)))
-//                .filter(offer -> (isService == null || offer.getIsService().equals(isService)) &&
-//                        (isProduct == null || offer.getIsProduct().equals(isProduct)))
+                .filter(offer -> (isService == null || (isService && offer.isService())) ||
+                        (isProduct == null || (isProduct && offer.isProduct())))
+                .filter(offer -> eventType == null || eventType.isEmpty() ||
+                        offer.getEventTypes().stream().anyMatch(type -> type.getName().equalsIgnoreCase(eventType))
+                )
+
                 .collect(Collectors.toList());
 
         int start = (int) pageable.getOffset();

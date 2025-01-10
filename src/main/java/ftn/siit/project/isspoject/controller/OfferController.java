@@ -1,6 +1,7 @@
 package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.event.EventDTO;
+import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.dto.offer.PriceListOfferDTO;
@@ -123,19 +124,19 @@ public class OfferController {
     public ResponseEntity<Page<OfferDTO>> searchOffers(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String description,
-            @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(required = false) Boolean isOnSale,
             @RequestParam(required = false) LocalDateTime startDate,
             @RequestParam(required = false) LocalDateTime endDate,
-            @RequestParam(required = false) List<String> categories,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String eventType,
             @RequestParam(required = false) Boolean isService,
             @RequestParam(required = false) Boolean isProduct,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int pageSize) {
 
         Pageable pageable = PageRequest.of(page, pageSize);
-        Page<OfferDTO> filteredOffers = offerService.searchOffers(name, description, maxPrice, isOnSale, startDate, endDate, categories, isService, isProduct, pageable);
+        Page<OfferDTO> filteredOffers = offerService.searchOffers(name, description, maxPrice, isOnSale, startDate, endDate, category, eventType, isService, isProduct, pageable);
 
         if (filteredOffers.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -232,5 +233,15 @@ public class OfferController {
 
         return ResponseEntity.ok(od);
 
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<List<String>> getCategories() {
+        List<String> categoryNames = categoryService.findAllNames();
+        if (categoryNames.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        System.out.println("Categories: " + categoryNames);
+        return ResponseEntity.ok(categoryNames);
     }
 }
