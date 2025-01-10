@@ -2,6 +2,7 @@ package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
+import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.dto.offer.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
@@ -11,11 +12,13 @@ import ftn.siit.project.isspoject.repository.ServiceRepository;
 import ftn.siit.project.isspoject.service.interfaces.OfferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
 public class OfferServiceImpl implements OfferService {
@@ -122,4 +125,46 @@ public class OfferServiceImpl implements OfferService {
     public List<Offer> searchItems(String name, String description, Double minPrice, Double maxPrice, LocalDateTime startDate, LocalDateTime endDate, String category, Boolean isService) {
         return offerRepository.searchItems(name, description, minPrice, maxPrice, startDate, endDate, category, isService);
     }
+
+    @Override
+    public Page<OfferDTO> searchOffers(String name, String description, Double maxPrice, Boolean isOnSale, LocalDateTime startDate, LocalDateTime endDate, List<String> categories, Boolean isService, Boolean isProduct, Pageable pageable) {
+        System.out.println("Search Offers called with parameters:");
+        System.out.println("Name: " + name);
+        System.out.println("Description: " + description);
+        System.out.println("Max Price: " + maxPrice);
+        System.out.println("Is On Sale: " + isOnSale);
+        System.out.println("Start Date: " + startDate);
+        System.out.println("End Date: " + endDate);
+        System.out.println("Categories: " + categories);
+        System.out.println("Is Service: " + isService);
+        System.out.println("Is Product: " + isProduct);
+        System.out.println("Page Number: " + pageable.getPageNumber());
+        System.out.println("Page Size: " + pageable.getPageSize());
+
+        List<Offer> offers = offerRepository.findAll();
+
+        List<Offer> filteredOffers = offers.stream()
+                .filter(offer ->
+                        (name == null || name.isEmpty() || offer.getName().toLowerCase().contains(name.toLowerCase())) ||
+                                (description == null || description.isEmpty() || offer.getDescription().toLowerCase().contains(description.toLowerCase())))
+                .filter(offer -> maxPrice == null || offer.getPrice() <= maxPrice)
+                .filter(offer -> isOnSale == null || offer.getSale().equals(isOnSale))
+                .filter(offer -> categories == null || categories.isEmpty() || categories.contains(offer.getCategory().getName()))
+//                .filter(offer -> (startDate == null || offer.getDate().isAfter(startDate)) &&
+//                        (endDate == null || offer.getDate().isBefore(endDate)))
+//                .filter(offer -> (isService == null || offer.getIsService().equals(isService)) &&
+//                        (isProduct == null || offer.getIsProduct().equals(isProduct)))
+                .collect(Collectors.toList());
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), filteredOffers.size());
+        List<Offer> paginatedOffers = filteredOffers.subList(start, end);
+        List<OfferDTO> paginatedOfferDTOs = filteredOffers.subList(start, end)
+                .stream()
+                .map(OfferDTO::new)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(paginatedOfferDTOs, pageable, filteredOffers.size());
+    }
+
 }
