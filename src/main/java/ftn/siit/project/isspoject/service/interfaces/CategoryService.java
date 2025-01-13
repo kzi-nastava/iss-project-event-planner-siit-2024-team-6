@@ -15,7 +15,7 @@ public interface CategoryService {
     List<String> findAllNames();
     List<Category> findAllByNames(List<String> names);
     void createPendingCategory(String category);
-
+    Category save(String name, String description);
     Category save(NewCategoryDTO newCategoryDTO);
     Category save(Category category);
     Category update(int id, NewCategoryDTO newCategoryDTO);
