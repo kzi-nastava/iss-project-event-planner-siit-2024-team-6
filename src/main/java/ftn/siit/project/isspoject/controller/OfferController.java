@@ -1,6 +1,7 @@
 package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.event.EventDTO;
+import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.dto.offer.PriceListOfferDTO;
@@ -17,6 +18,7 @@ import ftn.siit.project.isspoject.util.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -119,19 +121,31 @@ public class OfferController {
         return ResponseEntity.ok(prices);
     }
     @GetMapping("/search")
-    public ResponseEntity<List<Offer>> searchOffers(
+    public ResponseEntity<Page<OfferDTO>> searchOffers(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String description,
-            @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Boolean isOnSale,
             @RequestParam(required = false) LocalDateTime startDate,
             @RequestParam(required = false) LocalDateTime endDate,
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) Boolean isService) {
+            @RequestParam(required = false) String eventType,
+            @RequestParam(required = false) Boolean isService,
+            @RequestParam(required = false) Boolean isProduct,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int pageSize) {
 
-        List<Offer> filteredItems = offerService.searchItems(name, description, minPrice, maxPrice, startDate, endDate, category, isService);
-        return ResponseEntity.ok(filteredItems);
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<OfferDTO> filteredOffers = offerService.searchOffers(name, description, maxPrice, isOnSale, startDate, endDate, category, eventType, isService, isProduct, pageable);
+
+        if (filteredOffers.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        System.out.println("Filtered Offers: " + filteredOffers);
+
+        return ResponseEntity.ok(filteredOffers);
     }
+
 
     @PostMapping("{offerId}/favorite")
     public ResponseEntity<UserDTO> addOfferToFavorites(@PathVariable Integer offerId, HttpServletRequest request) {
@@ -219,5 +233,15 @@ public class OfferController {
 
         return ResponseEntity.ok(od);
 
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<List<String>> getCategories() {
+        List<String> categoryNames = categoryService.findAllNames();
+        if (categoryNames.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        System.out.println("Categories: " + categoryNames);
+        return ResponseEntity.ok(categoryNames);
     }
 }

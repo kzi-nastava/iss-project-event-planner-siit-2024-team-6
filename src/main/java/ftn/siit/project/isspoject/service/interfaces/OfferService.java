@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.service.interfaces;
 
+import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
@@ -26,4 +27,6 @@ public interface OfferService {
     Offer update(int id, NewOfferDTO dto);
     void delete(Offer offer);
     List<Offer> searchItems(String name, String description, Double minPrice, Double maxPrice, LocalDateTime startDate, LocalDateTime endDate, String category, Boolean isService);
+    Page<OfferDTO> searchOffers(String name, String description, Double maxPrice, Boolean isOnSale, LocalDateTime startDate, LocalDateTime endDate, String category, String eventType, Boolean isService, Boolean isProduct, Pageable pageable);
+
 }

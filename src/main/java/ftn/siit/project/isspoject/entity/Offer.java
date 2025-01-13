@@ -103,5 +103,13 @@ public class Offer {
             return new Service(dto, category);
         }
     }
+
+    public boolean isProduct() {
+        return this instanceof Product;
+    }
+
+    public boolean isService() {
+        return this instanceof Service;
+    }
 }
 
