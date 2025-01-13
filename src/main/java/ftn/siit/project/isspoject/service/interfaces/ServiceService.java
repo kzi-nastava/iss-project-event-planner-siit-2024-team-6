@@ -19,5 +19,6 @@ public interface ServiceService {
     Service save(NewOfferDTO offerDTO, Provider p, List<EventType> eventTypes, Category c, Status s);
     Service update(Service service);
     Service update(int id, NewOfferDTO dto, List<EventType> eventTypes);
+    Service update(int id, Category c, Status s);
     void delete(Service service);
 }
