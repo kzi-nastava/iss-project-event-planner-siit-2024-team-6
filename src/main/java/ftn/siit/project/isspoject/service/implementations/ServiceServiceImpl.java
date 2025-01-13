@@ -164,6 +164,14 @@ public class ServiceServiceImpl implements ServiceService {
     }
 
     @Override
+    public Service update(int id, Category c, Status st) {
+        Service s = findById(id);
+        s.setCategory(c);
+        s.setStatus(st);
+        return serviceRepository.save(s);
+    }
+
+    @Override
     public void delete(Service s) {
         findById(s.getId());
         s.setIsDeleted(true);

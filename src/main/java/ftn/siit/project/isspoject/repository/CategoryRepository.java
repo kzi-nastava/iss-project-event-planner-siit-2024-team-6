@@ -12,8 +12,7 @@ import java.util.List;
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Integer> {
     Category findByNameIgnoreCase(String name);
-    Category findById(int id);
-    @Query("SELECT c.name FROM Category c")
+    @Query("SELECT c.name FROM Category c WHERE c.isDeleted IS FALSE")
     List<String> findAllNames();
-    Page<Category> findAll(Pageable pageable);
+    Page<Category> findAllByIsDeletedIsFalse(Pageable pageable);
 }

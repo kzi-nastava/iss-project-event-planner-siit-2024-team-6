@@ -1,7 +1,6 @@
 package ftn.siit.project.isspoject.dto.offer;
 
-import ftn.siit.project.isspoject.dto.category.NewCategorySuggestionDTO;
-import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
+import ftn.siit.project.isspoject.dto.category.NewCategoryDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventTypeDTO;
 import ftn.siit.project.isspoject.entity.*;
 
@@ -21,7 +20,7 @@ public class NewOfferDTO {
     private Boolean isAvailable;
     private Boolean isDeleted;
     private String category;
-    private String categorySuggestion;
+    private NewCategoryDTO categorySuggestion;
     private List<NewEventTypeDTO> eventTypes;
     private String type; // product or service
 

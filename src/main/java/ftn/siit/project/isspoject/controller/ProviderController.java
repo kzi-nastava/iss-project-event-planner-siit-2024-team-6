@@ -2,10 +2,6 @@ package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
 import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
-import ftn.siit.project.isspoject.dto.category.CategorySuggestionDTO;
-import ftn.siit.project.isspoject.dto.category.NewCategorySuggestionDTO;
-import ftn.siit.project.isspoject.dto.event.EventDTO;
-import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventTypeDTO;
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
@@ -16,7 +12,6 @@ import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.interfaces.*;
 import ftn.siit.project.isspoject.util.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

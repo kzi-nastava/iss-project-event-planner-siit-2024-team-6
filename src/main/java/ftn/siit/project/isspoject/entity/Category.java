@@ -14,12 +14,14 @@ public class Category {
     private Integer id;
     private String name;
     private String description;
+    private Boolean isDeleted;
 
     public Category() {}
-    public Category(Integer id, String name, String description) {
+    public Category(Integer id, String name, String description, Boolean isDeleted) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.isDeleted = isDeleted;
     }
 }
 

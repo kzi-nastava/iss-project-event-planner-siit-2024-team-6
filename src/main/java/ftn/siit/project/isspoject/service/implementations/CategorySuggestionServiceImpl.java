@@ -1,16 +1,17 @@
 package ftn.siit.project.isspoject.service.implementations;
 
-import ftn.siit.project.isspoject.dto.category.NewCategorySuggestionDTO;
+import ftn.siit.project.isspoject.dto.category.NewCategoryDTO;
 import ftn.siit.project.isspoject.entity.CategorySuggestion;
 import ftn.siit.project.isspoject.entity.Status;
 import ftn.siit.project.isspoject.repository.CategorySuggestionRepository;
 import ftn.siit.project.isspoject.service.interfaces.CategorySuggestionService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CategorySuggestionServiceImpl implements CategorySuggestionService {
@@ -19,12 +20,19 @@ public class CategorySuggestionServiceImpl implements CategorySuggestionService 
 
     @Override
     public List<CategorySuggestion> getPending() {
-        return List.of();
+        return categorySuggestionRepository.findByStatus(Status.PENDING);
+    }
+
+    @Override
+    public Page<CategorySuggestion> getPending(Pageable pageable) {
+        return categorySuggestionRepository.findByStatus(Status.PENDING, pageable);
     }
 
     @Override
     public CategorySuggestion findById(int id) {
-        return categorySuggestionRepository.findById(id);
+        CategorySuggestion cs = categorySuggestionRepository.findById(id);
+        if (cs == null) throw new EntityNotFoundException("Category suggestion with id " + id + " not found");
+        return cs;
     }
 
     @Override
@@ -35,16 +43,33 @@ public class CategorySuggestionServiceImpl implements CategorySuggestionService 
     @Override
     public CategorySuggestion update(CategorySuggestion categorySuggestion) {
         CategorySuggestion existingCategorySuggestion = findById(categorySuggestion.getId());
-        if (existingCategorySuggestion == null) {
-            throw new EntityNotFoundException("Category suggestion does not exist");
-        }
-        existingCategorySuggestion.setSuggestion(categorySuggestion.getSuggestion());
+        existingCategorySuggestion.setName(categorySuggestion.getName());
+        existingCategorySuggestion.setDescription(categorySuggestion.getDescription());
         existingCategorySuggestion.setStatus(categorySuggestion.getStatus());
         return categorySuggestionRepository.save(existingCategorySuggestion);
     }
 
     @Override
-    public void delete(CategorySuggestion categorySuggestion) {
-        categorySuggestionRepository.delete(categorySuggestion);
+    public CategorySuggestion update(int id, NewCategoryDTO dto) {
+        CategorySuggestion existingCategorySuggestion = findById(id);
+        existingCategorySuggestion.setName(dto.getName());
+        existingCategorySuggestion.setDescription(dto.getDescription());
+        existingCategorySuggestion.setStatus(Status.ACCEPTED);
+        return categorySuggestionRepository.save(existingCategorySuggestion);
+    }
+
+
+    @Override
+    public CategorySuggestion approve(int id) {
+        CategorySuggestion existingCategorySuggestion = findById(id);
+        existingCategorySuggestion.setStatus(Status.ACCEPTED);
+        return update(existingCategorySuggestion);
+    }
+
+    @Override
+    public CategorySuggestion reject(int id) {
+        CategorySuggestion existingCategorySuggestion = findById(id);
+        existingCategorySuggestion.setStatus(Status.REJECTED);
+        return categorySuggestionRepository.save(existingCategorySuggestion);
     }
 }

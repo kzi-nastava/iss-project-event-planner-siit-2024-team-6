@@ -57,7 +57,11 @@ public class OfferDTO {
             this.isAvailable = offer.getIsAvailable();
             this.isDeleted = offer.getIsDeleted();
             this.eventTypes = offer.getEventTypes().stream().map(EventTypeDTO::new).toList();
-            this.category = offer.getCategory().getName();
+            if(offer.getCategory() != null) {
+                this.category = offer.getCategory().getName();
+            }else{
+                this.category = "Waiting for Category";
+            }
             if (offer instanceof Product) {
                 this.type = "Product";
             } else if (offer instanceof Service) {

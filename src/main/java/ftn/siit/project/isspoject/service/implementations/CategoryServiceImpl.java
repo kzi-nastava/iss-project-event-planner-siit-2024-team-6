@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -36,14 +37,15 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category findById(Integer id) {
-        return categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found with ID: " + id));
+        Optional<Category> c = categoryRepository.findById(id);
+        if(c == null || c.get().getIsDeleted()) throw new NotFoundException("Category not found");
+        return c.get();
     }
 
     @Override
     public Category findByName(String name) {
         Category category = categoryRepository.findByNameIgnoreCase(name);
-        if (category == null) {
+        if (category == null || category.getIsDeleted()) {
             throw new NotFoundException("Category not found with name: " + name);
         }
         return category;
@@ -51,7 +53,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Page<Category> findAll(Pageable pageable) {
-        Page<Category> categories = categoryRepository.findAll(pageable);
+        Page<Category> categories = categoryRepository.findAllByIsDeletedIsFalse(pageable);
         if (categories.isEmpty()) {
             throw new NotFoundException("No categories found.");
         }
@@ -66,7 +68,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Category> findAllByNames(List<String> names) {
         List<Category> categories = categoryRepository.findAll().stream()
-                .filter(category -> names.contains(category.getName()))
+                .filter(category -> names.contains(category.getName()) && category.getIsDeleted() == false)
                 .toList();
 
         if (categories.isEmpty()) {
@@ -96,13 +98,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category update(Category category) {
-        if (category == null || category.getId() == null) {
+        if (category == null || category.getId() == null || category.getIsDeleted()) {
             throw new IllegalArgumentException("Category or Category ID cannot be null while updating.");
         }
 
         Category existingCategory = findById(category.getId());
         existingCategory.setName(category.getName());
         existingCategory.setDescription(category.getDescription());
+        existingCategory.setIsDeleted(category.getIsDeleted());
         return categoryRepository.save(existingCategory);
     }
 
@@ -112,22 +115,33 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public Category save(String name, String description) {
+        Category category = new Category();
+        category.setName(name);
+        category.setDescription(description);
+        category.setIsDeleted(false);
+        return categoryRepository.save(category);
+    }
+
+    @Override
     public Category save(NewCategoryDTO newCategoryDTO) {
         Category category = new Category();
         category.setName(newCategoryDTO.getName());
         category.setDescription(newCategoryDTO.getDescription());
+        category.setIsDeleted(false);
         return categoryRepository.save(category);
     }
 
     @Override
     public void delete(Category category) {
-       delete(category.getId());
+       category.setIsDeleted(true);
+       categoryRepository.save(category);
     }
 
     @Override
     public void delete(Integer id) {
         Category category = findById(id);
-        if (category == null) {
+        if (category == null || category.getIsDeleted()) {
             throw new NotFoundException("Category not found with ID: " + id);
         }
         categoryRepository.deleteById(id);

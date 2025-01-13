@@ -30,8 +30,8 @@ public class Offer {
     private Boolean isAvailable;
     private Boolean isDeleted;
     private LocalDateTime lastChanged;
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "category_id", nullable = false)
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "category_id", nullable = true)
     private Category category;
     @ManyToMany
     @JoinTable(
