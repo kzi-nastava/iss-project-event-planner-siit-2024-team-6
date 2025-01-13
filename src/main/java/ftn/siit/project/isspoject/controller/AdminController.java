@@ -1,11 +1,9 @@
 package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.category.NewCategoryDTO;
-import ftn.siit.project.isspoject.dto.category.NewCategorySuggestionDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventTypeDTO;
-import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
 import ftn.siit.project.isspoject.dto.user.UserDTO;
 import ftn.siit.project.isspoject.entity.User;
@@ -22,7 +20,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,6 +53,8 @@ public class AdminController {
     private TokenUtils tokenUtils;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private ServiceService serviceService;
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -249,15 +248,24 @@ public class AdminController {
                 .header("Content-Disposition", "attachment; filename=event-analytics.pdf")
                 .body(pdf);
     }
+
+    @GetMapping("category-names")
+    public ResponseEntity<List<String>> getAllCategoryNames(HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        List<String> categories = categoryService.findAllNames();
+        if (categories.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(categories);
+    }
+
     @GetMapping("categories")
     public ResponseEntity<PagedResponse<Category>> getAllCategories(Pageable page, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
-        User u = userService.findByEmail(email);
-        if(!userService.getUserRole(u.getId()).equals("ROLE_ADMIN")) {
+        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Page<Category> categories = categoryService.findAll(page);
@@ -273,12 +281,7 @@ public class AdminController {
     @PostMapping("category")
     public ResponseEntity<Category> addCategory(@RequestBody NewCategoryDTO dto, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
-        User u = userService.findByEmail(email);
-        if(!userService.getUserRole(u.getId()).equals("ROLE_ADMIN")) {
+        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Category savedCategory = categoryService.save(dto);
@@ -288,12 +291,7 @@ public class AdminController {
     @PutMapping("category/{id}")
     public ResponseEntity<Category> updateCategory(@PathVariable int id, @RequestBody NewCategoryDTO dto, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
-        User u = userService.findByEmail(email);
-        if(!userService.getUserRole(u.getId()).equals("ROLE_ADMIN")) {
+        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Category oldCategory = categoryService.findById(id);
@@ -305,18 +303,10 @@ public class AdminController {
     @DeleteMapping("category/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable int id, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
-        User u = userService.findByEmail(email);
-        if(!userService.getUserRole(u.getId()).equals("ROLE_ADMIN")) {
+        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Category oldCategory = categoryService.findById(id);
-        if (oldCategory == null) {
-           throw new NotFoundException("Category with id " + id + " not found, can't be deleted");
-        }
         if (!offerService.allOffersWithCategory(oldCategory).isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The category must not have any offers using it.");
         }
@@ -325,30 +315,70 @@ public class AdminController {
     }
 
     @GetMapping("suggestions")
-    public ResponseEntity<List<CategorySuggestionDTO>> getAllCategorySuggestions() {
-        List<CategorySuggestion> suggestions = categorySuggestionService.getPending();
-        if (suggestions.isEmpty()) {
-            return ResponseEntity.noContent().build();
+    public ResponseEntity<PagedResponse<CategorySuggestionDTO>> getAllCategorySuggestions(Pageable page, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        return ResponseEntity.ok(suggestions.stream().map(CategorySuggestionDTO::new).collect(Collectors.toList()));
+        Page<CategorySuggestion> suggestions = categorySuggestionService.getPending(page);
+        List<CategorySuggestionDTO> dtos = suggestions.stream()
+                .map(suggestion -> {
+                    try {
+                        return new CategorySuggestionDTO(suggestion);
+                    } catch (Exception e) {
+                        System.err.println("Error converting suggestion to DTO: " + e.getMessage());
+                        return null;
+                    }
+                })
+                .filter(dto -> dto != null)
+                .toList();
+
+        PagedResponse<CategorySuggestionDTO> response = new PagedResponse<>(
+                dtos,
+                suggestions.getTotalPages(),
+                suggestions.getTotalElements()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("suggestion/approve/{id}")
+    public ResponseEntity<CategorySuggestionDTO> approveSuggestion(@PathVariable int id, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        CategorySuggestion suggestion = categorySuggestionService.approve(id);
+        Category c = categoryService.save(suggestion.getName(), suggestion.getDescription());
+        serviceService.update(suggestion.getOffer().getId(), c, Status.ACCEPTED);
+        notificationService.notifyUser(suggestion.getOffer().getProvider(), "Suggestion of new category ("+ suggestion.getName()+", "+suggestion.getDescription()+") has been approved");
+        return ResponseEntity.ok(new CategorySuggestionDTO(suggestion));
     }
 
     @PutMapping("suggestion/{id}")
-    public ResponseEntity<CategorySuggestionDTO> updateCategorySuggestion(@PathVariable int id, @RequestBody NewCategorySuggestionDTO dto) {
-        CategorySuggestion cs = categorySuggestionService.findById(id);
-        if (cs == null) {
-            throw new NotFoundException("CategorySuggestion with id " + id + " not found, can't be updated");
+    public ResponseEntity<CategorySuggestionDTO> updateCategorySuggestion(@PathVariable int id, @RequestBody NewCategoryDTO dto, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        cs.setSuggestion(dto.getSuggestion());
-        CategorySuggestion updated = categorySuggestionService.update(cs);
+        CategorySuggestion updated = categorySuggestionService.update(id, dto);
+        Category c = categoryService.save(updated.getName(), updated.getDescription());
+        serviceService.update(updated.getOffer().getId(), c, Status.ACCEPTED);
+        notificationService.notifyUser(updated.getOffer().getProvider(), "Your suggestion of new category has been changed to ("+ updated.getName()+", "+updated.getDescription()+") and approved");
         return ResponseEntity.ok(new CategorySuggestionDTO(updated));
     }
 
-    @DeleteMapping("suggestion/{id}")
-    public ResponseEntity<Void> deleteCategorySuggestion(@PathVariable int id) {
-        CategorySuggestion cs = categorySuggestionService.findById(id);
-        if (cs == null) {throw new NotFoundException("Category suggestion not found");}
-        categorySuggestionService.delete(cs);
-        return ResponseEntity.noContent().build();
+    @PutMapping("suggestion/reject/{id}")
+    public ResponseEntity<CategorySuggestionDTO> deleteCategorySuggestion(@PathVariable int id, @RequestParam String categoryName, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if(categoryName == null || categoryName.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        CategorySuggestion cs = categorySuggestionService.reject(id);
+        serviceService.update(cs.getOffer().getId(), categoryService.findByName(categoryName), Status.ACCEPTED);
+        notificationService.notifyUser(cs.getOffer().getProvider(), "Your suggestion of new category has been rejected. This category is chosen instead ("+ categoryName+") ");
+        return ResponseEntity.ok(new CategorySuggestionDTO(cs));
     }
 }
