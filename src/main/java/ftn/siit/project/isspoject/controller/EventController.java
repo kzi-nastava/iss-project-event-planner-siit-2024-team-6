@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,7 +28,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -291,14 +295,27 @@ public class EventController {
             @RequestParam(required = false) String description,
             @RequestParam(required = false) String place,
             @RequestParam(required = false) String eventType,
-            @RequestParam(required = false) Boolean isPublic,
-            @RequestParam(required = false) LocalDateTime startDate,
-            @RequestParam(required = false) LocalDateTime endDate,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int pageSize) {
 
+        LocalDateTime startDateTime = null;
+        LocalDateTime endDateTime = null;
+
+        if (startDate != null && !startDate.isEmpty()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            startDateTime = LocalDate.parse(startDate, formatter).atStartOfDay();
+        }
+
+        if (endDate != null && !endDate.isEmpty()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            endDateTime = LocalDate.parse(endDate, formatter).atTime(LocalTime.MAX);
+        }
+
+
         Pageable pageable = PageRequest.of(page, pageSize);
-        Page<Event> filteredEvents = eventService.searchEvents(name, description, place, eventType, startDate, endDate, pageable);
+        Page<Event> filteredEvents = eventService.searchEvents(name, description, place, eventType, startDateTime, endDateTime, pageable);
         if (filteredEvents.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
