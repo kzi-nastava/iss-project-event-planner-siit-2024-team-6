@@ -14,16 +14,22 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/api/notifications/")
-@CrossOrigin(origins = "http://localhost:4200")
 public class NotificationController {
 
     @Autowired
     private NotificationService notificationService;
+
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate; // Used to send WebSocket messages
 
     @PostMapping
     public ResponseEntity<NotificationDTO> addNotification(@RequestBody NewNotificationDTO dto) {
@@ -33,8 +39,11 @@ public class NotificationController {
         notification.setReceiver(receiver);
 
         Notification saved = notificationService.save(notification);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new NotificationDTO(saved));
 
+        // Send the notification via WebSocket
+        messagingTemplate.convertAndSend("/topic/notifications/" + receiver.getId(), new NotificationDTO(saved));
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(new NotificationDTO(saved));
     }
 
     @PutMapping("{id}")
@@ -43,9 +52,12 @@ public class NotificationController {
         notification.setText(dto.getText());
 
         Notification updated = notificationService.save(notification);
+
+        // Send the updated notification via WebSocket
+        messagingTemplate.convertAndSend("/topic/notifications/" + updated.getReceiver().getId(), new NotificationDTO(updated));
+
         return ResponseEntity.ok(new NotificationDTO(updated));
     }
-
 
     @GetMapping("receiver/{receiverId}")
     public ResponseEntity<List<NotificationDTO>> getByReceiver(@PathVariable Integer receiverId) {
@@ -58,6 +70,4 @@ public class NotificationController {
                 .toList();
         return ResponseEntity.ok(dtos);
     }
-
-
 }
