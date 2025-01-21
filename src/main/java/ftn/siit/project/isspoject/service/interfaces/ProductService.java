@@ -1,6 +1,9 @@
 package ftn.siit.project.isspoject.service.interfaces;
 
 import ftn.siit.project.isspoject.entity.Product;
+import ftn.siit.project.isspoject.entity.Provider;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -13,4 +16,6 @@ public interface ProductService {
     List<Product> filterProducts(String category, String eventType, Double minPrice, Double maxPrice, Boolean available, Boolean visible);
     Product findById(Integer productId);
     List<Product> findByProvider(int providerId);
+
+    Page<Product> findByProvider(Provider p, Pageable page);
 }

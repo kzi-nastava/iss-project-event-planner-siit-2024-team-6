@@ -6,6 +6,8 @@ import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.ProductRepository;
 import ftn.siit.project.isspoject.service.interfaces.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -77,6 +79,10 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Product> findByProvider(int providerId) {
         return productRepository.findByProviderIdAndIsDeletedFalseOrIsDeletedIsNull(providerId);
+    }
+    @Override
+    public Page<Product> findByProvider(Provider p, Pageable page) {
+        return productRepository.findAllByProviderIdAndIsDeletedFalseOrIsDeletedIsNull(p.getId(), page);
     }
 
 }

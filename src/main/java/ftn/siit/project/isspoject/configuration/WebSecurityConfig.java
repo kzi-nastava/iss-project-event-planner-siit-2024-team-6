@@ -118,14 +118,17 @@ public class WebSecurityConfig{
                     .requestMatchers(new AntPathRequestMatcher("/api/offers/**/favorite")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/events/**/favorite")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/events/**/getInfoPDF")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/events/**/event-types-by-category")).hasAnyRole("ADMIN","PROVIDER")
                     .requestMatchers(new AntPathRequestMatcher("/api/events/**/getEventStatisticsPDF")).hasAnyRole("ADMIN","ORGANIZER")
                     .requestMatchers(new AntPathRequestMatcher("/api/events/**/getOrganizer")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/organizers/events/**/activities")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/organizers/events/**/activity")).hasRole("ORGANIZER")
                     .requestMatchers(new AntPathRequestMatcher("/api/organizers/events/**/activity/**")).hasRole("ORGANIZER")
                     .requestMatchers(new AntPathRequestMatcher("/api/providers/**/my-services")).authenticated()
+                    .requestMatchers(new AntPathRequestMatcher("/api/providers/product")).hasAnyRole("ADMIN","PROVIDER")
+                    .requestMatchers(new AntPathRequestMatcher("/api/providers/my-products")).hasRole("PROVIDER")
 //                    .requestMatchers(new AntPathRequestMatcher("/api/users")).permitAll()
-//                    .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll()/getAgendaPDF /getInfoPDF getEventStatisticsPDF
+//                    .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll() my-products
                     // Разрешаем доступ к маршруту /error для более удобных сообщений об ошибках.""admin@a.a" /api/organizers/
                     .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
 //                    .requestMatchers(new AntPathRequestMatcher("/api/whoami")).hasRole("USER")

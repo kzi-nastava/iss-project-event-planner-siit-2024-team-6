@@ -321,6 +321,21 @@ public class EventController {
         }
         return ResponseEntity.ok(filteredEvents);
     }
+    @GetMapping("{categoryId}/event-types-by-category")
+    public ResponseEntity<List<EventTypeDTO>> getEventTypesByCategory( @PathVariable Integer categoryId, HttpServletRequest request){
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(eventTypeService.findAllWithCategoryId(categoryId));
+    }
 
     @GetMapping("{name}/event-type")
     public ResponseEntity<EventTypeDTO> getEventType(@PathVariable String name) {

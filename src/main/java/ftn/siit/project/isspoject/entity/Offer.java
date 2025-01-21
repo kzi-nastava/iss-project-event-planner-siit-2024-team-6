@@ -95,6 +95,23 @@ public class Offer {
         this.isDeleted = dto.getIsDeleted();
         this.category = category;
     }
+
+    public Offer(NewOfferDTO dto, Category category, List<EventType> e, Provider p) {
+        this.status = dto.getStatus();
+        this.name = dto.getName();
+        this.description = dto.getDescription();
+        this.price = dto.getPrice();
+        this.sale = dto.getSale();
+        this.photos = dto.getPhotos();
+        this.isVisible = dto.getIsVisible();
+        this.isAvailable = dto.getIsAvailable();
+        this.isDeleted = dto.getIsDeleted();
+        this.category = category;
+        this.eventTypes = e;
+        this.provider = p;
+    }
+
+
     public Offer toOffer(OfferDTO dto, Category category) {
         if (dto == null) {return null;}
         if (dto.getType().equals("Product")){
