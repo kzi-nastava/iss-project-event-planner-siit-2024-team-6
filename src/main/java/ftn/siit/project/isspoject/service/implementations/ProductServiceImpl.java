@@ -1,5 +1,8 @@
 package ftn.siit.project.isspoject.service.implementations;
 
+import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
+import ftn.siit.project.isspoject.entity.EventType;
+import ftn.siit.project.isspoject.entity.Offer;
 import ftn.siit.project.isspoject.entity.Product;
 import ftn.siit.project.isspoject.entity.Provider;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
@@ -83,6 +86,22 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<Product> findByProvider(Provider p, Pageable page) {
         return productRepository.findAllByProviderIdAndIsDeletedFalseOrIsDeletedIsNull(p.getId(), page);
+    }
+
+    @Override
+    public Offer update(int offerId, NewOfferDTO dto, List<EventType> eventTypes) {
+        Product existingProduct = this.findById(offerId);
+        existingProduct.setName(dto.getName());
+        existingProduct.setDescription(dto.getDescription());
+        existingProduct.setPrice(dto.getPrice());
+        existingProduct.setIsAvailable(dto.getIsAvailable());
+        existingProduct.setSale(dto.getSale());
+        existingProduct.setPhotos(dto.getPhotos());
+        existingProduct.setIsDeleted(false);
+        existingProduct.setIsVisible(dto.getIsVisible());
+        existingProduct.setEventTypes(eventTypes);
+
+        return this.save(existingProduct);
     }
 
 }
