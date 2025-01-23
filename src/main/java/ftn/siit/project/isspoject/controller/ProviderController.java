@@ -190,7 +190,21 @@ public class ProviderController {
         Offer updated = serviceService.update(offerId, dto, eventTypes);
         return ResponseEntity.ok(new OfferDTO(updated));
     }
-
+    @PutMapping("{offerId}/product")
+    public ResponseEntity<OfferDTO> updateProduct(@PathVariable int offerId, @RequestBody NewOfferDTO dto, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        providerService.findByEmail(email);
+        List<EventType> eventTypes = new ArrayList<>();
+        for (NewEventTypeDTO eventType : dto.getEventTypes()) {
+            eventTypes.add(eventTypeService.findByName(eventType.getName()));
+        }
+        Offer updated = productService.update(offerId, dto, eventTypes);
+        return ResponseEntity.ok(new OfferDTO(updated));
+    }
     @DeleteMapping("{offerId}")
     public ResponseEntity<Void> deleteOffer(@PathVariable int offerId, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
