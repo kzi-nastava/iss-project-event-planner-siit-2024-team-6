@@ -139,7 +139,10 @@ public class EventController {
     }
 
     @GetMapping("favorites")
-    public ResponseEntity<List<EventDTO>> getFavorites(HttpServletRequest request) {
+    public ResponseEntity<PagedResponse<EventDTO>> getFavorites(
+            HttpServletRequest request,
+            Pageable pageable
+    ) {
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -153,15 +156,21 @@ public class EventController {
 
         List<Event> events = user.getFavouriteEvents();
 
-        List<EventDTO> ed = new ArrayList<>();
+        List<EventDTO> eventDTOs = events.stream()
+                .map(EventDTO::new)
+                .collect(Collectors.toList());
 
-        for (Event e: events){
-            ed.add(new EventDTO(e));
-        }
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), eventDTOs.size());
+        List<EventDTO> paginatedEvents = eventDTOs.subList(start, end);
 
-        return ResponseEntity.ok(ed);
+        PagedResponse<EventDTO> response = new PagedResponse<>(paginatedEvents,
+                (int) Math.ceil((double) eventDTOs.size() / pageable.getPageSize()),
+                eventDTOs.size());
 
+        return ResponseEntity.ok(response);
     }
+
 
     private UserDTO toUserDTO(User user) {
         UserDTO userDTO = new UserDTO();
