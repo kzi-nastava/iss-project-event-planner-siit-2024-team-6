@@ -265,7 +265,7 @@ public class AdminController {
     @GetMapping("categories")
     public ResponseEntity<PagedResponse<Category>> getAllCategories(Pageable page, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
+        if (jwtToken == null ) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Page<Category> categories = categoryService.findAll(page);
@@ -277,7 +277,6 @@ public class AdminController {
         );
         return ResponseEntity.ok(response);
     }
-
     @PostMapping("category")
     public ResponseEntity<Category> addCategory(@RequestBody NewCategoryDTO dto, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);

@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.service.implementations;
 
+import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.EventTypeRepository;
@@ -7,6 +8,7 @@ import ftn.siit.project.isspoject.service.interfaces.EventTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -47,6 +49,16 @@ public class EventTypeServiceImpl implements EventTypeService {
     @Override
     public List<String> findAllNames() {
         return eventTypeRepository.findAllNames();
+    }
+
+    @Override
+    public List<EventTypeDTO> findAllWithCategoryId(Integer id) {
+        List<EventType> l = eventTypeRepository.findByCategoryId(id);
+        List<EventTypeDTO> lDTO = new ArrayList<>();
+        for(EventType e: l){
+            lDTO.add(new EventTypeDTO(e));
+        }
+        return lDTO;
     }
 
 //    @Override

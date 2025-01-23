@@ -47,7 +47,8 @@ public class EventController {
 
     @Autowired
     private PDFGeneratorService pdfGeneratorService;
-
+    @Autowired
+    private CategoryService categoryService;
     @Autowired
     private UserService userService;
     @Autowired
@@ -138,7 +139,10 @@ public class EventController {
     }
 
     @GetMapping("favorites")
-    public ResponseEntity<List<EventDTO>> getFavorites(HttpServletRequest request) {
+    public ResponseEntity<PagedResponse<EventDTO>> getFavorites(
+            HttpServletRequest request,
+            Pageable pageable
+    ) {
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -152,15 +156,21 @@ public class EventController {
 
         List<Event> events = user.getFavouriteEvents();
 
-        List<EventDTO> ed = new ArrayList<>();
+        List<EventDTO> eventDTOs = events.stream()
+                .map(EventDTO::new)
+                .collect(Collectors.toList());
 
-        for (Event e: events){
-            ed.add(new EventDTO(e));
-        }
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), eventDTOs.size());
+        List<EventDTO> paginatedEvents = eventDTOs.subList(start, end);
 
-        return ResponseEntity.ok(ed);
+        PagedResponse<EventDTO> response = new PagedResponse<>(paginatedEvents,
+                (int) Math.ceil((double) eventDTOs.size() / pageable.getPageSize()),
+                eventDTOs.size());
 
+        return ResponseEntity.ok(response);
     }
+
 
     private UserDTO toUserDTO(User user) {
         UserDTO userDTO = new UserDTO();
@@ -321,7 +331,36 @@ public class EventController {
         }
         return ResponseEntity.ok(filteredEvents);
     }
+    @GetMapping("{categoryId}/event-types-by-category")
+    public ResponseEntity<List<EventTypeDTO>> getEventTypesByCategory( @PathVariable Integer categoryId, HttpServletRequest request){
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
 
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(eventTypeService.findAllWithCategoryId(categoryId));
+    }
+    @GetMapping("{categoryName}/event-types-by-category-name")
+    public ResponseEntity<List<EventTypeDTO>> getEventTypesByCategoryName( @PathVariable String categoryName, HttpServletRequest request){
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(eventTypeService.findAllWithCategoryId(categoryService.findByName(categoryName).getId()));
+    }
     @GetMapping("{name}/event-type")
     public ResponseEntity<EventTypeDTO> getEventType(@PathVariable String name) {
         EventType eventType = eventTypeService.findByName(name);

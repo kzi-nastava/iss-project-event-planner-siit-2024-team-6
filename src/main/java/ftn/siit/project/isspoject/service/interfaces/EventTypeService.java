@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.service.interfaces;
 
+import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.entity.EventType;
 
 import java.util.List;
@@ -14,4 +15,6 @@ public interface EventTypeService {
     EventType findByName(String name);
 
     List<String> findAllNames();
+
+    List<EventTypeDTO> findAllWithCategoryId(Integer id);
 }
