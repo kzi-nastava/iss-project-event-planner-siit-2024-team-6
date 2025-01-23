@@ -18,6 +18,7 @@ import ftn.siit.project.isspoject.util.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -86,6 +87,76 @@ public class OfferController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("favoriteProducts")
+    public ResponseEntity<PagedResponse<OfferDTO>> getFavoriteProductsPageElements(Pageable page, HttpServletRequest request) {
+
+            String jwtToken = this.tokenUtils.getToken(request);
+            if (jwtToken == null) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+            String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+            User user = userService.findByEmail(email);
+
+            if (user == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            List<Offer> offers = user.getFavouriteOffers().stream().filter(Offer::isProduct).filter(o -> !o.getIsDeleted()).toList();
+
+            int start = (int) page.getOffset(); // Начальная позиция (offset)
+            int end = Math.min(start + page.getPageSize(), offers.size()); // Конечная позиция
+            List<Offer> paginatedOffers = offers.subList(start, end); // Выбираем нужный подсписок
+
+            List<OfferDTO> offerDTOs = new ArrayList<>();
+
+            for(Offer o: paginatedOffers){
+                offerDTOs.add(new OfferDTO(o));
+            }
+
+
+        PagedResponse<OfferDTO> response = new PagedResponse<>(
+                offerDTOs,
+                (int) Math.ceil((double) offerDTOs.size() / page.getPageSize()),
+                offerDTOs.size()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    @GetMapping("favoriteServices")
+    public ResponseEntity<PagedResponse<OfferDTO>> getFavoriteServicesPageElements(Pageable page, HttpServletRequest request) {
+
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<Offer> offers = user.getFavouriteOffers().stream().filter(Offer::isService).filter(o -> !o.getIsDeleted()).toList();
+
+        int start = (int) page.getOffset(); // Начальная позиция (offset)
+        int end = Math.min(start + page.getPageSize(), offers.size()); // Конечная позиция
+        List<Offer> paginatedOffers = offers.subList(start, end); // Выбираем нужный подсписок
+
+        List<OfferDTO> offerDTOs = new ArrayList<>();
+
+        for(Offer o: paginatedOffers){
+            offerDTOs.add(new OfferDTO(o));
+        }
+
+
+        PagedResponse<OfferDTO> response = new PagedResponse<>(
+                offerDTOs,
+                (int) Math.ceil((double) offerDTOs.size() / page.getPageSize()),
+                offerDTOs.size()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     @GetMapping("top-five")
     public ResponseEntity<List<OfferDTO>> getTopFive() {
@@ -196,7 +267,7 @@ public class OfferController {
         Offer offer = offerService.findById(offerId);
 
         // Проверка, что событие уже добавлено в избранное
-        if (user.getFavouriteOffers().contains(offer)) {
+        if (!user.getFavouriteOffers().contains(offer)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Событие уже в избранном
         }
 

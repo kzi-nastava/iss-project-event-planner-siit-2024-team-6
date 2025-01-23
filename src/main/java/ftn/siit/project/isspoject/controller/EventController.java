@@ -47,7 +47,8 @@ public class EventController {
 
     @Autowired
     private PDFGeneratorService pdfGeneratorService;
-
+    @Autowired
+    private CategoryService categoryService;
     @Autowired
     private UserService userService;
     @Autowired
@@ -336,7 +337,21 @@ public class EventController {
 
         return ResponseEntity.ok(eventTypeService.findAllWithCategoryId(categoryId));
     }
+    @GetMapping("{categoryName}/event-types-by-category-name")
+    public ResponseEntity<List<EventTypeDTO>> getEventTypesByCategoryName( @PathVariable String categoryName, HttpServletRequest request){
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
 
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(eventTypeService.findAllWithCategoryId(categoryService.findByName(categoryName).getId()));
+    }
     @GetMapping("{name}/event-type")
     public ResponseEntity<EventTypeDTO> getEventType(@PathVariable String name) {
         EventType eventType = eventTypeService.findByName(name);
