@@ -138,8 +138,33 @@ public class EventController {
         return ResponseEntity.ok(updatedUserDTO); // Возвращаем обновлённого пользователя
     }
 
+    @GetMapping("unPagedFavorites")
+    public ResponseEntity<List<EventDTO>> getFavorites(HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<Event> events = user.getFavouriteEvents();
+
+        List<EventDTO> ed = new ArrayList<>();
+
+        for (Event e: events){
+            ed.add(new EventDTO(e));
+        }
+
+        return ResponseEntity.ok(ed);
+
+    }
+
     @GetMapping("favorites")
-    public ResponseEntity<PagedResponse<EventDTO>> getFavorites(
+    public ResponseEntity<PagedResponse<EventDTO>> getPagedFavorites(
             HttpServletRequest request,
             Pageable pageable
     ) {
@@ -170,7 +195,6 @@ public class EventController {
 
         return ResponseEntity.ok(response);
     }
-
 
     private UserDTO toUserDTO(User user) {
         UserDTO userDTO = new UserDTO();
