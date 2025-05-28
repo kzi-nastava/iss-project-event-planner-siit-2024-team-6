@@ -43,6 +43,8 @@ public class OrganizerController {
     private EventTypeService eventTypeService;
     @Autowired
     private ActivityService activityService;
+    @Autowired
+    private BudgetService budgetService;
 
     @PostMapping("/events")
     public ResponseEntity<EventDTO> createEvent(@RequestBody NewEventDTO eventDTO, HttpServletRequest request) {
@@ -75,6 +77,13 @@ public class OrganizerController {
         event.setParticipants(0);
         event.setPhotos(eventDTO.getPhotos());
 
+        Budget budget = new Budget();
+        budget.setAvailable(0);
+        budget.setTotal(0);
+        Budget b = budgetService.save(budget);
+
+        event.setBudget(b);
+
         List<Event> myEvents = organizer.getMyEvents();
         myEvents.add(event);
         organizer.setMyEvents(myEvents);
@@ -86,10 +95,9 @@ public class OrganizerController {
         userService.save(organizer);
 
         // invitations
-        if(eventDTO.getIsPublic() == false){
+        if(eventDTO.getIsPublic() == false) {
             eventService.sendInvitations(eventDTO);
         }
-
         // Преобразование в DTO
         EventDTO responseDTO = toEventDTO(savedEvent);
 
