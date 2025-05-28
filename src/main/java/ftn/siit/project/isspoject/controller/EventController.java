@@ -6,10 +6,7 @@ import ftn.siit.project.isspoject.dto.user.OrganizerDTO;
 import ftn.siit.project.isspoject.dto.user.UserDTO;
 import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
-import ftn.siit.project.isspoject.entity.Event;
-import ftn.siit.project.isspoject.entity.EventType;
-import ftn.siit.project.isspoject.entity.Organizer;
-import ftn.siit.project.isspoject.entity.User;
+import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.implementations.EventTypeServiceImpl;
 import ftn.siit.project.isspoject.service.interfaces.*;
@@ -91,6 +88,7 @@ public class EventController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfContent);
     }
+
     @GetMapping("{eventId}/getEventStatisticsPDF")
     public ResponseEntity<byte[]> downloadEventStatisticsPDF(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
@@ -136,6 +134,24 @@ public class EventController {
         UserDTO updatedUserDTO = toUserDTO(updatedUser);
 
         return ResponseEntity.ok(updatedUserDTO); // Возвращаем обновлённого пользователя
+    }
+
+    @GetMapping("{eventId}/getCategories")
+    public ResponseEntity<List<String>> getEventCategories(@PathVariable Integer eventId, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        System.out.println(jwtToken);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Event event = eventService.findById(eventId);
+        List<String> categories = new ArrayList<>();
+        for (Category category : event.getEventType().getCategories()) {
+            categories.add(category.getName());
+        }
+        if (categories.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(categories);
     }
 
     @GetMapping("unPagedFavorites")
