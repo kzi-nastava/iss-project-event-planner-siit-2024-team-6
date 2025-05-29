@@ -1,4 +1,5 @@
 package ftn.siit.project.isspoject.controller;
+import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
@@ -65,6 +66,25 @@ public class EventController {
         
         return new ResponseEntity<>(eventDTO, HttpStatus.OK);
     }
+
+    @GetMapping("{eventId}/budget")
+    public  ResponseEntity<BudgetDTO> getBudget(@PathVariable Integer eventId, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Event event = eventService.findById(eventId);
+
+        if (event.getBudget() == null){
+            event.setBudget(new Budget());
+            eventService.save(event);
+        }
+
+        BudgetDTO dto = new BudgetDTO(event.getBudget());
+
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
     @GetMapping("{eventId}/getOrganizer")
     public ResponseEntity<OrganizerDTO> getEventOrganizer(@PathVariable Integer eventId) {
         User organizer = organizerService.findOrganizerByEventId(eventId);
