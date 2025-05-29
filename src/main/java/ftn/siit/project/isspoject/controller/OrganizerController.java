@@ -2,6 +2,8 @@ package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.activity.ActivityDTO;
 import ftn.siit.project.isspoject.dto.activity.NewActivityDTO;
+import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
+import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
 import ftn.siit.project.isspoject.entity.*;
@@ -45,6 +47,8 @@ public class OrganizerController {
     private ActivityService activityService;
     @Autowired
     private BudgetService budgetService;
+    @Autowired
+    private CategoryService categoryService;
 
     @PostMapping("/events")
     public ResponseEntity<EventDTO> createEvent(@RequestBody NewEventDTO eventDTO, HttpServletRequest request) {
@@ -102,6 +106,32 @@ public class OrganizerController {
         EventDTO responseDTO = toEventDTO(savedEvent);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO); // Возвращаем созданное событие
+    }
+
+    @GetMapping("category-names")
+    public ResponseEntity<List<String>> getAllCategoryNames(HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null ) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        List<String> categories = categoryService.findAllNames();
+        if (categories.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(categories);
+    }
+    @PutMapping("budget/{id}")
+    public ResponseEntity<BudgetDTO> updateBudget(@PathVariable int id, @RequestBody NewBudgetDTO budgetDTO, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null ) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        try {
+            Budget updatedBudget = budgetService.update(id, budgetDTO);
+            return ResponseEntity.ok(new BudgetDTO(updatedBudget));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("events")
