@@ -218,6 +218,37 @@ public class OfferController {
         return ResponseEntity.ok(filteredOffers);
     }
 
+    @GetMapping("/search-services")
+    public ResponseEntity<Page<OfferDTO>> searchProviderServices(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Boolean isOnSale,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String eventType,
+            @RequestParam(required = false) Boolean isAvailable,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int pageSize, HttpServletRequest request) {
+
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Provider provider = (Provider) userService.findByEmail(email);
+        if (provider == null){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<OfferDTO> filteredOffers = offerService.searchProviderServices(provider.getId(), name, maxPrice, isOnSale, category, eventType, isAvailable, pageable);
+
+        if (filteredOffers.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        System.out.println("Filtered Offers: " + filteredOffers);
+
+        return ResponseEntity.ok(filteredOffers);
+    }
+
     @PostMapping("/searchByBudget")
     public ResponseEntity<Page<OfferDTO>> searchOffers(@RequestBody NewBudgetDTO budgetDTO, HttpServletRequest request, @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int pageSize){
@@ -228,9 +259,6 @@ public class OfferController {
         Pageable pageable = PageRequest.of(page, pageSize);
         Page<OfferDTO> filteredOffers = offerService.searchOffers(budgetDTO, pageable);
 
-        if (filteredOffers.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
         System.out.println("Filtered Offers: " + filteredOffers);
 
         return ResponseEntity.ok(filteredOffers);
