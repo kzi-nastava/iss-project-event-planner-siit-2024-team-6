@@ -1,4 +1,5 @@
 package ftn.siit.project.isspoject.controller;
+import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
@@ -6,10 +7,7 @@ import ftn.siit.project.isspoject.dto.user.OrganizerDTO;
 import ftn.siit.project.isspoject.dto.user.UserDTO;
 import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
-import ftn.siit.project.isspoject.entity.Event;
-import ftn.siit.project.isspoject.entity.EventType;
-import ftn.siit.project.isspoject.entity.Organizer;
-import ftn.siit.project.isspoject.entity.User;
+import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.implementations.EventTypeServiceImpl;
 import ftn.siit.project.isspoject.service.interfaces.*;
@@ -68,6 +66,25 @@ public class EventController {
         
         return new ResponseEntity<>(eventDTO, HttpStatus.OK);
     }
+
+    @GetMapping("{eventId}/budget")
+    public  ResponseEntity<BudgetDTO> getBudget(@PathVariable Integer eventId, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Event event = eventService.findById(eventId);
+
+        if (event.getBudget() == null){
+            event.setBudget(new Budget());
+            eventService.save(event);
+        }
+
+        BudgetDTO dto = new BudgetDTO(event.getBudget());
+
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
     @GetMapping("{eventId}/getOrganizer")
     public ResponseEntity<OrganizerDTO> getEventOrganizer(@PathVariable Integer eventId) {
         User organizer = organizerService.findOrganizerByEventId(eventId);
@@ -91,6 +108,7 @@ public class EventController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfContent);
     }
+
     @GetMapping("{eventId}/getEventStatisticsPDF")
     public ResponseEntity<byte[]> downloadEventStatisticsPDF(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
@@ -136,6 +154,24 @@ public class EventController {
         UserDTO updatedUserDTO = toUserDTO(updatedUser);
 
         return ResponseEntity.ok(updatedUserDTO); // Возвращаем обновлённого пользователя
+    }
+
+    @GetMapping("{eventId}/getCategories")
+    public ResponseEntity<List<String>> getEventCategories(@PathVariable Integer eventId, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        System.out.println(jwtToken);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Event event = eventService.findById(eventId);
+        List<String> categories = new ArrayList<>();
+        for (Category category : event.getEventType().getCategories()) {
+            categories.add(category.getName());
+        }
+        if (categories.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(categories);
     }
 
     @GetMapping("unPagedFavorites")

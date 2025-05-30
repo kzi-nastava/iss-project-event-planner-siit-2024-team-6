@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.controller;
 
+import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
@@ -208,6 +209,24 @@ public class OfferController {
 
         Pageable pageable = PageRequest.of(page, pageSize);
         Page<OfferDTO> filteredOffers = offerService.searchOffers(name, description, maxPrice, isOnSale, startDate, endDate, category, eventType, isService, isProduct, pageable);
+
+        if (filteredOffers.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        System.out.println("Filtered Offers: " + filteredOffers);
+
+        return ResponseEntity.ok(filteredOffers);
+    }
+
+    @PostMapping("/searchByBudget")
+    public ResponseEntity<Page<OfferDTO>> searchOffers(@RequestBody NewBudgetDTO budgetDTO, HttpServletRequest request, @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int pageSize){
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<OfferDTO> filteredOffers = offerService.searchOffers(budgetDTO, pageable);
 
         if (filteredOffers.isEmpty()) {
             return ResponseEntity.noContent().build();

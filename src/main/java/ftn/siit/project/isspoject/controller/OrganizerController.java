@@ -2,6 +2,8 @@ package ftn.siit.project.isspoject.controller;
 
 import ftn.siit.project.isspoject.dto.activity.ActivityDTO;
 import ftn.siit.project.isspoject.dto.activity.NewActivityDTO;
+import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
+import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
 import ftn.siit.project.isspoject.entity.*;
@@ -43,6 +45,10 @@ public class OrganizerController {
     private EventTypeService eventTypeService;
     @Autowired
     private ActivityService activityService;
+    @Autowired
+    private BudgetService budgetService;
+    @Autowired
+    private CategoryService categoryService;
 
     @PostMapping("/events")
     public ResponseEntity<EventDTO> createEvent(@RequestBody NewEventDTO eventDTO, HttpServletRequest request) {
@@ -75,6 +81,13 @@ public class OrganizerController {
         event.setParticipants(0);
         event.setPhotos(eventDTO.getPhotos());
 
+        Budget budget = new Budget();
+        budget.setAvailable(0);
+        budget.setTotal(0);
+        Budget b = budgetService.save(budget);
+
+        event.setBudget(b);
+
         List<Event> myEvents = organizer.getMyEvents();
         myEvents.add(event);
         organizer.setMyEvents(myEvents);
@@ -86,14 +99,39 @@ public class OrganizerController {
         userService.save(organizer);
 
         // invitations
-        if(eventDTO.getIsPublic() == false){
+        if(eventDTO.getIsPublic() == false) {
             eventService.sendInvitations(eventDTO);
         }
-
         // Преобразование в DTO
         EventDTO responseDTO = toEventDTO(savedEvent);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO); // Возвращаем созданное событие
+    }
+
+    @GetMapping("category-names")
+    public ResponseEntity<List<String>> getAllCategoryNames(HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null ) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        List<String> categories = categoryService.findAllNames();
+        if (categories.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(categories);
+    }
+    @PutMapping("budget/{id}")
+    public ResponseEntity<BudgetDTO> updateBudget(@PathVariable int id, @RequestBody NewBudgetDTO budgetDTO, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null ) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        try {
+            Budget updatedBudget = budgetService.update(id, budgetDTO);
+            return ResponseEntity.ok(new BudgetDTO(updatedBudget));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("events")
