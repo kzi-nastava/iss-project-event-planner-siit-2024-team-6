@@ -80,8 +80,8 @@ public interface ServiceRepository extends JpaRepository<Service, Integer> {
                                @Param("name") String name, Pageable page);
 
 
-    List<Service> findAllByProviderIdAndIsDeletedFalseOrIsDeletedIsNull(int providerId);
+    List<Service> findAllByProviderIdAndIsDeletedFalseOrIsDeletedIsNullOrderById(int providerId);
 
-    Page<Service> findAllByProviderIdAndIsDeletedFalseOrIsDeletedIsNull(int providerId, Pageable pageable);
+    Page<Service> findAllByProviderIdAndIsDeletedFalseOrIsDeletedIsNullOrderByIdAsc(int providerId, Pageable pageable);
 
 }

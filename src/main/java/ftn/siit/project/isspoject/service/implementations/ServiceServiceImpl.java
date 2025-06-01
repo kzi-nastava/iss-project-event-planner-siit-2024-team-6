@@ -19,7 +19,7 @@ public class ServiceServiceImpl implements ServiceService {
 
     @Override
     public List<Service> findByProvider(Provider provider) {
-        List<Service> s = serviceRepository.findAllByProviderIdAndIsDeletedFalseOrIsDeletedIsNull(provider.getId());
+        List<Service> s = serviceRepository.findAllByProviderIdAndIsDeletedFalseOrIsDeletedIsNullOrderById(provider.getId());
         if (s.isEmpty()) {
             throw new NotFoundException("Provider has no services");
         }
@@ -28,7 +28,7 @@ public class ServiceServiceImpl implements ServiceService {
 
     @Override
     public Page<Service> findByProvider(Provider provider, Pageable pageable) {
-        return serviceRepository.findAllByProviderIdAndIsDeletedFalseOrIsDeletedIsNull(provider.getId(), pageable);
+        return serviceRepository.findAllByProviderIdAndIsDeletedFalseOrIsDeletedIsNullOrderByIdAsc(provider.getId(), pageable);
     }
 
     @Override
