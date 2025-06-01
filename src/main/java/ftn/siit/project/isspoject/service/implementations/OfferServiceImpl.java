@@ -133,6 +133,29 @@ public class OfferServiceImpl implements OfferService {
     }
 
     @Override
+    public Page<OfferDTO> searchProviderServices(Integer id, String name, Double maxPrice, Boolean isOnSale, String category, String eventType, Boolean isAvailable, Pageable pageable) {
+        List<Offer> offers = offerRepository.findAll();
+
+        List<Offer> filteredOffers = offers.stream()
+                .filter(offer ->
+                        (name == null || name.isEmpty() || offer.getName().toLowerCase().contains(name.toLowerCase())))
+                .filter(offer -> maxPrice == null ||
+                        (offer.getSale() != null && offer.getSale() > 0 ? offer.getSale() <= maxPrice : offer.getPrice() <= maxPrice)) //if it is on sale compare max price to sale price
+                .filter(offer -> isOnSale == null || (!isOnSale) || (isOnSale && offer.getSale() != null && offer.getSale() > 0)) //if isOnSale is false then return all
+                .filter(offer -> category == null || category.isEmpty() || category.toLowerCase().equals(offer.getCategory().getName().toLowerCase()))
+                .filter(offer -> (offer.isService() == true))
+                .filter(offer -> ( isAvailable == null || offer.getIsAvailable() == null || offer.getIsAvailable() == isAvailable))
+                .filter(offer -> eventType == null || eventType.isEmpty() ||
+                        offer.getEventTypes().stream().anyMatch(type -> type.getName().equalsIgnoreCase(eventType))
+                )
+                .filter(offer -> (offer.getIsDeleted() == null || offer.getIsDeleted() == false))
+                .filter(offer -> offer.getProvider().getId() == id)
+                .collect(Collectors.toList());
+
+        return paginateOffers(filteredOffers, pageable);
+    }
+
+    @Override
     public Page<OfferDTO> searchOffers(NewBudgetDTO dto, Pageable pageable) {
 
         List<Offer> offers = offerRepository.findAll();
