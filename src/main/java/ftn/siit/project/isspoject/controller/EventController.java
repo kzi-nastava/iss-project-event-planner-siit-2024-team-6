@@ -1,4 +1,5 @@
 package ftn.siit.project.isspoject.controller;
+import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
@@ -6,10 +7,7 @@ import ftn.siit.project.isspoject.dto.user.OrganizerDTO;
 import ftn.siit.project.isspoject.dto.user.UserDTO;
 import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
-import ftn.siit.project.isspoject.entity.Event;
-import ftn.siit.project.isspoject.entity.EventType;
-import ftn.siit.project.isspoject.entity.Organizer;
-import ftn.siit.project.isspoject.entity.User;
+import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.implementations.EventTypeServiceImpl;
 import ftn.siit.project.isspoject.service.interfaces.*;
@@ -47,7 +45,8 @@ public class EventController {
 
     @Autowired
     private PDFGeneratorService pdfGeneratorService;
-
+    @Autowired
+    private CategoryService categoryService;
     @Autowired
     private UserService userService;
     @Autowired
@@ -67,6 +66,25 @@ public class EventController {
         
         return new ResponseEntity<>(eventDTO, HttpStatus.OK);
     }
+
+    @GetMapping("{eventId}/budget")
+    public  ResponseEntity<BudgetDTO> getBudget(@PathVariable Integer eventId, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Event event = eventService.findById(eventId);
+
+        if (event.getBudget() == null){
+            event.setBudget(new Budget());
+            eventService.save(event);
+        }
+
+        BudgetDTO dto = new BudgetDTO(event.getBudget());
+
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
     @GetMapping("{eventId}/getOrganizer")
     public ResponseEntity<OrganizerDTO> getEventOrganizer(@PathVariable Integer eventId) {
         User organizer = organizerService.findOrganizerByEventId(eventId);
@@ -90,6 +108,7 @@ public class EventController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfContent);
     }
+
     @GetMapping("{eventId}/getEventStatisticsPDF")
     public ResponseEntity<byte[]> downloadEventStatisticsPDF(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
@@ -137,7 +156,25 @@ public class EventController {
         return ResponseEntity.ok(updatedUserDTO); // Возвращаем обновлённого пользователя
     }
 
-    @GetMapping("favorites")
+    @GetMapping("{eventId}/getCategories")
+    public ResponseEntity<List<String>> getEventCategories(@PathVariable Integer eventId, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        System.out.println(jwtToken);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Event event = eventService.findById(eventId);
+        List<String> categories = new ArrayList<>();
+        for (Category category : event.getEventType().getCategories()) {
+            categories.add(category.getName());
+        }
+        if (categories.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("unPagedFavorites")
     public ResponseEntity<List<EventDTO>> getFavorites(HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null) {
@@ -160,6 +197,39 @@ public class EventController {
 
         return ResponseEntity.ok(ed);
 
+    }
+
+    @GetMapping("favorites")
+    public ResponseEntity<PagedResponse<EventDTO>> getPagedFavorites(
+            HttpServletRequest request,
+            Pageable pageable
+    ) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<Event> events = user.getFavouriteEvents();
+
+        List<EventDTO> eventDTOs = events.stream()
+                .map(EventDTO::new)
+                .collect(Collectors.toList());
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), eventDTOs.size());
+        List<EventDTO> paginatedEvents = eventDTOs.subList(start, end);
+
+        PagedResponse<EventDTO> response = new PagedResponse<>(paginatedEvents,
+                (int) Math.ceil((double) eventDTOs.size() / pageable.getPageSize()),
+                eventDTOs.size());
+
+        return ResponseEntity.ok(response);
     }
 
     private UserDTO toUserDTO(User user) {
@@ -321,7 +391,36 @@ public class EventController {
         }
         return ResponseEntity.ok(filteredEvents);
     }
+    @GetMapping("{categoryId}/event-types-by-category")
+    public ResponseEntity<List<EventTypeDTO>> getEventTypesByCategory( @PathVariable Integer categoryId, HttpServletRequest request){
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
 
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(eventTypeService.findAllWithCategoryId(categoryId));
+    }
+    @GetMapping("{categoryName}/event-types-by-category-name")
+    public ResponseEntity<List<EventTypeDTO>> getEventTypesByCategoryName( @PathVariable String categoryName, HttpServletRequest request){
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(eventTypeService.findAllWithCategoryId(categoryService.findByName(categoryName).getId()));
+    }
     @GetMapping("{name}/event-type")
     public ResponseEntity<EventTypeDTO> getEventType(@PathVariable String name) {
         EventType eventType = eventTypeService.findByName(name);

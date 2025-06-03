@@ -261,11 +261,18 @@ public class AdminController {
         }
         return ResponseEntity.ok(categories);
     }
-
+    @GetMapping("categoriesNonPaged")
+    public ResponseEntity<List<Category>> getAllCategories() {
+        List<Category> categories = categoryService.findAll();
+        if (categories.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(categories);
+    }
     @GetMapping("categories")
     public ResponseEntity<PagedResponse<Category>> getAllCategories(Pageable page, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
+        if (jwtToken == null ) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Page<Category> categories = categoryService.findAll(page);
@@ -278,6 +285,21 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
+//    @GetMapping("categoriesNonPaged")
+//    public ResponseEntity<PagedResponse<Category>> getAllCategories(Pageable page, HttpServletRequest request) {
+//        String jwtToken = this.tokenUtils.getToken(request);
+//        if (jwtToken == null ) {
+//            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+//        }
+//        Page<Category> categories = categoryService.findAll(page);
+//
+//        PagedResponse<Category> response = new PagedResponse<>(
+//                categories.stream().toList(),
+//                categories.getTotalPages(),
+//                categories.getTotalElements()
+//        );
+//        return ResponseEntity.ok(response);
+//    }
     @PostMapping("category")
     public ResponseEntity<Category> addCategory(@RequestBody NewCategoryDTO dto, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);

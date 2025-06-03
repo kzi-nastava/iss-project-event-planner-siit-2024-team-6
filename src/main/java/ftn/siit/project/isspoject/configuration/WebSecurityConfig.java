@@ -118,18 +118,25 @@ public class WebSecurityConfig{
                     .requestMatchers(new AntPathRequestMatcher("/api/events/search")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/offers/**")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/offers/categories")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/offers/favoriteServices")).authenticated()
+                    .requestMatchers(new AntPathRequestMatcher("/api/offers/favoriteProducts")).authenticated()
                     .requestMatchers(new AntPathRequestMatcher("/api/offers/**/favorite")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/events/**/favorite")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/events/**/getInfoPDF")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/events/**/event-types-by-category")).hasAnyRole("ADMIN","PROVIDER")
+                    .requestMatchers(new AntPathRequestMatcher("/api/events/**/event-types-by-category-name")).hasAnyRole("ADMIN","PROVIDER")
                     .requestMatchers(new AntPathRequestMatcher("/api/events/**/getEventStatisticsPDF")).hasAnyRole("ADMIN","ORGANIZER")
                     .requestMatchers(new AntPathRequestMatcher("/api/events/**/getOrganizer")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/organizers/events/**/activities")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/organizers/events/**/activity")).hasRole("ORGANIZER")
                     .requestMatchers(new AntPathRequestMatcher("/api/organizers/events/**/activity/**")).hasRole("ORGANIZER")
                     .requestMatchers(new AntPathRequestMatcher("/api/providers/**/my-services")).authenticated()
+                    .requestMatchers(new AntPathRequestMatcher("/api/providers/**/product")).authenticated()
+                    .requestMatchers(new AntPathRequestMatcher("/api/providers/product")).hasAnyRole("ADMIN","PROVIDER")
+                    .requestMatchers(new AntPathRequestMatcher("/api/providers/my-products")).hasRole("PROVIDER")
 //                    .requestMatchers(new AntPathRequestMatcher("/api/users")).permitAll()
-//                    .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll()/getAgendaPDF /getInfoPDF getEventStatisticsPDF
-                    // Разрешаем доступ к маршруту /error для более удобных сообщений об ошибках.""admin@a.a" /api/organizers/
+//                    .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll() my-products unPagedFavorites
+//            event-types-by-category-name
                     .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
 //                    .requestMatchers(new AntPathRequestMatcher("/api/whoami")).hasRole("USER")
                     .anyRequest().authenticated();
@@ -156,7 +163,7 @@ public class WebSecurityConfig{
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://192.168.1.7:8000"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200" , "http://192.168.1.3:8000"));
         configuration.setAllowedMethods(Arrays.asList("POST", "PUT", "GET", "OPTIONS", "DELETE", "PATCH")); // или просто "*"
         configuration.setAllowedHeaders(Arrays.asList("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -3,6 +3,9 @@ package ftn.siit.project.isspoject.repository;
 import ftn.siit.project.isspoject.entity.Offer;
 import ftn.siit.project.isspoject.entity.Product;
 import ftn.siit.project.isspoject.entity.Reaction;
+import ftn.siit.project.isspoject.entity.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -34,4 +37,5 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     List<Product> searchByNameAndIsDeletedFalseOrIsDeletedIsNull(String name);
 
     List<Product> findByProviderIdAndIsDeletedFalseOrIsDeletedIsNull(int providerId);
+    Page<Product> findAllByProviderIdAndIsDeletedFalseOrIsDeletedIsNull(int providerId, Pageable pageable);
 }

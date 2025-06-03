@@ -61,6 +61,15 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public List<Category> findAll() {
+        List<Category> categories = categoryRepository.findAll();
+        if (categories.isEmpty()) {
+            throw new NotFoundException("No categories found.");
+        }
+        return categories;
+    }
+
+    @Override
     public List<String> findAllNames() {
         return categoryRepository.findAllNames();
     }

@@ -1,11 +1,13 @@
 package ftn.siit.project.isspoject.service.implementations;
 
+import ftn.siit.project.isspoject.dto.notification.NotificationDTO;
 import ftn.siit.project.isspoject.entity.Notification;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.NotificationRepository;
 import ftn.siit.project.isspoject.service.interfaces.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,6 +15,8 @@ import java.util.List;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
     @Autowired
     private NotificationRepository notificationRepository;
     @Override
@@ -58,5 +62,6 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setText(message);
         notification.setTimestamp(LocalDateTime.now());
         save(notification);
+        messagingTemplate.convertAndSend("/topic/notifications/" + user.getId(), new NotificationDTO(notification));
     }
 }

@@ -12,6 +12,7 @@ public interface CategoryService {
     Category findById(Integer id);
     Category findByName(String name);
     Page<Category> findAll(Pageable pageable);
+    List<Category> findAll();
     List<String> findAllNames();
     List<Category> findAllByNames(List<String> names);
     void createPendingCategory(String category);

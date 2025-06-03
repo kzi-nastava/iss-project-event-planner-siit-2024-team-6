@@ -1,5 +1,7 @@
 package ftn.siit.project.isspoject.service.implementations;
 
+import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
+import ftn.siit.project.isspoject.dto.budget.NewBudgetItemDTO;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
@@ -19,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.ArrayList;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -42,7 +45,7 @@ public class OfferServiceImpl implements OfferService {
             priceListOfferDTO.setPrice(offer.getPrice());
             priceListOfferDTO.setName(offer.getName());
             priceListOfferDTO.setSale(offer.getSale());
-            priceListOfferDTO.setSalePrice(offer.getPrice()*offer.getSale()/100);
+            priceListOfferDTO.setSalePrice(offer.getPrice() * offer.getSale() / 100);
             dtos.add(priceListOfferDTO);
         }
         return dtos;
@@ -61,14 +64,16 @@ public class OfferServiceImpl implements OfferService {
     public List<Offer> findAll() {
         return offerRepository.findByIsDeletedFalseOrIsDeletedIsNull();
     }
+
     @Override
     public Page<Offer> findAll(Pageable page) {
         return offerRepository.findAll(page);
     }
+
     @Override
     public Offer findById(Integer offerId) {
         Offer o = offerRepository.findById(offerId).orElseThrow(() -> new NotFoundException("Offer not found"));
-        if(o.getIsDeleted()){
+        if (o.getIsDeleted()) {
             throw new NotFoundException("Offer is deleted");
         }
         return o;
@@ -125,6 +130,81 @@ public class OfferServiceImpl implements OfferService {
     @Override
     public List<Offer> searchItems(String name, String description, Double minPrice, Double maxPrice, LocalDateTime startDate, LocalDateTime endDate, String category, Boolean isService) {
         return offerRepository.searchItems(name, description, minPrice, maxPrice, startDate, endDate, category, isService);
+    }
+
+    @Override
+    public Page<OfferDTO> searchProviderServices(Integer id, String name, Double maxPrice, Boolean isOnSale, String category, String eventType, Boolean isAvailable, Pageable pageable) {
+        List<Offer> offers = offerRepository.findAll();
+
+        List<Offer> filteredOffers = offers.stream()
+                .filter(offer ->
+                        (name == null || name.isEmpty() || offer.getName().toLowerCase().contains(name.toLowerCase())))
+                .filter(offer -> maxPrice == null ||
+                        (offer.getSale() != null && offer.getSale() > 0 ? offer.getSale() <= maxPrice : offer.getPrice() <= maxPrice)) //if it is on sale compare max price to sale price
+                .filter(offer -> isOnSale == null || (!isOnSale) || (isOnSale && offer.getSale() != null && offer.getSale() > 0)) //if isOnSale is false then return all
+                .filter(offer -> category == null || category.isEmpty() || category.toLowerCase().equals(offer.getCategory().getName().toLowerCase()))
+                .filter(offer -> (offer.isService() == true))
+                .filter(offer -> ( isAvailable == null || offer.getIsAvailable() == null || offer.getIsAvailable() == isAvailable))
+                .filter(offer -> eventType == null || eventType.isEmpty() ||
+                        offer.getEventTypes().stream().anyMatch(type -> type.getName().equalsIgnoreCase(eventType))
+                )
+                .filter(offer -> (offer.getIsDeleted() == null || offer.getIsDeleted() == false))
+                .filter(offer -> offer.getProvider().getId() == id)
+                .collect(Collectors.toList());
+
+        return paginateOffers(filteredOffers, pageable);
+    }
+
+    @Override
+    public Page<OfferDTO> searchOffers(NewBudgetDTO dto, Pageable pageable) {
+
+        List<Offer> offers = offerRepository.findAll();
+
+        if (dto.getBudgetItems() == null || dto.getBudgetItems().isEmpty()) {
+            List<Offer> visibleOffers = offers.stream()
+                    .filter(offer -> (offer.getIsDeleted() == null || !offer.getIsDeleted()))
+                    .filter(Offer::getIsVisible)
+                    .collect(Collectors.toList());
+
+            return paginateOffers(visibleOffers, pageable);
+        }
+        // Build a map of category to max price
+        Map<String, Double> categoryMaxPriceMap = dto.getBudgetItems().stream()
+                .collect(Collectors.toMap(
+                        NewBudgetItemDTO::getCategory,
+                        item -> {
+                            Double max = item.getMaxPrice() != 0.0 ? item.getMaxPrice() : 0.0;
+                            Double curr = item.getCurrPrice() != 0.0 ? item.getCurrPrice() : 0.0;
+                            return max - curr;
+                        }
+                ));
+
+        List<Offer> filteredOffers = offers.stream()
+                .filter(offer -> (offer.getIsDeleted() == null || !offer.getIsDeleted()))
+                .filter(Offer::getIsVisible)
+                .filter(offer -> {
+                    String category = offer.getCategory().getName();
+                    Double maxAllowed = categoryMaxPriceMap.get(category);
+                    return maxAllowed != null && (
+                            (offer.getPrice() != null && offer.getPrice() <= maxAllowed) ||
+                                    (offer.getSale() != null && offer.getSale() <= maxAllowed)
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return paginateOffers(filteredOffers, pageable);
+
+    }
+
+    private Page<OfferDTO> paginateOffers(List<Offer> offers, Pageable pageable) {
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), offers.size());
+
+        List<OfferDTO> paginated = offers.subList(start, end).stream()
+                .map(OfferDTO::new)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(paginated, pageable, offers.size());
     }
 
     @Override

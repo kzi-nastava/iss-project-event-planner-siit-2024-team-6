@@ -1,11 +1,16 @@
 package ftn.siit.project.isspoject.service.implementations;
 
+import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
+import ftn.siit.project.isspoject.entity.EventType;
+import ftn.siit.project.isspoject.entity.Offer;
 import ftn.siit.project.isspoject.entity.Product;
 import ftn.siit.project.isspoject.entity.Provider;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.ProductRepository;
 import ftn.siit.project.isspoject.service.interfaces.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -77,6 +82,26 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Product> findByProvider(int providerId) {
         return productRepository.findByProviderIdAndIsDeletedFalseOrIsDeletedIsNull(providerId);
+    }
+    @Override
+    public Page<Product> findByProvider(Provider p, Pageable page) {
+        return productRepository.findAllByProviderIdAndIsDeletedFalseOrIsDeletedIsNull(p.getId(), page);
+    }
+
+    @Override
+    public Offer update(int offerId, NewOfferDTO dto, List<EventType> eventTypes) {
+        Product existingProduct = this.findById(offerId);
+        existingProduct.setName(dto.getName());
+        existingProduct.setDescription(dto.getDescription());
+        existingProduct.setPrice(dto.getPrice());
+        existingProduct.setIsAvailable(dto.getIsAvailable());
+        existingProduct.setSale(dto.getSale());
+        existingProduct.setPhotos(dto.getPhotos());
+        existingProduct.setIsDeleted(false);
+        existingProduct.setIsVisible(dto.getIsVisible());
+        existingProduct.setEventTypes(eventTypes);
+
+        return this.save(existingProduct);
     }
 
 }
