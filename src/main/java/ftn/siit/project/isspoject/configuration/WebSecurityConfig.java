@@ -103,6 +103,7 @@ public class WebSecurityConfig{
                     .requestMatchers(new AntPathRequestMatcher("/api/users")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/users/quick-register")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/events/event-types")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/events/top-five")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("api/events/**/event-type")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/users/profile/password-change")).authenticated()
                     .requestMatchers(new AntPathRequestMatcher("/api/admins/event-types")).permitAll()
@@ -114,7 +115,9 @@ public class WebSecurityConfig{
                     .requestMatchers(new AntPathRequestMatcher("/api/organizers/events/**")).hasRole("ORGANIZER")
                     .requestMatchers(new AntPathRequestMatcher("/api/organizers/events/**/getAgendaPDF")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/events/**")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/events/search")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/offers/**")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/offers/categories")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/offers/**/favorite")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/events/**/favorite")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/events/**/getInfoPDF")).permitAll()
@@ -153,7 +156,7 @@ public class WebSecurityConfig{
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://192.168.1.7:8000"));
         configuration.setAllowedMethods(Arrays.asList("POST", "PUT", "GET", "OPTIONS", "DELETE", "PATCH")); // или просто "*"
         configuration.setAllowedHeaders(Arrays.asList("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
