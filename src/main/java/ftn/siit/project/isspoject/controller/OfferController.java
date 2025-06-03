@@ -24,7 +24,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -68,7 +71,7 @@ public class OfferController {
 //        return ResponseEntity.ok(offerDTOs);
 //    }
 
-    @GetMapping(value = "/all-elements")
+    @GetMapping(value = "all-elements")
     public ResponseEntity<PagedResponse<OfferDTO>> getOffersPageAllElements(Pageable page) {
 
         Page<Offer> offersPage = offerService.findAll(page);
@@ -126,8 +129,8 @@ public class OfferController {
             @RequestParam(required = false) String description,
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(required = false) Boolean isOnSale,
-            @RequestParam(required = false) LocalDateTime startDate,
-            @RequestParam(required = false) LocalDateTime endDate,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String eventType,
             @RequestParam(required = false) Boolean isService,
@@ -135,8 +138,21 @@ public class OfferController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int pageSize) {
 
+        LocalDateTime startDateTime = null;
+        LocalDateTime endDateTime = null;
+        if (startDate != null && !startDate.isEmpty()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            startDateTime = LocalDate.parse(startDate, formatter).atStartOfDay();
+        }
+
+        if (endDate != null && !endDate.isEmpty()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            endDateTime = LocalDate.parse(endDate, formatter).atTime(LocalTime.MAX);
+        }
+
+
         Pageable pageable = PageRequest.of(page, pageSize);
-        Page<OfferDTO> filteredOffers = offerService.searchOffers(name, description, maxPrice, isOnSale, startDate, endDate, category, eventType, isService, isProduct, pageable);
+        Page<OfferDTO> filteredOffers = offerService.searchOffers(name, description, maxPrice, isOnSale, startDateTime, endDateTime, category, eventType, isService, isProduct, pageable);
 
         if (filteredOffers.isEmpty()) {
             return ResponseEntity.noContent().build();
