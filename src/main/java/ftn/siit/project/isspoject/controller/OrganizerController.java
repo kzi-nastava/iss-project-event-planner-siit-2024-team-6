@@ -120,6 +120,21 @@ public class OrganizerController {
 
         return new ResponseEntity<>(eventDTOs, HttpStatus.OK);
     }
+    @GetMapping("{id}/events")
+    public ResponseEntity<List<EventDTO>> getOrganizersEvents(@PathVariable int id) {
+        Organizer organizer = organizerService.findById(id);
+        if (organizer == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        List<Event> events = eventService.findByOrganizer(organizer);
+        List<EventDTO> eventDTOs = new ArrayList<>();
+        for(Event e: events){
+            eventDTOs.add(new EventDTO(e));
+        }
+
+        return new ResponseEntity<>(eventDTOs, HttpStatus.OK);
+    }
 
     @PutMapping("events/{eventId}")
     public ResponseEntity<EventDTO> updateEvent(
