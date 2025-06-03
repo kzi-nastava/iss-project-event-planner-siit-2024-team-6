@@ -25,4 +25,6 @@ public interface EventService {
     Page<Event> searchEvents(String name, String description, String place, String eventType, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
     void sendInvitations(NewEventDTO dto);
     List<Event> findByOrganizer(Organizer organizer);
+    List<Event> getFutureEvents(Organizer organizer);
+
 }

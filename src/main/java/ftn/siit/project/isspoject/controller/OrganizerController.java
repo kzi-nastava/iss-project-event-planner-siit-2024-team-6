@@ -20,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -159,13 +160,29 @@ public class OrganizerController {
         return new ResponseEntity<>(eventDTOs, HttpStatus.OK);
     }
     @GetMapping("{id}/events")
-    public ResponseEntity<List<EventDTO>> getOrganizersEvents(@PathVariable int id) {
+    public ResponseEntity<List<EventDTO>> getEvents(@PathVariable int id) {
         Organizer organizer = organizerService.findById(id);
         if (organizer == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         List<Event> events = eventService.findByOrganizer(organizer);
+        List<EventDTO> eventDTOs = new ArrayList<>();
+        for(Event e: events){
+            eventDTOs.add(new EventDTO(e));
+        }
+
+        return new ResponseEntity<>(eventDTOs, HttpStatus.OK);
+    }
+
+    @GetMapping("{id}/future-events")
+    public ResponseEntity<List<EventDTO>> getFutureEvents(@PathVariable int id) {
+        Organizer organizer = organizerService.findById(id);
+        if (organizer == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        List<Event> events = eventService.getFutureEvents(organizer);
         List<EventDTO> eventDTOs = new ArrayList<>();
         for(Event e: events){
             eventDTOs.add(new EventDTO(e));
