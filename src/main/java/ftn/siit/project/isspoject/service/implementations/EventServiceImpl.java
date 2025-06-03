@@ -73,6 +73,10 @@ public class EventServiceImpl implements EventService {
         }
         return events;
     }
+    @Override
+    public List<Event> getFutureEvents(Organizer organizer) {
+        return eventRepository.findFutureEventsByOrganizer(organizer, LocalDateTime.now());
+    }
 
     @Override
     public List<Event> findTopFive() {

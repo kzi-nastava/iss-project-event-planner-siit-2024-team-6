@@ -22,6 +22,11 @@ public interface EventRepository extends JpaRepository<Event, Integer>{
     @Query("SELECT e FROM User u JOIN u.attends e WHERE u.id = :userId")
     List<Event> findEventsByUserId(@Param("userId") Integer userId);
 
+    @Query("SELECT e FROM Event e WHERE e.id IN (" +
+            "SELECT ev.id FROM Organizer o JOIN o.myEvents ev " +
+            "WHERE o = :organizer AND ev.date > :now)")
+    List<Event> findFutureEventsByOrganizer(@Param("organizer") Organizer organizer, @Param("now") LocalDateTime now);
+
     @Query("SELECT e FROM Event e WHERE e.id IN (SELECT ev.id FROM Organizer o JOIN o.myEvents ev WHERE o = :organizer)")
     List<Event> findByOrganizer(Organizer organizer);
 }
