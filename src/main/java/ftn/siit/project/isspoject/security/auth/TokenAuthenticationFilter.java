@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.security.auth;
 import ftn.siit.project.isspoject.util.TokenUtils;
+import io.jsonwebtoken.JwtException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -63,9 +64,16 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
 
-        }
-        catch (ExpiredJwtException ex) {
-            LOGGER.debug("Срок действия токена истёк!");
+        }catch (ExpiredJwtException ex) {
+            logger.warn("Token expired", ex);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"error\": \"Token expired\"}");
+            return;
+        } catch (JwtException | IllegalArgumentException ex) {
+            logger.warn("Invalid token", ex);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"error\": \"Invalid token\"}");
+            return;
         }
         // Передача запроса далее следующему фильтру
         chain.doFilter(request, response);
