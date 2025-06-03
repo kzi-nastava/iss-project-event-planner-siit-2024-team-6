@@ -329,7 +329,7 @@ public class EventController {
 //    }
 
 
-    @GetMapping(value = "/all-elements")
+    @GetMapping(value = "all-elements")
     public ResponseEntity<PagedResponse<EventDTO>> getEventsPageAllElements(Pageable page) {
 
         Page<Event> eventsPage = eventService.findAll(page);
