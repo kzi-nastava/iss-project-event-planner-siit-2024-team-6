@@ -1,5 +1,8 @@
 package ftn.siit.project.isspoject.exceptions;
+
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -13,6 +16,8 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFoundException(NotFoundException ex) {
@@ -27,6 +32,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidJson(HttpMessageNotReadableException ex) {
+        ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 Map.of(
                         "timestamp", LocalDateTime.now(),
@@ -38,6 +44,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        logger.error("IllegalArgumentException caught in GlobalExceptionHandler", ex);
+
+        ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 Map.of(
                         "timestamp", LocalDateTime.now(),
@@ -49,6 +58,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(org.springframework.web.servlet.NoHandlerFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNoHandlerFoundException(NoHandlerFoundException ex) {
+        ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 Map.of(
                         "timestamp", LocalDateTime.now(),
@@ -58,12 +68,14 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // Catch-all for any other exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
+        ex.printStackTrace(); // Log full stack trace for debugging
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 Map.of(
                         "timestamp", LocalDateTime.now(),
-                        "message", "An unexpected error occurred",
+                        "message", ex.getMessage() != null ? ex.getMessage() : "An unexpected error occurred",
                         "status", HttpStatus.INTERNAL_SERVER_ERROR.value()
                 )
         );
@@ -71,6 +83,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UnsupportedOperationException.class)
     public ResponseEntity<Map<String, Object>> handleUnsupportedOperationException(UnsupportedOperationException ex) {
+        ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(
                 Map.of(
                         "timestamp", LocalDateTime.now(),
@@ -80,4 +93,3 @@ public class GlobalExceptionHandler {
         );
     }
 }
-
