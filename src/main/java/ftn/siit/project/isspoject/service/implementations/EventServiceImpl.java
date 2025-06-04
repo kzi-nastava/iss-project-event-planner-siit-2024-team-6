@@ -49,7 +49,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Page<Event> findAll(Pageable page) {
-        return eventRepository.findAll(page);
+        return eventRepository.findByIsDeletedFalse(page);
     }
 
 
@@ -170,6 +170,7 @@ public class EventServiceImpl implements EventService {
         List<Event> events = eventRepository.findAll();
 
         List<Event> filteredEvents = events.stream()
+                .filter(event -> !event.getIsDeleted())
                 .filter(event ->
                         (name == null || name.isEmpty() || event.getName().toLowerCase().contains(name.toLowerCase())) ||
                                 (description == null || description.isEmpty() || event.getDescription().toLowerCase().contains(description.toLowerCase())) ||
