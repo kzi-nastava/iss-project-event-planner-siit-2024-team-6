@@ -128,11 +128,6 @@ public class OfferServiceImpl implements OfferService {
     }
 
     @Override
-    public List<Offer> searchItems(String name, String description, Double minPrice, Double maxPrice, LocalDateTime startDate, LocalDateTime endDate, String category, Boolean isService) {
-        return offerRepository.searchItems(name, description, minPrice, maxPrice, startDate, endDate, category, isService);
-    }
-
-    @Override
     public Page<OfferDTO> searchProviderServices(Integer id, String name, Double maxPrice, Boolean isOnSale, String category, String eventType, Boolean isAvailable, Pageable pageable) {
         List<Offer> offers = offerRepository.findAll();
 
@@ -182,6 +177,7 @@ public class OfferServiceImpl implements OfferService {
         List<Offer> filteredOffers = offers.stream()
                 .filter(offer -> (offer.getIsDeleted() == null || !offer.getIsDeleted()))
                 .filter(Offer::getIsVisible)
+                .filter(offer -> (offer.getStatus() == Status.ACCEPTED))
                 .filter(offer -> {
                     String category = offer.getCategory().getName();
                     Double maxAllowed = categoryMaxPriceMap.get(category);
