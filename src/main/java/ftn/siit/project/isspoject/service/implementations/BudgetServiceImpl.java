@@ -32,7 +32,7 @@ public class BudgetServiceImpl implements BudgetService {
         for(BudgetItem bi : b.getBudgetItems()) {
             if(bi.getCategory().equals(category)){
                 b.getBudgetItems().remove(bi);
-                return update(b);
+                return save(b);
             }
         }
         return b;
@@ -42,10 +42,8 @@ public class BudgetServiceImpl implements BudgetService {
         Budget b = findById(budgetId);
         for(BudgetItem bi : b.getBudgetItems()) {
             if(bi.getCategory().equals(category)){
-                if(bi.getMaxPrice()- bi.getCurrPrice() >= price){
-                    bi.setCurrPrice(bi.getCurrPrice() + price);
-                    return update(b);
-                }
+                bi.setCurrPrice(bi.getCurrPrice() + price);
+                return save(b);
             }
         }
         BudgetItem i = new BudgetItem();
@@ -54,7 +52,7 @@ public class BudgetServiceImpl implements BudgetService {
         i.setMaxPrice(0);
         b.getBudgetItems().add(i);
         b.setBudgetItems(b.getBudgetItems());
-        return update(b);
+        return save(b);
     }
 
     @Override

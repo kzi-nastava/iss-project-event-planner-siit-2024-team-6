@@ -159,6 +159,7 @@ public class OfferServiceImpl implements OfferService {
             List<Offer> visibleOffers = offers.stream()
                     .filter(offer -> (offer.getIsDeleted() == null || !offer.getIsDeleted()))
                     .filter(Offer::getIsVisible)
+                    .filter(offer -> (offer.getStatus() == Status.ACCEPTED))
                     .collect(Collectors.toList());
 
             return paginateOffers(visibleOffers, pageable);
@@ -177,7 +178,6 @@ public class OfferServiceImpl implements OfferService {
         List<Offer> filteredOffers = offers.stream()
                 .filter(offer -> (offer.getIsDeleted() == null || !offer.getIsDeleted()))
                 .filter(Offer::getIsVisible)
-                .filter(offer -> (offer.getStatus() == Status.ACCEPTED))
                 .filter(offer -> {
                     String category = offer.getCategory().getName();
                     Double maxAllowed = categoryMaxPriceMap.get(category);
@@ -187,6 +187,7 @@ public class OfferServiceImpl implements OfferService {
                     );
                 })
                 .collect(Collectors.toList());
+
 
         return paginateOffers(filteredOffers, pageable);
 
