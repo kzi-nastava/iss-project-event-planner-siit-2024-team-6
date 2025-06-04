@@ -69,6 +69,10 @@ public class OfferServiceImpl implements OfferService {
     public Page<Offer> findAll(Pageable page) {
         return offerRepository.findAll(page);
     }
+    @Override
+    public Page<Offer> findAccepted(Pageable page) {
+        return offerRepository.findAllAccepted(page);
+    }
 
     @Override
     public Offer findById(Integer offerId) {
@@ -226,6 +230,9 @@ public class OfferServiceImpl implements OfferService {
         List<Offer> offers = offerRepository.findAll();
 
         List<Offer> filteredOffers = offers.stream()
+                .filter(offer -> !offer.getIsDeleted())
+                .filter(offer -> offer.getIsVisible())
+                .filter(offer -> offer.getStatus() == Status.ACCEPTED)
                 .filter(offer ->
                         (name == null || name.isEmpty() || offer.getName().toLowerCase().contains(name.toLowerCase())) ||
                                 (description == null || description.isEmpty() || offer.getDescription().toLowerCase().contains(description.toLowerCase())))

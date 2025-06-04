@@ -91,6 +91,23 @@ public class OfferController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    @GetMapping(value = "accepted")
+    public ResponseEntity<PagedResponse<OfferDTO>> getAccepted(Pageable page) {
+
+        Page<Offer> offersPage = offerService.findAccepted(page);
+
+        List<OfferDTO> offerDTOs = offersPage.stream()
+                .map(OfferDTO::new)
+                .toList();
+
+        PagedResponse<OfferDTO> response = new PagedResponse<>(
+                offerDTOs,
+                offersPage.getTotalPages(),
+                offersPage.getTotalElements()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     @GetMapping(value = "{offerId}/provider")
     public ResponseEntity<ProviderDTO> getOffersPageAllElements(@PathVariable int offerId) {

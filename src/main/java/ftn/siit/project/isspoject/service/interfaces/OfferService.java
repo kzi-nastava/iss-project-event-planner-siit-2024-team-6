@@ -19,6 +19,7 @@ public interface OfferService {
     Offer updatePrice(int offerId, NewPriceListOfferDTO dto);
     List<Offer> findAll();
     Page<Offer> findAll(Pageable page);
+    Page<Offer> findAccepted(Pageable page);
     Offer findById(Integer id);
     List<Offer> findTopFive();
 
