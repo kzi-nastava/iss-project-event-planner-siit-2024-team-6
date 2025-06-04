@@ -175,13 +175,17 @@ public class OrganizerController {
         return new ResponseEntity<>(eventDTOs, HttpStatus.OK);
     }
 
-    @GetMapping("{id}/future-events")
-    public ResponseEntity<List<EventDTO>> getFutureEvents(@PathVariable int id) {
-        Organizer organizer = organizerService.findById(id);
-        if (organizer == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    @GetMapping("future-events")
+    public ResponseEntity<List<EventDTO>> getFutureEvents(HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer organizer = (Organizer) userService.findByEmail(email);
+        if (organizer == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         List<Event> events = eventService.getFutureEvents(organizer);
         List<EventDTO> eventDTOs = new ArrayList<>();
         for(Event e: events){
