@@ -4,11 +4,14 @@ import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
 import ftn.siit.project.isspoject.dto.budget.NewBudgetItemDTO;
 import ftn.siit.project.isspoject.entity.Budget;
 import ftn.siit.project.isspoject.entity.BudgetItem;
+import ftn.siit.project.isspoject.entity.Category;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.BudgetRepository;
 import ftn.siit.project.isspoject.repository.CategoryRepository;
 import ftn.siit.project.isspoject.service.interfaces.BudgetService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -23,6 +26,36 @@ public class BudgetServiceImpl implements BudgetService {
   //  public Page<Budget> findAll(Pageable page) {
 //        return budgetRepository.findAll(page);
 //    }
+    @Override
+    public Budget removeItem(int id, Category category) {
+        Budget b = findById(id);
+        for(BudgetItem bi : b.getBudgetItems()) {
+            if(bi.getCategory().equals(category)){
+                b.getBudgetItems().remove(bi);
+                return update(b);
+            }
+        }
+        return b;
+    }
+    @Override
+    public Budget addNewItem(Category category, double price, int budgetId){
+        Budget b = findById(budgetId);
+        for(BudgetItem bi : b.getBudgetItems()) {
+            if(bi.getCategory().equals(category)){
+                if(bi.getMaxPrice()- bi.getCurrPrice() >= price){
+                    bi.setCurrPrice(bi.getCurrPrice() + price);
+                    return update(b);
+                }
+            }
+        }
+        BudgetItem i = new BudgetItem();
+        i.setCategory(category);
+        i.setCurrPrice(price);
+        i.setMaxPrice(0);
+        b.getBudgetItems().add(i);
+        b.setBudgetItems(b.getBudgetItems());
+        return update(b);
+    }
 
     @Override
     public Budget findById(Integer id) {
