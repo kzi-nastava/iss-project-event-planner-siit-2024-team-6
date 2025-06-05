@@ -18,7 +18,7 @@ public class Budget {
     private Integer id;
     private double total;
     private double available;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "budget_id")
     private List<BudgetItem> budgetItems = new ArrayList<>();
 

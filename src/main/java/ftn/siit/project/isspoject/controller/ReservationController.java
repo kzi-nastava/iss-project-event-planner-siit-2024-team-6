@@ -27,6 +27,8 @@ public class ReservationController {
     @Autowired
     private EventService eventService;
     @Autowired
+    private BudgetService budgetService;
+    @Autowired
     private OrganizerService organizerService;
     private static final Logger logger = LoggerFactory.getLogger(ReservationController.class);
 
@@ -76,6 +78,11 @@ public class ReservationController {
                 event.getId(), service.getId(), provider.getId(), organizer.getId());
 
         Reservation created = reservationService.addReservation(event, service, provider, organizer, dto, userService);
+        double price = service.getSale();
+        if (price == 0) {
+            price = service.getPrice();
+        }
+        budgetService.addNewItem(service.getCategory(), price, event.getBudget().getId());
 
         logger.info("Reservation created with ID: {}", created.getId());
 
@@ -98,6 +105,7 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservation(@PathVariable Integer id) {
         Reservation reservation = reservationService.findById(id);
         reservation.setCanceled(true);
+        budgetService.removeItem(reservation.getEvent().getBudget().getId(), reservation.getOfferService().getCategory());
         reservationService.save(reservation);
         return ResponseEntity.noContent().build();
     }

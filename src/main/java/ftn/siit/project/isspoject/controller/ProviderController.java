@@ -218,36 +218,6 @@ public class ProviderController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("{providerId}/services-filter")
-    public ResponseEntity<PagedResponse<OfferDTO>> getFilteredServices(@PathVariable int providerId,
-                                                                       @RequestParam(required = false) List<String> categories,
-                                                                       @RequestParam(required = false) List<String> eventTypes,
-                                                                       @RequestParam(required = false) Double price,
-                                                                       @RequestParam(required = false) Boolean isAvailable, Pageable pageable) {
-        System.out.println(" Recieved Categories: " + categories);
-        System.out.println("Event Types: " + eventTypes);
-        Provider provider = providerService.findById(providerId);
-        Page<Service> filteredOfferServices = serviceService.getFilteredServices(provider, categories, eventTypes, price, isAvailable, pageable);
-        List<OfferDTO> dtos = filteredOfferServices.stream()
-                .map(service -> {
-                    try {
-                        return new OfferDTO(service);
-                    } catch (Exception e) {
-                        System.err.println("Error converting service to DTO: " + e.getMessage());
-                        return null;
-                    }
-                })
-                .filter(dto -> dto != null)
-                .toList();
-
-        PagedResponse<OfferDTO> response = new PagedResponse<>(
-                dtos,
-                filteredOfferServices.getTotalPages(),
-                filteredOfferServices.getTotalElements()
-        );
-        return ResponseEntity.ok(response);
-    }
-
     @GetMapping("search")
     public ResponseEntity<PagedResponse<OfferDTO>> getFilteredServices(@RequestParam() String name, Pageable page, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
@@ -278,35 +248,6 @@ public class ProviderController {
                 filteredOfferServices.getTotalElements()
         );
         return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("{id}/budget")
-    public ResponseEntity<BudgetDTO> getBudget(@PathVariable int id) {
-        Budget budget = budgetService.findById(id);
-        if (budget == null) throw new NotFoundException("Budget not found");
-        return ResponseEntity.ok(new BudgetDTO(budget));
-    }
-
-    @PostMapping("budget")
-    public ResponseEntity<BudgetDTO> createBudget(@RequestBody NewBudgetDTO dto) {
-        Budget budget = new Budget();
-        if (budget == null) {
-            throw new IllegalArgumentException("Budget is null");
-        }
-        Budget created = budgetService.save(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new BudgetDTO(created));
-    }
-
-    @PutMapping("budget/{id}")
-    public ResponseEntity<BudgetDTO> updateBudget(@PathVariable int id, @RequestBody NewBudgetDTO dto) {
-        Budget updatedBudget = budgetService.update(id, dto);
-        return ResponseEntity.ok(new BudgetDTO(updatedBudget));
-    }
-
-    @DeleteMapping("budget/{id}")
-    public ResponseEntity<Void> deleteBudget(@PathVariable int id) {
-        budgetService.delete(id);
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("categories")

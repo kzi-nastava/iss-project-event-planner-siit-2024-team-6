@@ -12,12 +12,10 @@ import ftn.siit.project.isspoject.dto.user.UserDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.implementations.OfferServiceImpl;
-import ftn.siit.project.isspoject.service.interfaces.CategoryService;
-import ftn.siit.project.isspoject.service.interfaces.OfferHistoryService;
-import ftn.siit.project.isspoject.service.interfaces.OfferService;
-import ftn.siit.project.isspoject.service.interfaces.UserService;
+import ftn.siit.project.isspoject.service.interfaces.*;
 import ftn.siit.project.isspoject.util.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -43,15 +41,19 @@ public class OfferController {
     @Autowired
     private OfferService offerService;
     @Autowired
+    private EventService eventService;
+    @Autowired
     private OfferHistoryService offerHistoryService;
     @Autowired
     private UserService userService;
     @Autowired
     private CategoryService categoryService;
     @Autowired
-    private OfferServiceImpl offerServiceImpl;
+    private OrganizerService organizerService;
     @Autowired
     private TokenUtils tokenUtils;
+    @Autowired
+    private BudgetService budgetService;
     @GetMapping()
     public ResponseEntity<List<OfferDTO>> getAll() {
         List<Offer> offers = offerService.findAll();
@@ -90,6 +92,33 @@ public class OfferController {
         );
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    @PostMapping("{offerId}/buy")
+    public ResponseEntity<Void> buyProduct(@PathVariable int offerId,  @RequestParam int eventId, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer user = organizerService.findByEmail(email);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Event event = eventService.findById(eventId);
+        if (event == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Offer o = offerService.findById(offerId);
+        if (o == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        double price = o.getSale();
+        if(price == 0){
+            price = o.getPrice();
+        }
+        Budget b = event.getBudget();
+        budgetService.addNewItem(o.getCategory(), price, b.getId());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping(value = "{offerId}/provider")
