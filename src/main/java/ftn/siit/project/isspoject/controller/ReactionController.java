@@ -6,6 +6,9 @@ import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.interfaces.*;
 import ftn.siit.project.isspoject.service.interfaces.OfferService;
+import ftn.siit.project.isspoject.util.TokenUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,17 +32,31 @@ public class ReactionController {
     private UserService userService;
     @Autowired
     private EventService eventService;
+    @Autowired
+    private TokenUtils tokenUtils;
 
     @PostMapping()
-    public ResponseEntity<ReactionDTO> addReaction(@RequestBody NewReactionDTO dto) {
+    public ResponseEntity<ReactionDTO> addReaction(@RequestBody NewReactionDTO dto, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         Reaction reaction = new Reaction(dto);
-        Offer offer = offerService.findById(dto.getOfferId());
-        Event event = eventService.findById(dto.getEventId());
-        User user = userService.findById(dto.getUserId());
+        if(dto.getEventId() == null && dto.getOfferId() == null){
+             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }else if(dto.getEventId() != null){
+            Event event = eventService.findById(dto.getEventId());
+            reaction.setEvent(event);
+        }else if(dto.getOfferId() != null){
+            Offer offer = offerService.findById(dto.getOfferId());
+            reaction.setOffer(offer);
+        }
         reaction.setUser(user);
-        reaction.setOffer(offer);
-        reaction.setEvent(event);
-
         //comment is by default pending
         if(reaction.getText()!=null && reaction.getText().length()>0) {
             reaction.setStatus(Status.PENDING);
@@ -113,10 +130,6 @@ public class ReactionController {
         if (dto.getEventId() != null) {
             Event event = eventService.findById(dto.getEventId());
             existingReaction.setEvent(event);
-        }
-        if (dto.getUserId() != null) {
-            User user = userService.findById(dto.getUserId());
-            existingReaction.setUser(user);
         }
 
         Reaction updated = reactionService.save(existingReaction);
