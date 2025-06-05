@@ -4,6 +4,8 @@ import ftn.siit.project.isspoject.dto.offer.NewReservationDTO;
 import ftn.siit.project.isspoject.dto.offer.ReservationDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.service.interfaces.*;
+import ftn.siit.project.isspoject.util.TokenUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,9 @@ public class ReservationController {
     private BudgetService budgetService;
     @Autowired
     private OrganizerService organizerService;
+    @Autowired
+    private TokenUtils tokenUtils;
+
     private static final Logger logger = LoggerFactory.getLogger(ReservationController.class);
 
     @PostMapping()
@@ -124,6 +129,32 @@ public class ReservationController {
     public ResponseEntity<ReservationDTO> getReservationById(@PathVariable Integer id) {
         Reservation reservation = reservationService.findById(id);
         return ResponseEntity.ok(new ReservationDTO(reservation));
+    }
+
+    @GetMapping("{offerId}/reserved")
+    public ResponseEntity<Boolean> isPurchased(@PathVariable int offerId, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer user = organizerService.findByEmail(email);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        List<Reservation> reservations = reservationService.findByServiceId(offerId);
+        if(reservations.isEmpty()) {
+            return new ResponseEntity<>(false, HttpStatus.OK);
+        }
+        for(Reservation reservation : reservations) {
+            for(Event e: user.getMyEvents()){
+                if (reservation.getEvent().getId().equals(e.getId()) && !reservation.isCanceled()) {
+                    return new ResponseEntity<>(true, HttpStatus.OK);
+                }
+            }
+        }
+        return new ResponseEntity<>(false, HttpStatus.OK);
     }
 
 }
