@@ -54,6 +54,8 @@ public class OfferController {
     private TokenUtils tokenUtils;
     @Autowired
     private BudgetService budgetService;
+    @Autowired
+    private PurchaseService purchaseService;
     @GetMapping()
     public ResponseEntity<List<OfferDTO>> getAll() {
         List<Offer> offers = offerService.findAll();
@@ -93,6 +95,21 @@ public class OfferController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @GetMapping("{offerId}/purchased")
+    public ResponseEntity<Boolean> isPurchased(@PathVariable int offerId, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer user = organizerService.findByEmail(email);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(purchaseService.existsPurchase(user.getId(), offerId), HttpStatus.OK);
+    }
+
     @PostMapping("{offerId}/buy")
     public ResponseEntity<Void> buyProduct(@PathVariable int offerId,  @RequestParam int eventId, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
@@ -118,6 +135,9 @@ public class OfferController {
         }
         Budget b = event.getBudget();
         budgetService.addNewItem(o.getCategory(), price, b.getId());
+        if(!purchaseService.existsPurchase(user.getId(), o.getId())){
+            purchaseService.save(new Purchase(user, (Product) o));
+        }
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
