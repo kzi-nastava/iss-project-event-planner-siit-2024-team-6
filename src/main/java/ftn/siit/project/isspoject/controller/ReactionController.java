@@ -58,6 +58,9 @@ public class ReactionController {
         }
         reaction.setUser(user);
         //comment is by default pending
+        if((reaction.getText() == null || reaction.getText().length() == 0) && (reaction.getRating() == 0 || reaction.getRating() == null)){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         if(reaction.getText()!=null && reaction.getText().length()>0) {
             reaction.setStatus(Status.PENDING);
         }
