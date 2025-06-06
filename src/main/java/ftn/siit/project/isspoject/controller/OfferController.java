@@ -19,10 +19,7 @@ import ftn.siit.project.isspoject.service.interfaces.UserService;
 import ftn.siit.project.isspoject.util.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -92,9 +89,15 @@ public class OfferController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     @GetMapping(value = "accepted")
-    public ResponseEntity<PagedResponse<OfferDTO>> getAccepted(Pageable page) {
+    public ResponseEntity<PagedResponse<OfferDTO>> getAccepted(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "price"));
 
-        Page<Offer> offersPage = offerService.findAccepted(page);
+        Page<Offer> offersPage = offerService.findAccepted(pageable);
 
         List<OfferDTO> offerDTOs = offersPage.stream()
                 .map(OfferDTO::new)
@@ -307,7 +310,8 @@ public class OfferController {
             @RequestParam(required = false) Boolean isService,
             @RequestParam(required = false) Boolean isProduct,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "8") int pageSize) {
+            @RequestParam(defaultValue = "8") int pageSize,
+            @RequestParam(defaultValue = "asc") String sortDir) {
 
         LocalDateTime startDateTime = null;
         LocalDateTime endDateTime = null;
@@ -323,7 +327,7 @@ public class OfferController {
 
 
         Pageable pageable = PageRequest.of(page, pageSize);
-        Page<OfferDTO> filteredOffers = offerService.searchOffers(name, description, maxPrice, isOnSale, startDateTime, endDateTime, category, eventType, isService, isProduct, pageable);
+        Page<OfferDTO> filteredOffers = offerService.searchOffers(name, description, maxPrice, isOnSale, startDateTime, endDateTime, category, eventType, isService, isProduct, pageable, sortDir);
 
         if (filteredOffers.isEmpty()) {
             return ResponseEntity.noContent().build();

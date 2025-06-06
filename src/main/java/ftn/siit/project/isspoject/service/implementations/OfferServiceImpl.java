@@ -212,7 +212,7 @@ public class OfferServiceImpl implements OfferService {
     }
 
     @Override
-    public Page<OfferDTO> searchOffers(String name, String description, Double maxPrice, Boolean isOnSale, LocalDateTime startDate, LocalDateTime endDate, String category, String eventType, Boolean isService, Boolean isProduct, Pageable pageable) {
+    public Page<OfferDTO> searchOffers(String name, String description, Double maxPrice, Boolean isOnSale, LocalDateTime startDate, LocalDateTime endDate, String category, String eventType, Boolean isService, Boolean isProduct, Pageable pageable,String sortDir) {
         System.out.println("Search Offers called with parameters:");
         System.out.println("Name: " + name);
         System.out.println("Description: " + description);
@@ -240,14 +240,18 @@ public class OfferServiceImpl implements OfferService {
                         (offer.getSale() != null && offer.getSale() > 0 ? offer.getSale() <= maxPrice : offer.getPrice() <= maxPrice)) //if it is on sale compare max price to sale price
                 .filter(offer -> isOnSale == null || (!isOnSale) || (isOnSale && offer.getSale() != null && offer.getSale() > 0)) //if isOnSale is false then return all
                 .filter(offer -> category == null || category.isEmpty() || category.toLowerCase().equals(offer.getCategory().getName().toLowerCase()))
-//                .filter(offer -> (startDate == null || offer.getDate().isAfter(startDate)) &&
-//                        (endDate == null || offer.getDate().isBefore(endDate)))
                 .filter(offer -> (isService == null || (isService && offer.isService())) ||
                         (isProduct == null || (isProduct && offer.isProduct())))
                 .filter(offer -> eventType == null || eventType.isEmpty() ||
                         offer.getEventTypes().stream().anyMatch(type -> type.getName().equalsIgnoreCase(eventType))
                 )
-
+                .sorted((o1, o2) -> {
+                    double price1 = (o1.getSale() != null && o1.getSale() > 0) ? o1.getSale() : o1.getPrice();
+                    double price2 = (o2.getSale() != null && o2.getSale() > 0) ? o2.getSale() : o2.getPrice();
+                    return sortDir != null && sortDir.equalsIgnoreCase("desc")
+                            ? Double.compare(price2, price1)
+                            : Double.compare(price1, price2);
+                })
                 .collect(Collectors.toList());
 
         int start = (int) pageable.getOffset();
