@@ -22,7 +22,7 @@ public interface EventService {
     Event save(Event event);
     void delete(Event event);
     List<Event> getEventsUserAttends(Integer userId);
-    Page<Event> searchEvents(String name, String description, String place, String eventType, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+    Page<Event> searchEvents(String name, String description, String place, String eventType, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String sortDir);
     void sendInvitations(NewEventDTO dto);
     List<Event> findByOrganizer(Organizer organizer);
     List<Event> getFutureEvents(Organizer organizer);

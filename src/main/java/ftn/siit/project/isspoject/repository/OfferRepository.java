@@ -2,6 +2,8 @@ package ftn.siit.project.isspoject.repository;
 
 import ftn.siit.project.isspoject.entity.Offer;
 import ftn.siit.project.isspoject.entity.Provider;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +16,8 @@ import java.util.Optional;
 @Repository
 public interface OfferRepository extends JpaRepository<Offer, Integer> {
     List<Offer> findTop5ByOrderByLastChangedAsc();
+    @Query("SELECT o FROM Offer o WHERE o.isDeleted = false AND o.isVisible = true AND o.status = 1")
+    Page<Offer> findAllAccepted(Pageable pageable);
 
     List<Offer> findByIsDeletedFalseOrIsDeletedIsNull();
 
