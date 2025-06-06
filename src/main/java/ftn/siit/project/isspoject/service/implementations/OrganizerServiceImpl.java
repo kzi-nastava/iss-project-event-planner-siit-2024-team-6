@@ -3,6 +3,7 @@ package ftn.siit.project.isspoject.service.implementations;
 import ftn.siit.project.isspoject.entity.Organizer;
 import ftn.siit.project.isspoject.repository.OrganizerRepository;
 import ftn.siit.project.isspoject.service.interfaces.OrganizerService;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,6 +17,11 @@ public class OrganizerServiceImpl implements OrganizerService {
     @Autowired
     public OrganizerServiceImpl(OrganizerRepository organizerRepository) {
         this.organizerRepository = organizerRepository;
+    }
+
+    @Override
+    public Organizer findByEmail(String email) {
+        return organizerRepository.findOrganizerByEmailAndIsActiveIsTrue(email);
     }
 
     @Override

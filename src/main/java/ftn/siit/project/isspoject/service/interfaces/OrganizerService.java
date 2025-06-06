@@ -8,4 +8,5 @@ public interface OrganizerService {
     Organizer findById(Integer organizerId);
     Organizer findOrganizerByEventId(Integer eventId);
     Organizer findByEventId(Integer eventId);
+    Organizer findByEmail(String email);
 }

@@ -57,6 +57,8 @@ public class AdminController {
     private ServiceService serviceService;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private AdminService adminService;
 
     @PostMapping("event-types")
     public ResponseEntity<EventTypeDTO> addEventType(@RequestBody NewEventTypeDTO eventTypeDTO, HttpServletRequest request) {
@@ -241,7 +243,6 @@ public class AdminController {
         if (event == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
         byte[] pdf = pdfGeneratorService.generateEventAnalyticsPDF(event);
 
         return ResponseEntity.ok()
@@ -270,11 +271,7 @@ public class AdminController {
         return ResponseEntity.ok(categories);
     }
     @GetMapping("categories")
-    public ResponseEntity<PagedResponse<Category>> getAllCategories(Pageable page, HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null ) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity<PagedResponse<Category>> getAllCategories(Pageable page) {
         Page<Category> categories = categoryService.findAll(page);
 
         PagedResponse<Category> response = new PagedResponse<>(
@@ -301,21 +298,13 @@ public class AdminController {
 //        return ResponseEntity.ok(response);
 //    }
     @PostMapping("category")
-    public ResponseEntity<Category> addCategory(@RequestBody NewCategoryDTO dto, HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity<Category> addCategory(@RequestBody NewCategoryDTO dto) {
         Category savedCategory = categoryService.save(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
     }
 
     @PutMapping("category/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable int id, @RequestBody NewCategoryDTO dto, HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity<Category> updateCategory(@PathVariable int id, @RequestBody NewCategoryDTO dto) {
         Category oldCategory = categoryService.findById(id);
         Category updated = categoryService.update(id, dto);
         notificationService.notifyUsers(userService.findByRole("Provider"), "Updated category\nOLD:\n"+oldCategory.getName()+"\n"+oldCategory.getDescription()+"\nNEW:\n"+updated.getName()+"\n"+updated.getDescription());
@@ -323,11 +312,7 @@ public class AdminController {
     }
 
     @DeleteMapping("category/{id}")
-    public ResponseEntity<String> deleteCategory(@PathVariable int id, HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity<String> deleteCategory(@PathVariable int id) {
         Category oldCategory = categoryService.findById(id);
         if (!offerService.allOffersWithCategory(oldCategory).isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The category must not have any offers using it.");
@@ -337,11 +322,7 @@ public class AdminController {
     }
 
     @GetMapping("suggestions")
-    public ResponseEntity<PagedResponse<CategorySuggestionDTO>> getAllCategorySuggestions(Pageable page, HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity<PagedResponse<CategorySuggestionDTO>> getAllCategorySuggestions(Pageable page) {
         Page<CategorySuggestion> suggestions = categorySuggestionService.getPending(page);
         List<CategorySuggestionDTO> dtos = suggestions.stream()
                 .map(suggestion -> {
@@ -364,11 +345,7 @@ public class AdminController {
     }
 
     @PutMapping("suggestion/approve/{id}")
-    public ResponseEntity<CategorySuggestionDTO> approveSuggestion(@PathVariable int id, HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity<CategorySuggestionDTO> approveSuggestion(@PathVariable int id) {
         CategorySuggestion suggestion = categorySuggestionService.approve(id);
         Category c = categoryService.save(suggestion.getName(), suggestion.getDescription());
         serviceService.update(suggestion.getOffer().getId(), c, Status.ACCEPTED);
@@ -377,11 +354,7 @@ public class AdminController {
     }
 
     @PutMapping("suggestion/{id}")
-    public ResponseEntity<CategorySuggestionDTO> updateCategorySuggestion(@PathVariable int id, @RequestBody NewCategoryDTO dto, HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity<CategorySuggestionDTO> updateCategorySuggestion(@PathVariable int id, @RequestBody NewCategoryDTO dto) {
         CategorySuggestion updated = categorySuggestionService.update(id, dto);
         Category c = categoryService.save(updated.getName(), updated.getDescription());
         serviceService.update(updated.getOffer().getId(), c, Status.ACCEPTED);
@@ -390,11 +363,7 @@ public class AdminController {
     }
 
     @PutMapping("suggestion/reject/{id}")
-    public ResponseEntity<CategorySuggestionDTO> deleteCategorySuggestion(@PathVariable int id, @RequestParam String categoryName, HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity<CategorySuggestionDTO> deleteCategorySuggestion(@PathVariable int id, @RequestParam String categoryName) {
         if(categoryName == null || categoryName.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

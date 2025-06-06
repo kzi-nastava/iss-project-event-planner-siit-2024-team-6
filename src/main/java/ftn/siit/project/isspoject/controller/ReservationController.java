@@ -4,6 +4,8 @@ import ftn.siit.project.isspoject.dto.offer.NewReservationDTO;
 import ftn.siit.project.isspoject.dto.offer.ReservationDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.service.interfaces.*;
+import ftn.siit.project.isspoject.util.TokenUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +29,12 @@ public class ReservationController {
     @Autowired
     private EventService eventService;
     @Autowired
+    private BudgetService budgetService;
+    @Autowired
     private OrganizerService organizerService;
+    @Autowired
+    private TokenUtils tokenUtils;
+
     private static final Logger logger = LoggerFactory.getLogger(ReservationController.class);
 
     @PostMapping()
@@ -76,6 +83,11 @@ public class ReservationController {
                 event.getId(), service.getId(), provider.getId(), organizer.getId());
 
         Reservation created = reservationService.addReservation(event, service, provider, organizer, dto, userService);
+        double price = service.getSale();
+        if (price == 0) {
+            price = service.getPrice();
+        }
+        budgetService.addNewItem(service.getCategory(), price, event.getBudget().getId());
 
         logger.info("Reservation created with ID: {}", created.getId());
 
@@ -98,6 +110,7 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservation(@PathVariable Integer id) {
         Reservation reservation = reservationService.findById(id);
         reservation.setCanceled(true);
+        budgetService.removeItem(reservation.getEvent().getBudget().getId(), reservation.getOfferService().getCategory());
         reservationService.save(reservation);
         return ResponseEntity.noContent().build();
     }
@@ -116,6 +129,32 @@ public class ReservationController {
     public ResponseEntity<ReservationDTO> getReservationById(@PathVariable Integer id) {
         Reservation reservation = reservationService.findById(id);
         return ResponseEntity.ok(new ReservationDTO(reservation));
+    }
+
+    @GetMapping("{offerId}/reserved")
+    public ResponseEntity<Boolean> isPurchased(@PathVariable int offerId, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer user = organizerService.findByEmail(email);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        List<Reservation> reservations = reservationService.findByServiceId(offerId);
+        if(reservations.isEmpty()) {
+            return new ResponseEntity<>(false, HttpStatus.OK);
+        }
+        for(Reservation reservation : reservations) {
+            for(Event e: user.getMyEvents()){
+                if (reservation.getEvent().getId().equals(e.getId()) && !reservation.isCanceled()) {
+                    return new ResponseEntity<>(true, HttpStatus.OK);
+                }
+            }
+        }
+        return new ResponseEntity<>(false, HttpStatus.OK);
     }
 
 }
