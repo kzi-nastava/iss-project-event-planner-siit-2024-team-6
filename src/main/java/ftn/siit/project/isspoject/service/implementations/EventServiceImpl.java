@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -49,7 +50,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Page<Event> findAll(Pageable page) {
-        return eventRepository.findByIsDeletedFalse(page);
+        return eventRepository.findByIsDeletedFalse(page,LocalDateTime.now());
     }
 
 
@@ -156,7 +157,7 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    public Page<Event> searchEvents(String name, String description, String place, String eventType, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+    public Page<Event> searchEvents(String name, String description, String place, String eventType, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String sortDir) {
         System.out.println("Search Events called with parameters:");
         System.out.println("Name: " + name);
         System.out.println("Description: " + description);
@@ -167,10 +168,14 @@ public class EventServiceImpl implements EventService {
         System.out.println("Page Number: " + pageable.getPageNumber());
         System.out.println("Page Size: " + pageable.getPageSize());
 
+        Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        LocalDateTime now = LocalDateTime.now();
+
         List<Event> events = eventRepository.findAll();
 
         List<Event> filteredEvents = events.stream()
                 .filter(event -> !event.getIsDeleted())
+                .filter(event -> event.getDate().isAfter(now))
                 .filter(event ->
                         (name == null || name.isEmpty() || event.getName().toLowerCase().contains(name.toLowerCase())) ||
                                 (description == null || description.isEmpty() || event.getDescription().toLowerCase().contains(description.toLowerCase())) ||
@@ -178,6 +183,11 @@ public class EventServiceImpl implements EventService {
                 .filter(event -> eventType == null || eventType.isEmpty() || event.getEventType().getName().equals(eventType))
                 .filter(event -> (startDate == null || event.getDate().isAfter(startDate)) &&
                         (endDate == null || event.getDate().isBefore(endDate)))
+                .sorted((e1, e2) ->
+                        direction == Sort.Direction.ASC
+                                ? e1.getDate().compareTo(e2.getDate())
+                                : e2.getDate().compareTo(e1.getDate())
+                )
                 .collect(Collectors.toList());
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), filteredEvents.size());

@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -330,9 +331,15 @@ public class EventController {
 
 
     @GetMapping(value = "all-elements")
-    public ResponseEntity<PagedResponse<EventDTO>> getEventsPageAllElements(Pageable page) {
+    public ResponseEntity<PagedResponse<EventDTO>> getEventsPageAllElements(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "date"));
 
-        Page<Event> eventsPage = eventService.findAll(page);
+        Page<Event> eventsPage = eventService.findAll(pageable);
 
         List<EventDTO> eventDTOs = eventsPage.stream()
                 .map(EventDTO::new)
@@ -346,6 +353,7 @@ public class EventController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 
 
     @GetMapping("top-five")
@@ -368,7 +376,8 @@ public class EventController {
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "8") int pageSize) {
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "asc") String sortDir) {
 
         LocalDateTime startDateTime = null;
         LocalDateTime endDateTime = null;
@@ -385,7 +394,7 @@ public class EventController {
 
 
         Pageable pageable = PageRequest.of(page, pageSize);
-        Page<Event> filteredEvents = eventService.searchEvents(name, description, place, eventType, startDateTime, endDateTime, pageable);
+        Page<Event> filteredEvents = eventService.searchEvents(name, description, place, eventType, startDateTime, endDateTime, pageable,sortDir);
         if (filteredEvents.isEmpty()) {
             return ResponseEntity.noContent().build();
         }

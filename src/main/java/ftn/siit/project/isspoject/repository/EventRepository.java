@@ -31,6 +31,7 @@ public interface EventRepository extends JpaRepository<Event, Integer>{
 
     @Query("SELECT e FROM Event e WHERE e.id IN (SELECT ev.id FROM Organizer o JOIN o.myEvents ev WHERE o = :organizer)")
     List<Event> findByOrganizer(Organizer organizer);
-    @Query("SELECT e FROM Event  e WHERE e.isDeleted = false")
-    Page<Event> findByIsDeletedFalse(Pageable pageable);
+    @Query("SELECT e FROM Event  e WHERE e.isDeleted = false AND e.date > :now")
+    Page<Event> findByIsDeletedFalse(Pageable pageable,@Param("now") LocalDateTime now);
+
 }
