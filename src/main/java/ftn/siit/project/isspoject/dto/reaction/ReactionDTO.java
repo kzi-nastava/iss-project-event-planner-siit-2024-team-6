@@ -16,8 +16,13 @@ public class ReactionDTO {
         this.id = reaction.getId();
         this.text = reaction.getText();
         this.rating = reaction.getRating();
-        this.offerId = reaction.getOffer().getId();
-        this.eventId = reaction.getEvent().getId();
+        this.eventId = null;
+        this.offerId = null;
+        if(reaction.getOffer() != null) {
+            this.offerId = reaction.getOffer().getId();
+        }else if(reaction.getEvent() != null) {
+            this.eventId = reaction.getEvent().getId();
+        }
         this.userId = reaction.getUser().getId();
     }
 }

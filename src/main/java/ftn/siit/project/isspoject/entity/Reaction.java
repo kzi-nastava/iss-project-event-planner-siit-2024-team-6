@@ -14,13 +14,13 @@ public class Reaction {
     private String text;
     private Integer rating;
     private Status status;
-    @OneToOne(optional = true)
+    @ManyToOne(optional = true)
     @JoinColumn(name = "offer_id", referencedColumnName = "id")
     private Offer offer;
-    @OneToOne(optional = true)
+    @ManyToOne(optional = true)
     @JoinColumn(name = "event_id", referencedColumnName = "id")
     private Event event;
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
     private boolean isDeleted = false;

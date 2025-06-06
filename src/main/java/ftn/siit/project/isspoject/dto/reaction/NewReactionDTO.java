@@ -12,5 +12,4 @@ public class NewReactionDTO {
     private Integer rating;
     private Integer offerId;
     private Integer eventId;
-    private Integer userId;
 }
