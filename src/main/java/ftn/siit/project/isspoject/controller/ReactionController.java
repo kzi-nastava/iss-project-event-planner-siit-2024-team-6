@@ -10,6 +10,9 @@ import ftn.siit.project.isspoject.util.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -105,13 +108,15 @@ public class ReactionController {
     }
 
     @GetMapping("pending")
-    public ResponseEntity<List<ReactionDTO>> getPendingReactions() {
-        List<Reaction> pending = reactionService.getPendingReactions();
+    public ResponseEntity<Page<ReactionDTO>> getPendingReactions(
+            @PageableDefault(size = 10) Pageable pageable) {
 
-        List<ReactionDTO> reactionDTOs = pending.stream()
-                .map(ReactionDTO::new)
-                .toList();
-        return ResponseEntity.ok(reactionDTOs);
+        // Assuming your service method supports Pageable
+        Page<Reaction> pendingPage = reactionService.getPendingReactions(pageable);
+
+        Page<ReactionDTO> reactionDTOPage = pendingPage.map(ReactionDTO::new);
+
+        return ResponseEntity.ok(reactionDTOPage);
     }
     @PutMapping("{id}")
     public ResponseEntity<ReactionDTO> updateReaction(@PathVariable Integer id, @RequestBody NewReactionDTO dto) {

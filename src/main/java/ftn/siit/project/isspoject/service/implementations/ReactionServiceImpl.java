@@ -5,6 +5,8 @@ import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.repository.ReactionRepository;
 import ftn.siit.project.isspoject.service.interfaces.ReactionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -49,7 +51,7 @@ public class ReactionServiceImpl implements ReactionService {
     public void delete(Reaction reaction) {
         reactionRepository.delete(reaction);
     }
-    public List<Reaction> getPendingReactions() {
-        return reactionRepository.findByStatus(Status.PENDING);
+    public Page<Reaction> getPendingReactions(Pageable pageable) {
+        return reactionRepository.findByStatusAndIsDeletedFalse(Status.PENDING,pageable);
     }
 }
