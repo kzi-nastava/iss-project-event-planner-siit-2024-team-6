@@ -1,6 +1,8 @@
 package ftn.siit.project.isspoject.service.interfaces;
 
 import ftn.siit.project.isspoject.entity.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -15,5 +17,5 @@ public interface ReactionService {
 
     Reaction save(Reaction reaction);
     void delete(Reaction reaction);
-    List<Reaction> getPendingReactions();
+    Page<Reaction> getPendingReactions(Pageable pageable);
 }
