@@ -1,10 +1,9 @@
 package ftn.siit.project.isspoject.entity;
 
-import ftn.siit.project.isspoject.dto.user.NewUserReportDTO;
+import ftn.siit.project.isspoject.dto.user.NewReportDTO;
 import lombok.Data;
 
 import jakarta.persistence.*;
-import lombok.Data;
 
 @Data
 @Entity
@@ -35,7 +34,7 @@ public class Report {
     private Reaction reactions;
 
     public Report(){}
-    public Report(NewUserReportDTO userReportDTO) {
+    public Report(NewReportDTO userReportDTO) {
         if (userReportDTO == null) {
             throw new IllegalArgumentException("UserReportDTO cannot be null");
         }
