@@ -21,9 +21,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @RestController
@@ -239,6 +242,29 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Аккаунт неактивен
         }
 
+        // checking for suspension
+        LocalDateTime suspendedSince = user.getSuspendedSince();
+        if (suspendedSince != null) {
+            LocalDateTime now = LocalDateTime.now();
+            Duration suspensionDuration = Duration.between(suspendedSince, now);
+
+            long totalSuspensionMinutes = 3 * 24 * 60;
+            long minutesPassed = suspensionDuration.toMinutes();
+
+            if (minutesPassed < totalSuspensionMinutes) {
+                long minutesLeft = totalSuspensionMinutes - minutesPassed;
+                String formattedDuration = formatDuration(minutesLeft);
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("message", "User is suspended. Please try again in " + formattedDuration + ".");
+                response.put("minutesLeft", minutesLeft);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+            } else {
+                // Suspension expired, clear suspension and continue login
+                user.setSuspendedSince(null);
+                userService.save(user);
+            }
+        }
         try {
             TokenDTO token = new TokenDTO();
 
@@ -374,19 +400,6 @@ public class UserController {
         return ResponseEntity.ok(block);
     }
 
-    @PostMapping("/report")
-    public ResponseEntity<UserReportDTO> reportUser(@RequestBody NewUserReportDTO userReportDTO) {
-        if (userReportDTO == null || userReportDTO.getReporterId() == null || userReportDTO.getReportedId() == null) {
-            throw new IllegalArgumentException("Not all arguments were given while reporting user");
-        }
-        Report report = new Report(userReportDTO);
-        User reporter = userService.findById(userReportDTO.getReporterId());
-        User reported = userService.findById(userReportDTO.getReportedId());
-        report.setReporter(reporter);
-        report.setReported(reported);
-        Report savedReport = reportService.save(report);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new UserReportDTO(savedReport));
-    }
     private UserDTO toDTO(User user) {
         if (user instanceof Provider) {
             return new ProviderDTO((Provider) user);
@@ -395,5 +408,21 @@ public class UserController {
         }
         return new UserDTO(user);
     }
+    public static String formatDuration(long totalMinutes) {
+        long days = TimeUnit.MINUTES.toDays(totalMinutes);
+        long hours = TimeUnit.MINUTES.toHours(totalMinutes) - TimeUnit.DAYS.toHours(days);
+        long minutes = totalMinutes - TimeUnit.DAYS.toMinutes(days) - TimeUnit.HOURS.toMinutes(hours);
 
+        StringBuilder sb = new StringBuilder();
+        if (days > 0) {
+            sb.append(days).append(days == 1 ? " day " : " days ");
+        }
+        if (hours > 0) {
+            sb.append(hours).append(hours == 1 ? " hour " : " hours ");
+        }
+        if (minutes > 0 || (days == 0 && hours == 0)) {
+            sb.append(minutes).append(minutes == 1 ? " minute" : " minutes");
+        }
+        return sb.toString().trim();
+    }
 }
