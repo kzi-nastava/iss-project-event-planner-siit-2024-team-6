@@ -127,7 +127,6 @@ public class EventController {
     }
     @PostMapping("{eventId}/favorite")
     public ResponseEntity<UserDTO> addEventToFavorites(@PathVariable Integer eventId, HttpServletRequest request) {
-        // Проверка существования пользователя
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -139,23 +138,45 @@ public class EventController {
             return ResponseEntity.notFound().build();
         }
 
-        // Проверка существования события
         Event event = eventService.findById(eventId);
 
-        // Проверка, что событие уже добавлено в избранное
         if (user.getFavouriteEvents().contains(event)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Событие уже в избранном
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
-        // Добавление события в избранное
         user.getFavouriteEvents().add(event);
         User updatedUser = userService.save(user);
 
-        // Преобразование в DTO
         UserDTO updatedUserDTO = toUserDTO(updatedUser);
 
-        return ResponseEntity.ok(updatedUserDTO); // Возвращаем обновлённого пользователя
+        return ResponseEntity.ok(updatedUserDTO);
     }
+    @PostMapping("{eventId}/participate")
+    public ResponseEntity<UserDTO> participateInEvent(@PathVariable Integer eventId, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        Event event = eventService.findById(eventId);
+
+        if (user.getAttends().contains(event)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        user.getAttends().add(event);
+        User updatedUser = userService.save(user);
+
+        UserDTO updatedUserDTO = toUserDTO(updatedUser);
+
+        return ResponseEntity.ok(updatedUserDTO);
+    }
+
 
     @GetMapping("{eventId}/getCategories")
     public ResponseEntity<List<String>> getEventCategories(@PathVariable Integer eventId, HttpServletRequest request) {
@@ -189,6 +210,30 @@ public class EventController {
         }
 
         List<Event> events = user.getFavouriteEvents();
+
+        List<EventDTO> ed = new ArrayList<>();
+
+        for (Event e: events){
+            ed.add(new EventDTO(e));
+        }
+
+        return ResponseEntity.ok(ed);
+
+    }
+    @GetMapping("participated")
+    public ResponseEntity<List<EventDTO>> getParticipated(HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<Event> events = user.getAttends();
 
         List<EventDTO> ed = new ArrayList<>();
 
@@ -291,6 +336,38 @@ public class EventController {
 
         // Удаление события из избранного
         user.getFavouriteEvents().remove(event);
+        User updatedUser = userService.save(user);
+
+        // Преобразование в DTO
+        UserDTO updatedUserDTO = toUserDTO(updatedUser);
+
+        return ResponseEntity.ok(updatedUserDTO); // Возвращаем обновлённого пользователя
+    }
+
+    @DeleteMapping("{eventId}/participate")
+    public ResponseEntity<UserDTO> removeEventParticipation( @PathVariable Integer eventId, HttpServletRequest request) {
+
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Проверка существования события
+        Event event = eventService.findById(eventId);
+
+        // Проверка, что событие есть в избранном
+        if (!user.getAttends().contains(event)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Событие отсутствует в избранном
+        }
+
+        // Удаление события из избранного
+        user.getAttends().remove(event);
         User updatedUser = userService.save(user);
 
         // Преобразование в DTO
