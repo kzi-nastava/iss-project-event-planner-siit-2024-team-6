@@ -45,18 +45,18 @@ public class CalendarController {
 
         List<CalendarItemDTO> calendarItems = new ArrayList<>();
         for(Event e: user.getAttends())
-            calendarItems.add(new CalendarItemDTO(e.getName(), e.getDate(), "Event"));
+            calendarItems.add(new CalendarItemDTO(e.getName(), e.getDate(), "Event", e.getId()));
 
         switch (user.getUserType()){
             case "Organizer":
                 for(Event e: ((Organizer) user).getMyEvents())
-                    calendarItems.add(new CalendarItemDTO(e.getName(), e.getDate(), "MyEvent"));
+                    calendarItems.add(new CalendarItemDTO(e.getName(), e.getDate(), "MyEvent", e.getId()));
                 break;
             case "Provider":
                 for(Service s: (serviceService.findByProvider((Provider) user))){
                     List<Reservation> rs = reservationService.findByServiceId(s.getId());
                     for(Reservation r: rs)
-                        calendarItems.add(new CalendarItemDTO(s.getName(), r.getStartTime(), "MyService"));
+                        calendarItems.add(new CalendarItemDTO(s.getName(), r.getStartTime(), "MyService", s.getId()));
                 }
         }
 
