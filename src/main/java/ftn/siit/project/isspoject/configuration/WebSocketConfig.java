@@ -12,13 +12,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic", "/queue"); // Prefixes for outgoing and private messages
-        config.setApplicationDestinationPrefixes("/app"); // Prefix for incoming messages
+        config.setApplicationDestinationPrefixes("/socket-subscriber")
+                .enableSimpleBroker("/socket-publisher");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws") // WebSocket endpoint
+        registry.addEndpoint("/socket") // WebSocket endpoint
                 .setAllowedOrigins("http://localhost:4200") // Allow CORS for Angular app
                 .withSockJS(); // Fallback for browsers without WebSocket support
     }
