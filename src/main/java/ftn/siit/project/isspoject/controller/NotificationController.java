@@ -41,7 +41,7 @@ public class NotificationController {
         Notification saved = notificationService.save(notification);
 
         // Send the notification via WebSocket
-        messagingTemplate.convertAndSend("/topic/notifications/" + receiver.getId(), new NotificationDTO(saved));
+        messagingTemplate.convertAndSend("/socket-publisher/notifications/" + receiver.getId(), new NotificationDTO(saved));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new NotificationDTO(saved));
     }
@@ -54,7 +54,7 @@ public class NotificationController {
         Notification updated = notificationService.save(notification);
 
         // Send the updated notification via WebSocket
-        messagingTemplate.convertAndSend("/topic/notifications/" + updated.getReceiver().getId(), new NotificationDTO(updated));
+        messagingTemplate.convertAndSend("/socket-publisher/notifications/" + updated.getReceiver().getId(), new NotificationDTO(updated));
 
         return ResponseEntity.ok(new NotificationDTO(updated));
     }
