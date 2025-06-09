@@ -7,9 +7,9 @@ public class ChatDTO {
 
     public ChatDTO() {
     }
-    public ChatDTO(int id, String name, String photoUrl) {
+    public ChatDTO(int id, String name, String lastName, String photoUrl) {
         this.id = id;
-        this.name = name;
+        this.name = name + " " + lastName;
         this.photoUrl = photoUrl;
     }
 }
