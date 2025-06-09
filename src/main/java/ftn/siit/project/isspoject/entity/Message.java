@@ -1,6 +1,7 @@
 package ftn.siit.project.isspoject.entity;
 
 import ftn.siit.project.isspoject.dto.message.MessageDTO;
+import ftn.siit.project.isspoject.dto.message.NewMessageDTO;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -31,6 +32,13 @@ public class Message {
         this.id = dto.getId();
         this.text = dto.getText();
         this.time = dto.getTime();
+        this.sender = sender;
+        this.receiver = receiver;
+    }
+
+    public Message(NewMessageDTO dto, User sender, User receiver) {
+        this.text = dto.getText();
+        this.time = LocalDateTime.now();
         this.sender = sender;
         this.receiver = receiver;
     }
