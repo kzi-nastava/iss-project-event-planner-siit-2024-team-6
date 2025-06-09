@@ -10,7 +10,7 @@ public class NewMessageDTO {
     private String text;
 
     NewMessageDTO(){}
-    NewMessageDTO(Message message) {
+    NewMessageDTO(Message message, boolean fromUser) {
         this.text = message.getText();
     }
 }

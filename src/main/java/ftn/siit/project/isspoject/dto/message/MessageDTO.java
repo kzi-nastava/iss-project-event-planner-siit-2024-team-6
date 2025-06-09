@@ -13,12 +13,14 @@ public class MessageDTO {
     private Integer id;
     private String text;
     private LocalDateTime time;
+    private boolean isFromUser;
 
     public MessageDTO() {}
 
-    public MessageDTO(Message message) {
+    public MessageDTO(Message message, boolean fromUser) {
         this.id = message.getId();
         this.text = message.getText();
         this.time = message.getTime();
+        this.isFromUser = fromUser;
     }
 }
