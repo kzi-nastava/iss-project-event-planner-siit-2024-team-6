@@ -13,4 +13,5 @@ public interface ChatService {
     Chat updateActivity(int chatId);
     Chat findChatById(int chatId);
     Chat saveChat(Chat chat);
+    Chat findChatByUsers(User u1, User u2);
 }

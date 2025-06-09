@@ -80,4 +80,14 @@ public class ChatServiceImpl implements ChatService{
         return chatRepository.save(chat);
     }
 
+    @Override
+    public Chat findChatByUsers(User u1, User u2) {
+        Optional<Chat> chat = chatRepository.findChatByParticipants(u1.getId(), u2.getId());
+        if (chat.isPresent()) {
+            return chat.get();
+        }else{
+            return null;
+        }
+    }
+
 }
