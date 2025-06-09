@@ -8,6 +8,10 @@ import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.interfaces.NotificationService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -58,16 +62,22 @@ public class NotificationController {
 
         return ResponseEntity.ok(new NotificationDTO(updated));
     }
-
     @GetMapping("receiver/{receiverId}")
-    public ResponseEntity<List<NotificationDTO>> getByReceiver(@PathVariable Integer receiverId) {
-        List<Notification> notifications = notificationService.findByReceiverId(receiverId);
-        if (notifications.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        List<NotificationDTO> dtos = notifications.stream()
-                .map(NotificationDTO::new)
-                .toList();
-        return ResponseEntity.ok(dtos);
+    public ResponseEntity<Page<NotificationDTO>> getByReceiver(
+            @PathVariable Integer receiverId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "timestamp") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir
+    ) {
+        Pageable pageable = PageRequest.of(page, size,
+                sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending());
+
+        Page<Notification> notificationsPage = notificationService.findByReceiverId(receiverId, pageable);
+
+        Page<NotificationDTO> dtoPage = notificationsPage.map(NotificationDTO::new);
+
+        return dtoPage.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(dtoPage);
     }
+
 }

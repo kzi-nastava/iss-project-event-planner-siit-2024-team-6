@@ -25,5 +25,6 @@ public class Notification {
     public Notification(NewNotificationDTO dto){
         this.text = dto.getText();
         this.timestamp = dto.getTimestamp();
+        this.type = NotificationType.INFO;
     }
 }
