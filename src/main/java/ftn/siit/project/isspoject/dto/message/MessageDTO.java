@@ -12,7 +12,6 @@ import java.time.ZonedDateTime;
 public class MessageDTO {
     private Integer id;
     private String text;
-    private LocalDateTime time;
     private boolean isFromUser;
 
     public MessageDTO() {}
@@ -20,7 +19,6 @@ public class MessageDTO {
     public MessageDTO(Message message, boolean fromUser) {
         this.id = message.getId();
         this.text = message.getText();
-        this.time = message.getTime();
         this.isFromUser = fromUser;
     }
 }
