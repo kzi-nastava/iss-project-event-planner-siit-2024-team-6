@@ -109,8 +109,8 @@ public class WebSecurityConfig{
                     .requestMatchers(new AntPathRequestMatcher("/api/admins/event-types")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/admins/event-types/**")).hasRole("ADMIN")
                     .requestMatchers(new AntPathRequestMatcher("/api/admins/categories")).hasRole("ADMIN")
-                    .requestMatchers(new AntPathRequestMatcher("/api/admins/category*")).hasRole("ADMIN")
-                    .requestMatchers(new AntPathRequestMatcher("/api/admins/suggestion*")).hasRole("ADMIN")
+                    .requestMatchers(new AntPathRequestMatcher("/api/admins/category**")).hasRole("ADMIN")
+                    .requestMatchers(new AntPathRequestMatcher("/api/admins/suggestion**")).hasRole("ADMIN")
                     .requestMatchers(new AntPathRequestMatcher("/api/admins/event-types/**/**")).hasRole("ADMIN")
                     .requestMatchers(new AntPathRequestMatcher("/api/organizers/**")).hasRole("ORGANIZER")
                     .requestMatchers(new AntPathRequestMatcher("/api/organizers/events/**/getAgendaPDF")).permitAll()
@@ -133,6 +133,7 @@ public class WebSecurityConfig{
                     .requestMatchers(new AntPathRequestMatcher("/api/providers/**/my-services")).authenticated()
                     .requestMatchers(new AntPathRequestMatcher("/api/providers/**/product")).authenticated()
                     .requestMatchers(new AntPathRequestMatcher("/api/providers/product")).hasAnyRole("ADMIN","PROVIDER")
+                    .requestMatchers(new AntPathRequestMatcher("/api/messages**")).authenticated()
                     .requestMatchers(new AntPathRequestMatcher("/api/providers/my-products")).hasRole("PROVIDER")
 //                    .requestMatchers(new AntPathRequestMatcher("/api/users")).permitAll()
 //                    .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll() my-products unPagedFavorites
