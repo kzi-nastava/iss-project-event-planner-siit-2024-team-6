@@ -97,21 +97,20 @@ public class ChatsController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Chat chat = chatService.findChatById(chatId);
+        Boolean isCurrentUserFirstParticipant = chat.getParticipant1().getId() == user.getId();
         ChatDTO chatDTO = new ChatDTO(
                 chat.getId(),
-                chat.getParticipant1().getId() == user.getId() ? chat.getParticipant2().getName() : chat.getParticipant1().getName(),
-                chat.getParticipant1().getId() == user.getId() ? chat.getParticipant2().getLastname() : chat.getParticipant1().getLastname(),
-                chat.getParticipant1().getId() == user.getId() ? chat.getParticipant2().getPhotoUrl() : chat.getParticipant1().getPhotoUrl()
+                isCurrentUserFirstParticipant ? chat.getParticipant2().getName() : chat.getParticipant1().getName(),
+                isCurrentUserFirstParticipant ? chat.getParticipant2().getLastname() : chat.getParticipant1().getLastname(),
+                isCurrentUserFirstParticipant ? chat.getParticipant2().getPhotoUrl() : chat.getParticipant1().getPhotoUrl()
         );
         List<Message> messages = chat.getMessages();
         List<MessageDTO> dtos = new ArrayList<>();
         for (Message message : messages) {
             if (message.getSender().getId() == user.getId()) {
                 dtos.add(new MessageDTO(message, true));
-                System.out.println("HEEREEEE");
             } else {
                 dtos.add(new MessageDTO(message, false));
-                System.out.println("HEEREEEE2");
             }
         }
         ChatWithMessagesDTO response = new ChatWithMessagesDTO(chatDTO, dtos);
