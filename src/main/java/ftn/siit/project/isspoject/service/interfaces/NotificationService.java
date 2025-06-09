@@ -1,13 +1,15 @@
 package ftn.siit.project.isspoject.service.interfaces;
 import ftn.siit.project.isspoject.entity.Notification;
 import ftn.siit.project.isspoject.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface NotificationService {
 
     Notification findById(Integer id);
-    List<Notification> findByReceiverId(Integer receiverId);
+    Page<Notification> findByReceiverId(Integer receiverId, Pageable pageable);
     void notifyAdmin(String s);
 
     Notification save(Notification notification);
