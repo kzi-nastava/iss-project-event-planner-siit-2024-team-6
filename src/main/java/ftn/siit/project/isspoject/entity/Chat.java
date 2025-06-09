@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
@@ -23,6 +25,10 @@ public class Chat {
     private Instant lastUpdated;
 
     private boolean isBlocked;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "chat_id")  // foreign key in messages table
+    private List<Message> messages = new ArrayList<>();
 
     public Chat(){}
     public Chat(User participant1, User participant2, Instant lastUpdated, boolean isBlocked) {
