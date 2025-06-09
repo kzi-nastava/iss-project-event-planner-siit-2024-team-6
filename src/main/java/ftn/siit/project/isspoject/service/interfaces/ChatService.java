@@ -10,4 +10,7 @@ public interface ChatService {
     Chat blockChat(int chatId);
     Chat unblockChat(int chatId);
     Chat createChat(User u1, User u2);
+    Chat updateActivity(int chatId);
+    Chat findChatById(int chatId);
+    Chat saveChat(Chat chat);
 }

@@ -53,4 +53,31 @@ public class ChatServiceImpl implements ChatService{
         return chatRepository.save(c);
     }
 
+    @Override
+    public Chat updateActivity(int chatId) {
+        Optional<Chat> chat = chatRepository.findById(chatId);
+        if (chat.isPresent()) {
+            Chat c = chat.get();
+            c.setLastUpdated(Instant.now());
+            return chatRepository.save(c);
+        } else {
+            throw new NotFoundException("Chat with id " + chatId + " not found");
+        }
+    }
+
+    @Override
+    public Chat findChatById(int chatId) {
+        Optional<Chat> chat = chatRepository.findById(chatId);
+        if (chat.isPresent()) {
+            return chat.get();
+        } else {
+            throw new NotFoundException("Chat with id " + chatId + " not found");
+        }
+    }
+
+    @Override
+    public Chat saveChat(Chat chat) {
+        return chatRepository.save(chat);
+    }
+
 }
