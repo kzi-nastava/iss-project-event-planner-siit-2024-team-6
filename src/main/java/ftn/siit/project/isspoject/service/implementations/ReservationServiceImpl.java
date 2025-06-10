@@ -59,6 +59,8 @@ public class ReservationServiceImpl implements ReservationService {
         return reservations;
     }
 
+
+
     @Override
     public Reservation save(Reservation reservation) {
         if (reservation == null) {
@@ -90,6 +92,17 @@ public class ReservationServiceImpl implements ReservationService {
         Reservation created = this.save(reservation);
         sendConfirmations(event,service,provider,organizer,dto);
         return created;
+    }
+
+    @Override
+    public boolean existsFutureReservation(ftn.siit.project.isspoject.entity.Service service) {
+        List<Reservation> reservations = reservationRepository.findReservationsByServiceId(service.getId());
+        for(Reservation reservation : reservations) {
+            if(reservation.getEndTime().isAfter(LocalDateTime.now())){
+                return true;
+            }
+        }
+        return false;
     }
 
     private void checkIfClosed(LocalDateTime start, LocalDateTime end, Provider provider, UserService userService) {
