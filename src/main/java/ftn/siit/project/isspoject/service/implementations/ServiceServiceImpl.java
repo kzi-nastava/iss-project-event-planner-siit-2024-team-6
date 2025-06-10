@@ -96,7 +96,11 @@ public class ServiceServiceImpl implements ServiceService {
         existingService.setPrice(dto.getPrice());
         existingService.setIsAvailable(dto.getIsAvailable());
         existingService.setSpecifics(dto.getSpecifics());
-        existingService.setSale(dto.getSale());
+        if (dto.getSale() == null){
+            existingService.setSale(0.0);
+        }else{
+            existingService.setSale(dto.getSale());
+        }
         existingService.setPhotos(dto.getPhotos());
         existingService.setProvider(p);
         existingService.setIsDeleted(false);
@@ -148,7 +152,11 @@ public class ServiceServiceImpl implements ServiceService {
         existingService.setPrice(dto.getPrice());
         existingService.setIsAvailable(dto.getIsAvailable());
         existingService.setSpecifics(dto.getSpecifics());
-        existingService.setSale(dto.getSale());
+        if (dto.getSale() == null){
+            existingService.setSale(0.0);
+        }else{
+            existingService.setSale(dto.getSale());
+        }
         existingService.setPhotos(dto.getPhotos());
         existingService.setIsDeleted(false);
         existingService.setIsVisible(dto.getIsVisible());
