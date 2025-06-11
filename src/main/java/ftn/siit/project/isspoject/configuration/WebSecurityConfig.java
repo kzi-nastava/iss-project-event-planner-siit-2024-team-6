@@ -136,6 +136,7 @@ public class WebSecurityConfig{
                     .requestMatchers(new AntPathRequestMatcher("/api/messages**")).authenticated()
                     .requestMatchers(new AntPathRequestMatcher("/api/providers/my-products")).hasRole("PROVIDER")
                     .requestMatchers(new AntPathRequestMatcher("/socket/**")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/socket-web/**")).permitAll()
 //                    .requestMatchers(new AntPathRequestMatcher("/api/users")).permitAll()
 //                    .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll() my-products unPagedFavorites
 //            event-types-by-category-name
@@ -165,7 +166,7 @@ public class WebSecurityConfig{
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200" , "http://192.168.1.3:8000"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200" , "http://192.168..:8000"));
         configuration.setAllowedMethods(Arrays.asList("POST", "PUT", "GET", "OPTIONS", "DELETE", "PATCH")); // или просто "*"
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
