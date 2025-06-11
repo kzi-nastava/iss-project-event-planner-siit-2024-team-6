@@ -6,7 +6,6 @@ import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
-import ftn.siit.project.isspoject.dto.offer.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.CategoryRepository;
@@ -34,21 +33,6 @@ public class OfferServiceImpl implements OfferService {
     @Override
     public List<Offer> allOffersWithCategory(Category category) {
         return offerRepository.findNonDeletedOffersByCategory(category.getId());
-    }
-
-    @Override
-    public List<PriceListOfferDTO> getPriceList(Provider p) {
-        List<Offer> offers = offerRepository.findByProviderAndIsDeletedFalseOrIsDeletedIsNull(p);
-        List<PriceListOfferDTO> dtos = new ArrayList<>();
-        for (Offer offer : offers) {
-            PriceListOfferDTO priceListOfferDTO = new PriceListOfferDTO();
-            priceListOfferDTO.setPrice(offer.getPrice());
-            priceListOfferDTO.setName(offer.getName());
-            priceListOfferDTO.setSale(offer.getSale());
-            priceListOfferDTO.setSalePrice(offer.getPrice() * offer.getSale() / 100);
-            dtos.add(priceListOfferDTO);
-        }
-        return dtos;
     }
 
     @Override

@@ -3,15 +3,12 @@ package ftn.siit.project.isspoject.controller;
 import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
-import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
-import ftn.siit.project.isspoject.dto.offer.PriceListOfferDTO;
 import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
 import ftn.siit.project.isspoject.dto.user.ProviderDTO;
 import ftn.siit.project.isspoject.dto.user.UserDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
-import ftn.siit.project.isspoject.service.implementations.OfferServiceImpl;
 import ftn.siit.project.isspoject.service.interfaces.*;
 import ftn.siit.project.isspoject.util.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -330,22 +327,7 @@ public class OfferController {
         return ResponseEntity.ok(new OfferDTO(offer));
     }
 
-    @PutMapping("{id}")
-    public ResponseEntity<PriceListOfferDTO> updatePrice(@PathVariable int id, @RequestBody NewPriceListOfferDTO dto) {
-        Offer updatedOffer = offerService.updatePrice(id, dto);
-        // add implementation of updating the offer in the list of its provider's offers
-        offerHistoryService.add(updatedOffer.getId(), updatedOffer);
-        return ResponseEntity.ok(new PriceListOfferDTO(updatedOffer));
-    }
 
-    @GetMapping("{providerId}/price-list")
-    public ResponseEntity<List<PriceListOfferDTO>> getPriceList(@PathVariable int providerId) {
-        Provider provider = (Provider) userService.findById(providerId);
-        if (provider == null) {throw new NotFoundException("Provider not found");}
-        List<PriceListOfferDTO> prices = offerService.getPriceList(provider);
-        if (prices.isEmpty()) {return ResponseEntity.noContent().build();}
-        return ResponseEntity.ok(prices);
-    }
     @GetMapping("/search")
     public ResponseEntity<Page<OfferDTO>> searchOffers(
             @RequestParam(required = false) String name,
