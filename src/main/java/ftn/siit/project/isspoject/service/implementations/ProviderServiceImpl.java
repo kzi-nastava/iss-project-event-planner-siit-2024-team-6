@@ -2,6 +2,7 @@ package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.entity.Offer;
 import ftn.siit.project.isspoject.entity.Provider;
+import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.ProviderRepository;
 import ftn.siit.project.isspoject.service.interfaces.ProviderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class ProviderServiceImpl implements ProviderService {
     public Provider findByEmail(String email) {
         Provider p = providerRepository.findByEmailAndIsActiveIsTrue(email);
         if (p == null) {
-            throw new IllegalArgumentException("Provider with email " + email + " not found");
+            throw new NotFoundException("Provider with email " + email + " not found");
         }
         return p;
     }
