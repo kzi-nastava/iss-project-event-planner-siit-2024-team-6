@@ -15,4 +15,5 @@ public interface ReservationService {
     Reservation save(Reservation reservation);
     Reservation save(NewReservationDTO reservationDTO);
     Reservation addReservation(Event event, Service service, Provider provider, Organizer organizer, NewReservationDTO reservationDto, UserService userService);
+    boolean existsFutureReservation(Service service);
 }

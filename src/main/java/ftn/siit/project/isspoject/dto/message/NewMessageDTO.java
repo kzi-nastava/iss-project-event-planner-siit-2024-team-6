@@ -8,11 +8,9 @@ import java.time.LocalDateTime;
 @Data
 public class NewMessageDTO {
     private String text;
-    private LocalDateTime time;
 
     NewMessageDTO(){}
-    NewMessageDTO(Message message) {
+    NewMessageDTO(Message message, boolean fromUser) {
         this.text = message.getText();
-        this.time = LocalDateTime.now();
     }
 }

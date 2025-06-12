@@ -30,7 +30,7 @@ public class ProviderController {
     @Autowired
     private OfferService offerService;
     @Autowired
-    private BudgetService budgetService;
+    private ReservationService reservationService;
     @Autowired
     private CategorySuggestionService categorySuggestionService;
     @Autowired
@@ -43,6 +43,7 @@ public class ProviderController {
     private TokenUtils tokenUtils;
     @Autowired
     private ProductService productService;
+
     @GetMapping("{providerId}")
     public ResponseEntity<List<OfferDTO>> getAllServices(@PathVariable int providerId) {
         Provider provider = providerService.findById(providerId);
@@ -82,6 +83,7 @@ public class ProviderController {
 
         return ResponseEntity.ok(response);
     }
+
     @GetMapping("my-products")
     public ResponseEntity<PagedResponse<OfferDTO>> getAllPageProducts(Pageable page, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
@@ -114,6 +116,7 @@ public class ProviderController {
 
         return ResponseEntity.ok(response);
     }
+
     @GetMapping("{name}/category")
     public ResponseEntity<Category> findByName(@PathVariable String name, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
@@ -150,6 +153,7 @@ public class ProviderController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new OfferDTO(saved));
     }
+
     @PostMapping("product")
     public ResponseEntity<OfferDTO> createProduct(@RequestBody NewOfferDTO dto, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
@@ -168,13 +172,14 @@ public class ProviderController {
         }
         Product saved = new Product(dto, category, eventTypes, provider);
         offerService.save(saved);
-        if (dto.getCategorySuggestion() != null){
+        if (dto.getCategorySuggestion() != null) {
             categorySuggestionService.save(new CategorySuggestion(dto.getCategorySuggestion(), Status.PENDING, saved));
         }
 
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new OfferDTO(saved));
     }
+
     @PutMapping("{offerId}")
     public ResponseEntity<OfferDTO> updateService(@PathVariable int offerId, @RequestBody NewOfferDTO dto, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
@@ -190,6 +195,7 @@ public class ProviderController {
         Offer updated = serviceService.update(offerId, dto, eventTypes);
         return ResponseEntity.ok(new OfferDTO(updated));
     }
+
     @PutMapping("{offerId}/product")
     public ResponseEntity<OfferDTO> updateProduct(@PathVariable int offerId, @RequestBody NewOfferDTO dto, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
@@ -205,6 +211,7 @@ public class ProviderController {
         Offer updated = productService.update(offerId, dto, eventTypes);
         return ResponseEntity.ok(new OfferDTO(updated));
     }
+
     @DeleteMapping("{offerId}")
     public ResponseEntity<Void> deleteOffer(@PathVariable int offerId, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
@@ -214,12 +221,16 @@ public class ProviderController {
         String email = this.tokenUtils.getUsernameFromToken(jwtToken);
         providerService.findByEmail(email);
         Offer offer = offerService.findById(offerId);
+        if (offer instanceof Service && reservationService.existsFutureReservation((Service) offer)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         offerService.delete(offer);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("search")
-    public ResponseEntity<PagedResponse<OfferDTO>> getFilteredServices(@RequestParam() String name, Pageable page, HttpServletRequest request) {
+    public ResponseEntity<PagedResponse<OfferDTO>> getFilteredServices(@RequestParam() String name, Pageable
+            page, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
