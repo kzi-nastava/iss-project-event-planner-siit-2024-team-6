@@ -77,7 +77,7 @@ public class NotificationController {
 
         Page<NotificationDTO> dtoPage = notificationsPage.map(NotificationDTO::new);
 
-        return dtoPage.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(dtoPage);
+        return ResponseEntity.ok(dtoPage);
     }
 
 }
