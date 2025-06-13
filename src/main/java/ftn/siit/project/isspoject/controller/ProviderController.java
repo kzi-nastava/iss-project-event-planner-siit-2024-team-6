@@ -43,6 +43,10 @@ public class ProviderController {
     private TokenUtils tokenUtils;
     @Autowired
     private ProductService productService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping("{providerId}")
     public ResponseEntity<List<OfferDTO>> getAllServices(@PathVariable int providerId) {
@@ -149,6 +153,7 @@ public class ProviderController {
         } else {
             saved = serviceService.save(dto, provider, eventTypes, null, Status.PENDING);
             categorySuggestionService.save(new CategorySuggestion(dto.getCategorySuggestion(), Status.PENDING, saved));
+            notifyAdmins();
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new OfferDTO(saved));
@@ -174,12 +179,20 @@ public class ProviderController {
         offerService.save(saved);
         if (dto.getCategorySuggestion() != null) {
             categorySuggestionService.save(new CategorySuggestion(dto.getCategorySuggestion(), Status.PENDING, saved));
+            notifyAdmins();
+
         }
 
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new OfferDTO(saved));
     }
+    private void notifyAdmins(){
+        //notifications sending to admins
+        List<User> admins = userService.findByRole("Admin");
+        String notificationMessage = "A new category suggestion has been created. Please check the updated list of suggestions.";
+        notificationService.notifyUsers(admins, notificationMessage);
 
+    }
     @PutMapping("{offerId}")
     public ResponseEntity<OfferDTO> updateService(@PathVariable int offerId, @RequestBody NewOfferDTO dto, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);

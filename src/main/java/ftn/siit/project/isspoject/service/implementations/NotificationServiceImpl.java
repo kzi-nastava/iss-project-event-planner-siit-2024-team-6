@@ -46,9 +46,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void notifyUsers(List<User> users, String message) {
-        if (users == null || users.isEmpty()) {
-            throw new IllegalArgumentException("User list cannot be null or empty.");
-        }
         for (User user : users) {
             notifyUser(user, message);
         }
@@ -64,6 +61,7 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setText(message);
         notification.setTimestamp(LocalDateTime.now());
         save(notification);
+        System.out.println("Notification sent to: " + user.getUsername());
         messagingTemplate.convertAndSend("/topic/notifications/" + user.getId(), new NotificationDTO(notification));
     }
 }
