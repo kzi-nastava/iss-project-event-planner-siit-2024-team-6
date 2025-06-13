@@ -62,6 +62,6 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setTimestamp(LocalDateTime.now());
         save(notification);
         System.out.println("Notification sent to: " + user.getUsername());
-        messagingTemplate.convertAndSend("/topic/notifications/" + user.getId(), new NotificationDTO(notification));
+        messagingTemplate.convertAndSend("/socket-publisher/notifications/" + user.getId(), new NotificationDTO(notification));
     }
 }
