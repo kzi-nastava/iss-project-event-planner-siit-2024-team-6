@@ -7,6 +7,8 @@ import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.NotificationRepository;
 import ftn.siit.project.isspoject.service.interfaces.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -29,8 +31,8 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public List<Notification> findByReceiverId(Integer receiverId) {
-        List<Notification> notifications = notificationRepository.findByReceiverId(receiverId);
+    public Page<Notification> findByReceiverId(Integer receiverId, Pageable pageable) {
+        Page<Notification> notifications = notificationRepository.findByReceiverId(receiverId, pageable);
         return notifications;
     }
 
