@@ -272,8 +272,9 @@ public class UserController {
             this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
             String tokenValue = this.tokenUtils.generateToken((User) userDetails);
+            boolean muted = user.isNotificationsMuted();
             token.setToken(tokenValue);
-
+            token.setMuted(muted);
             return new ResponseEntity<>(token, HttpStatus.OK);
         } catch (BadCredentialsException e) {
             throw new BadRequestException("Wrong password!");
@@ -398,6 +399,13 @@ public class UserController {
     ) {
         Block block = userService.blockUser(blockerId, blockedId);
         return ResponseEntity.ok(block);
+    }
+    @PutMapping("/mute/{userId}")
+    public ResponseEntity<Void> toggleMute(@PathVariable Integer userId, @RequestParam boolean mute) {
+        User user = userService.findById(userId);
+        user.setNotificationsMuted(mute);
+        userService.save(user);
+        return ResponseEntity.ok().build();
     }
 
     private UserDTO toDTO(User user) {
