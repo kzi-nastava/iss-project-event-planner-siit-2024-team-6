@@ -226,9 +226,9 @@ public class OrganizerController {
         event.setDate(eventDTO.getDate());
         event.setIsDeleted(eventDTO.getIsDeleted());
         Event updatedEvent = eventService.save(event);
-
+        //notifications sending
         List<User> attendees = userService.findEventAttendees(eventId);
-        String notificationMessage = "The event '" + updatedEvent.getName() + "' has been updated.";
+        String notificationMessage = "The event '" + updatedEvent.getName() + "' has been updated. Please check the latest updates.";
         notificationService.notifyUsers(attendees, notificationMessage);
 
         // Преобразование в DTO

@@ -82,6 +82,9 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Notification> notifications = new ArrayList<>();
 
+    @Column(name = "notifications_muted")
+    private boolean notificationsMuted = false;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + userType.toUpperCase()));
