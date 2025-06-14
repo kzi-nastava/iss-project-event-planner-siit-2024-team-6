@@ -1,11 +1,9 @@
 package ftn.siit.project.isspoject.service.interfaces;
 
 import ftn.siit.project.isspoject.dto.user.RegistrationRequestDTO;
-import ftn.siit.project.isspoject.entity.Block;
 import ftn.siit.project.isspoject.entity.User;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 public interface UserService {
@@ -26,7 +24,6 @@ public interface UserService {
 
     List<User> findEventAttendees(Integer eventId);
     void updateRole(Integer userId, String newRole);
-    Block blockUser(Integer blockerId, Integer blockedId);
     User suspendUser(Integer userId);
     String getUserRole(Integer userId);
     List<User> findByRole(String role);
