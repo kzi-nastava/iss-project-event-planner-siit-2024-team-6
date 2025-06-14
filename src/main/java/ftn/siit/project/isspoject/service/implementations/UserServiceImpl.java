@@ -1,17 +1,12 @@
 package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.dto.user.RegistrationRequestDTO;
-import ftn.siit.project.isspoject.entity.Block;
 import ftn.siit.project.isspoject.entity.Organizer;
 import ftn.siit.project.isspoject.entity.Provider;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.repository.UserRepository;
-import ftn.siit.project.isspoject.service.interfaces.BlockService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,11 +19,9 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final BlockService blockService;
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, BlockService blockService) {
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.blockService = blockService;
     }
 
     @Override
@@ -156,22 +149,7 @@ public class UserServiceImpl implements UserService {
 ////            throw new IllegalArgumentException("Invalid role: " + newRole + ". Allowed roles are 'Provider' or 'Organizer'.");
 ////        }
 //    }
-@Override
-public Block blockUser(Integer blockerId, Integer blockedId) {
 
-        User blocker = userRepository.findById(blockerId).get();
-        User blocked = userRepository.findById(blockedId).get();
-    // Проверяем, существует ли уже блокировка через BlockService
-    if (blockService.existsByBlockerIdAndBlockedId(blocker, blocked)) {
-        throw new IllegalArgumentException("User is already blocked.");
-    }
-
-    Block block = new Block();
-    block.setBlockerId(blocker);
-    block.setBlockedId(blocked);
-
-    return blockService.save(block);
-}
     @Override
     public User suspendUser(Integer userId) {
         User user = userRepository.findById(userId)

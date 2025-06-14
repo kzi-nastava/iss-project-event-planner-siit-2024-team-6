@@ -392,14 +392,7 @@ public class UserController {
 
         return ResponseEntity.ok(eventDTOs);
     }
-    @PostMapping("/{blockerId}/block/{blockedId}")
-    public ResponseEntity<Block> blockUser(
-            @PathVariable Integer blockerId,
-            @PathVariable Integer blockedId
-    ) {
-        Block block = userService.blockUser(blockerId, blockedId);
-        return ResponseEntity.ok(block);
-    }
+
     @PutMapping("/mute/{userId}")
     public ResponseEntity<Void> toggleMute(@PathVariable Integer userId, @RequestParam boolean mute) {
         User user = userService.findById(userId);
