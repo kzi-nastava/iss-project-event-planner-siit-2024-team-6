@@ -270,7 +270,9 @@ public class OfferServiceImpl implements OfferService {
         }else{
             OfferHistory offerHistory = oh.get();
             offerHistory.getOffers().add(offer);
+            offerHistory.setOffers(offerHistory.getOffers());
             offerHistory.getTimestamps().add(LocalDateTime.now());
+            offerHistory.setTimestamps(offerHistory.getTimestamps());
             offerHistoryService.save(offerHistory);
         }
     }
