@@ -140,4 +140,66 @@ public class ChatsController {
         }
         return ResponseEntity.ok(dtos);
     }
+
+    @GetMapping("{chatId}/participant")
+    public ResponseEntity<?> getOtherParticipant(@PathVariable Integer chatId, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User currentUser = userService.findByEmail(email);
+        if (currentUser == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Chat chat = chatService.findChatById(chatId);
+        if (chat == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        User otherParticipant;
+        if (chat.getParticipant1().getId().equals(currentUser.getId())) {
+            otherParticipant = chat.getParticipant2();
+        } else if (chat.getParticipant2().getId().equals(currentUser.getId())) {
+            otherParticipant = chat.getParticipant1();
+        } else {
+            return new ResponseEntity<>("User is not part of this chat", HttpStatus.FORBIDDEN);
+        }
+
+        return ResponseEntity.ok(otherParticipant.getId());
+    }
+
+    @PostMapping("{chatId}/block")
+    public ResponseEntity<?> blockChat(@PathVariable Integer chatId, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User currentUser = userService.findByEmail(email);
+        if (currentUser == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Chat chat = chatService.findChatById(chatId);
+        if (chat == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        boolean isParticipant = chat.getParticipant1().getId().equals(currentUser.getId()) ||
+                chat.getParticipant2().getId().equals(currentUser.getId());
+        if (!isParticipant) {
+            return new ResponseEntity<>("User is not part of this chat", HttpStatus.FORBIDDEN);
+        }
+
+        // Set isBlocked to true
+        chat.setBlocked(true);
+        chatService.saveChat(chat);
+
+        return ResponseEntity.ok().build();
+    }
+
+
 }
