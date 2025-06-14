@@ -2,7 +2,7 @@ package ftn.siit.project.isspoject.service.interfaces;
 
 import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
-import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
+import ftn.siit.project.isspoject.dto.offer.NewPriceListItemDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
 import ftn.siit.project.isspoject.entity.*;
 import org.springframework.data.domain.Page;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface OfferService {
     List<Offer> allOffersWithCategory(Category category);
-    Offer updatePrice(int offerId, NewPriceListOfferDTO dto);
+    Offer updatePrice(int offerId, NewPriceListItemDTO dto);
     List<Offer> findAll();
     Page<Offer> findAll(Pageable page);
     Page<Offer> findAccepted(Pageable page);
