@@ -1,13 +1,10 @@
 package ftn.siit.project.isspoject.controller;
 
-import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
-import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventTypeDTO;
 import ftn.siit.project.isspoject.dto.offer.*;
 import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.entity.Service;
-import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
 import ftn.siit.project.isspoject.service.interfaces.*;
 import ftn.siit.project.isspoject.util.TokenUtils;
@@ -47,15 +44,6 @@ public class ProviderController {
     private TokenUtils tokenUtils;
     @Autowired
     private ProductService productService;
-    @Autowired
-    private OfferHistoryService offerHistoryService;
-
-    @GetMapping("{providerId}")
-    public ResponseEntity<List<OfferDTO>> getAllServices(@PathVariable int providerId) {
-        Provider provider = providerService.findById(providerId);
-        List<OfferDTO> dtos = serviceService.findByProvider(provider).stream().map(OfferDTO::new).toList();
-        return ResponseEntity.ok(dtos);
-    }
 
     @GetMapping("price-list")
     public ResponseEntity<List<PriceListItemDTO>> getPriceList(HttpServletRequest request) {
@@ -108,11 +96,9 @@ public class ProviderController {
                 .body(pdfContent);
     }
 
-    @PutMapping("{id}")
-    public ResponseEntity<PriceListItemDTO> updatePrice(@PathVariable int id, @RequestBody NewPriceListOfferDTO dto) {
+    @PutMapping("price/{id}")
+    public ResponseEntity<PriceListItemDTO> updatePrice(@PathVariable int id, @RequestBody NewPriceListItemDTO dto) {
         Offer updatedOffer = offerService.updatePrice(id, dto);
-        // add implementation of updating the offer in the list of its provider's offers
-        offerHistoryService.add(updatedOffer.getId(), updatedOffer);
         return ResponseEntity.ok(new PriceListItemDTO(updatedOffer));
     }
 
