@@ -5,11 +5,7 @@ import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.user.OrganizerDTO;
 import ftn.siit.project.isspoject.dto.user.UserDTO;
-import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
-import ftn.siit.project.isspoject.dto.event.NewEventDTO;
 import ftn.siit.project.isspoject.entity.*;
-import ftn.siit.project.isspoject.exceptions.NotFoundException;
-import ftn.siit.project.isspoject.service.implementations.EventTypeServiceImpl;
 import ftn.siit.project.isspoject.service.interfaces.*;
 import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
 import ftn.siit.project.isspoject.util.TokenUtils;
@@ -19,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -244,7 +239,24 @@ public class EventController {
         return ResponseEntity.ok(ed);
 
     }
+    @GetMapping("{eventId}/is-favorited")
+    public ResponseEntity<Boolean> isEventFavourited(@PathVariable int eventId, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
 
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        List<Event> favourites = user.getFavouriteEvents();
+        boolean isFavourited = favourites.stream().anyMatch(o -> o.getId() == eventId);
+
+        return ResponseEntity.ok(isFavourited);
+    }
     @GetMapping("favorites")
     public ResponseEntity<PagedResponse<EventDTO>> getPagedFavorites(
             HttpServletRequest request,
