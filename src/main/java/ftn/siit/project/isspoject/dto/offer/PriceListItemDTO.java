@@ -23,7 +23,7 @@ public class PriceListItemDTO {
         this.offerId = o.getId();
         this.offerName = o.getName();
         this.offerPrice = o.getPrice();
-        this.offerDiscountPrice = o.getSale();
+        this.offerDiscountPrice = o.getSale() != null ? o.getSale() : 0.0;
         this.isService = o.isService();
     }
     public PriceListItemDTO() {}

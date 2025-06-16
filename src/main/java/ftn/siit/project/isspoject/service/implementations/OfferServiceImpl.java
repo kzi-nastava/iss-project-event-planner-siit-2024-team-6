@@ -41,7 +41,7 @@ public class OfferServiceImpl implements OfferService {
         Offer o = offerRepository.findById(offerId).orElseThrow(() -> new NotFoundException("Offer not found"));
         o.setSale(dto.getSalePrice());
         if(dto.getSalePrice() == 0.0 || dto.getSalePrice() == null){
-            o.setSale(null);
+            o.setSale(0.0);
         }else if(dto.getPrice() < dto.getSalePrice()){
             throw new IllegalArgumentException("Price must be greater than or equal to Sale");
         }
@@ -99,7 +99,7 @@ public class OfferServiceImpl implements OfferService {
         existingOffer.setName(offer.getName());
         existingOffer.setCategory(offer.getCategory());
         if(offer.getSale() == 0.0 || offer.getSale() == null){
-            existingOffer.setSale(null);
+            existingOffer.setSale(0.0);
         }else{
             existingOffer.setSale(offer.getSale());
         }
