@@ -81,7 +81,7 @@ public class OrganizerController {
         event.setEventType(eventTypeService.findByName(eventDTO.getEventType()));
         event.setParticipants(0);
         event.setPhotos(eventDTO.getPhotos());
-
+        event.setIsDeleted(false);
         Budget budget = new Budget();
         budget.setAvailable(0);
         budget.setTotal(0);
