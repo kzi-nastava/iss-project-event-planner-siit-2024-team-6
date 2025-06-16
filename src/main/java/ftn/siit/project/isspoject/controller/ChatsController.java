@@ -8,6 +8,7 @@ import ftn.siit.project.isspoject.entity.Chat;
 import ftn.siit.project.isspoject.entity.Message;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.service.interfaces.ChatService;
+import ftn.siit.project.isspoject.service.interfaces.NotificationService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
 import ftn.siit.project.isspoject.util.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,6 +34,8 @@ public class ChatsController {
     private TokenUtils tokenUtils;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private NotificationService notificationService;
 
     @PostMapping("{chatId}/send")
     public ResponseEntity<MessageDTO> sendMessage(@RequestBody NewMessageDTO dto, @PathVariable Integer chatId, HttpServletRequest request) {
@@ -55,7 +58,7 @@ public class ChatsController {
         Chat c = chatService.saveChat(chat);
         chatService.updateActivity(c.getId());
         messagingTemplate.convertAndSend("/socket-publisher/messages/" + user2.getId(), new MessageDTO(created, false));
-
+        notificationService.notifyUser(user2, "You have a new message from "+user.getName()+" "+user.getLastname());
         return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDTO(created, true));
     }
 

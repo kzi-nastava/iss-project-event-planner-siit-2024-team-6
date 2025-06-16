@@ -135,12 +135,12 @@ public class ReservationController {
     public ResponseEntity<Boolean> isPurchased(@PathVariable int offerId, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.ok(false);
         }
         String email = this.tokenUtils.getUsernameFromToken(jwtToken);
         Organizer user = organizerService.findByEmail(email);
         if (user == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.ok(false);
         }
 
         List<Reservation> reservations = reservationService.findByServiceId(offerId);

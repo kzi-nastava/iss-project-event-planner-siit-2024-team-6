@@ -2,16 +2,14 @@ package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
 import ftn.siit.project.isspoject.dto.budget.NewBudgetItemDTO;
-import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
-import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
+import ftn.siit.project.isspoject.dto.offer.NewPriceListItemDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
-import ftn.siit.project.isspoject.dto.offer.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.CategoryRepository;
 import ftn.siit.project.isspoject.repository.OfferRepository;
-import ftn.siit.project.isspoject.repository.ServiceRepository;
+import ftn.siit.project.isspoject.service.interfaces.OfferHistoryService;
 import ftn.siit.project.isspoject.service.interfaces.OfferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,9 +17,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -30,6 +28,8 @@ public class OfferServiceImpl implements OfferService {
     private OfferRepository offerRepository;
     @Autowired
     private CategoryRepository categoryRepository;
+    @Autowired
+    private OfferHistoryService offerHistoryService;
 
     @Override
     public List<Offer> allOffersWithCategory(Category category) {
@@ -37,26 +37,16 @@ public class OfferServiceImpl implements OfferService {
     }
 
     @Override
-    public List<PriceListOfferDTO> getPriceList(Provider p) {
-        List<Offer> offers = offerRepository.findByProviderAndIsDeletedFalseOrIsDeletedIsNull(p);
-        List<PriceListOfferDTO> dtos = new ArrayList<>();
-        for (Offer offer : offers) {
-            PriceListOfferDTO priceListOfferDTO = new PriceListOfferDTO();
-            priceListOfferDTO.setPrice(offer.getPrice());
-            priceListOfferDTO.setName(offer.getName());
-            priceListOfferDTO.setSale(offer.getSale());
-            priceListOfferDTO.setSalePrice(offer.getPrice() * offer.getSale() / 100);
-            dtos.add(priceListOfferDTO);
-        }
-        return dtos;
-    }
-
-    @Override
-    public Offer updatePrice(int offerId, NewPriceListOfferDTO dto) {
+    public Offer updatePrice(int offerId, NewPriceListItemDTO dto) {
         Offer o = offerRepository.findById(offerId).orElseThrow(() -> new NotFoundException("Offer not found"));
+        o.setSale(dto.getSalePrice());
+        if(dto.getSalePrice() == null || dto.getSalePrice() == 0.0){
+            o.setSale(0.0);
+        }else if(dto.getPrice() < dto.getSalePrice()){
+            throw new IllegalArgumentException("Price must be greater than or equal to Sale");
+        }
         o.setPrice(dto.getPrice());
-        o.setName(dto.getName());
-        o.setSale(dto.getSale());
+        updateOfferHistory(o);
         return update(o);
     }
 
@@ -92,12 +82,14 @@ public class OfferServiceImpl implements OfferService {
     public Offer save(NewOfferDTO dto) {
         Offer offer = new Offer(dto, categoryRepository.findByNameIgnoreCase(dto.getCategory()));
         offer.setLastChanged(LocalDateTime.now());
+        updateOfferHistory(offer);
         return offerRepository.save(offer);
     }
 
     @Override
     public Offer save(Offer offer) {
         offer.setLastChanged(LocalDateTime.now());
+        updateOfferHistory(offer);
         return offerRepository.save(offer);
     }
 
@@ -106,7 +98,11 @@ public class OfferServiceImpl implements OfferService {
         Offer existingOffer = offerRepository.findById(offer.getId()).orElseThrow(() -> new NotFoundException("Offer not found"));
         existingOffer.setName(offer.getName());
         existingOffer.setCategory(offer.getCategory());
-        existingOffer.setSale(offer.getSale());
+        if(offer.getSale() == 0.0 || offer.getSale() == null){
+            existingOffer.setSale(0.0);
+        }else{
+            existingOffer.setSale(offer.getSale());
+        }
         existingOffer.setIsDeleted(offer.getIsDeleted());
         existingOffer.setPrice(offer.getPrice());
         existingOffer.setDescription(offer.getDescription());
@@ -115,6 +111,7 @@ public class OfferServiceImpl implements OfferService {
         existingOffer.setIsAvailable(offer.getIsAvailable());
         existingOffer.setPhotos(offer.getPhotos());
         existingOffer.setLastChanged(LocalDateTime.now());
+        updateOfferHistory(existingOffer);
         return offerRepository.save(existingOffer);
     }
 
@@ -260,6 +257,24 @@ public class OfferServiceImpl implements OfferService {
                 .collect(Collectors.toList());
 
         return new PageImpl<>(paginatedOfferDTOs, pageable, filteredOffers.size());
+    }
+
+    private void updateOfferHistory(Offer offer) {
+        Optional<OfferHistory> oh = offerHistoryService.findById(offer.getId());
+        if(oh.isEmpty()){
+            OfferHistory offerHistory = new OfferHistory();
+            offerHistory.setId(offer.getId());
+            offerHistory.setOffers(List.of(offer));
+            offerHistory.setTimestamps(List.of(LocalDateTime.now()));
+            offerHistoryService.save(offerHistory);
+        }else{
+            OfferHistory offerHistory = oh.get();
+            offerHistory.getOffers().add(offer);
+            offerHistory.setOffers(offerHistory.getOffers());
+            offerHistory.getTimestamps().add(LocalDateTime.now());
+            offerHistory.setTimestamps(offerHistory.getTimestamps());
+            offerHistoryService.save(offerHistory);
+        }
     }
 
 }

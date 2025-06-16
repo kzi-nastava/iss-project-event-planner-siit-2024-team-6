@@ -1,11 +1,9 @@
 package ftn.siit.project.isspoject.service.interfaces;
 
 import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
-import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
-import ftn.siit.project.isspoject.dto.offer.NewPriceListOfferDTO;
+import ftn.siit.project.isspoject.dto.offer.NewPriceListItemDTO;
 import ftn.siit.project.isspoject.dto.offer.OfferDTO;
-import ftn.siit.project.isspoject.dto.offer.PriceListOfferDTO;
 import ftn.siit.project.isspoject.entity.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,8 +13,7 @@ import java.util.List;
 
 public interface OfferService {
     List<Offer> allOffersWithCategory(Category category);
-    List<PriceListOfferDTO> getPriceList(Provider p);
-    Offer updatePrice(int offerId, NewPriceListOfferDTO dto);
+    Offer updatePrice(int offerId, NewPriceListItemDTO dto);
     List<Offer> findAll();
     Page<Offer> findAll(Pageable page);
     Page<Offer> findAccepted(Pageable page);

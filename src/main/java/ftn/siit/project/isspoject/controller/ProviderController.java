@@ -1,19 +1,18 @@
 package ftn.siit.project.isspoject.controller;
 
-import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
-import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventTypeDTO;
-import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
-import ftn.siit.project.isspoject.dto.offer.OfferDTO;
+import ftn.siit.project.isspoject.dto.offer.*;
 import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.entity.Service;
-import ftn.siit.project.isspoject.exceptions.NotFoundException;
+import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
 import ftn.siit.project.isspoject.service.interfaces.*;
 import ftn.siit.project.isspoject.util.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
@@ -25,6 +24,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/providers/")
 public class ProviderController {
+    @Autowired
+    private PDFGeneratorService pdfGeneratorService;
     @Autowired
     private ProviderService providerService;
     @Autowired
@@ -48,11 +49,61 @@ public class ProviderController {
     @Autowired
     private NotificationService notificationService;
 
-    @GetMapping("{providerId}")
-    public ResponseEntity<List<OfferDTO>> getAllServices(@PathVariable int providerId) {
-        Provider provider = providerService.findById(providerId);
-        List<OfferDTO> dtos = serviceService.findByProvider(provider).stream().map(OfferDTO::new).toList();
+    @GetMapping("price-list")
+    public ResponseEntity<List<PriceListItemDTO>> getPriceList(HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Provider p = providerService.findByEmail(email);
+        if (p == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Provider provider = providerService.findById(p.getId());
+        List<PriceListItemDTO> dtos = new ArrayList<>();
+        dtos.addAll(serviceService.findByProvider(provider)
+                .stream().map(PriceListItemDTO::new).toList());
+        dtos.addAll(productService.findByProvider(provider.getId())
+                .stream().map(PriceListItemDTO::new).toList());
+
         return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("price-list/export")
+    public ResponseEntity<byte[]> downloadEventStatisticsPDF(HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Provider p = providerService.findByEmail(email);
+        if (p == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Provider provider = providerService.findById(p.getId());
+        List<PriceListItemDTO> dtos = new ArrayList<>();
+        dtos.addAll(serviceService.findByProvider(provider)
+                .stream().map(PriceListItemDTO::new).toList());
+        dtos.addAll(productService.findByProvider(provider.getId())
+                .stream().map(PriceListItemDTO::new).toList());
+
+        byte[] pdfContent = pdfGeneratorService.generatePriceListPdf(dtos);
+
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentDispositionFormData("attachment", "document.pdf");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfContent);
+    }
+
+    @PutMapping("price/{id}")
+    public ResponseEntity<PriceListItemDTO> updatePrice(@PathVariable int id, @RequestBody NewPriceListItemDTO dto) {
+        Offer updatedOffer = offerService.updatePrice(id, dto);
+        return ResponseEntity.ok(new PriceListItemDTO(updatedOffer));
     }
 
     @GetMapping("my-services")

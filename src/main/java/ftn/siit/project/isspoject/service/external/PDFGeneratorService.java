@@ -1,4 +1,5 @@
 package ftn.siit.project.isspoject.service.external;
+
 import ftn.siit.project.isspoject.entity.Activity;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -8,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+
 import ftn.siit.project.isspoject.entity.Event;
+import ftn.siit.project.isspoject.dto.offer.PriceListItemDTO;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -19,6 +22,82 @@ import java.util.List;
 
 @Service
 public class PDFGeneratorService {
+
+    public byte[] generatePriceListPdf(List<PriceListItemDTO> items) {
+        try (PDDocument document = new PDDocument();
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+            PDPage page = new PDPage();
+            document.addPage(page);
+            PDPageContentStream contentStream = new PDPageContentStream(document, page);
+
+            try {
+                float margin = 50;
+                float yStart = 750;
+                float rowHeight = 20;
+                float cellMargin = 5;
+                float nextY = yStart;
+
+                // Column headers and widths
+                String[] headers = {"#", "Name", "Price", "Discount Price", "Type"};
+                float[] columnWidths = {50, 150, 80, 100, 80};
+
+                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+
+                // Draw header row
+                for (int i = 0; i < headers.length; i++) {
+                    drawCell(contentStream, margin, nextY, columnWidths[i], rowHeight, headers[i], cellMargin, PDType1Font.HELVETICA_BOLD, 10);
+                    margin += columnWidths[i];
+                }
+                margin = 50;
+                nextY -= rowHeight;
+
+                contentStream.setFont(PDType1Font.HELVETICA, 10);
+                int k = 1;
+                for (PriceListItemDTO item : items) {
+                    String[] row = {
+                            String.valueOf(k),
+                            item.getOfferName(),
+                            String.format("%.2f", item.getOfferPrice()),
+                            item.getOfferDiscountPrice() == 0.0 ? "None" : String.format("%.2f", item.getOfferDiscountPrice()),
+                            item.isService() ? "Service" : "Product"
+                    };
+
+                    k += 1;
+                    float maxCellHeight = 0;
+                    for (int i = 0; i < row.length; i++) {
+                        float cellHeight = calculateCellHeight(row[i], columnWidths[i], PDType1Font.HELVETICA, 10, cellMargin);
+                        maxCellHeight = Math.max(maxCellHeight, cellHeight);
+                    }
+
+                    for (int i = 0; i < row.length; i++) {
+                        drawCell(contentStream, margin, nextY, columnWidths[i], maxCellHeight, row[i], cellMargin, PDType1Font.HELVETICA, 10);
+                        margin += columnWidths[i];
+                    }
+
+                    margin = 50;
+                    nextY -= maxCellHeight;
+
+                    if (nextY <= margin) {
+                        contentStream.close();
+                        page = new PDPage();
+                        document.addPage(page);
+                        contentStream = new PDPageContentStream(document, page);
+                        nextY = yStart;
+                    }
+                }
+            } finally {
+                contentStream.close();
+            }
+
+            document.save(out);
+            return out.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException("Error creating price list PDF", e);
+        }
+    }
+
+
     public byte[] generateAgendaPdf(List<Activity> activities) {
         try (PDDocument document = new PDDocument();
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -98,7 +177,7 @@ public class PDFGeneratorService {
                         nextY = yStart;
                     }
 
-            }
+                }
             } finally {
                 contentStream.close(); // Гарантированное закрытие потока
             }
@@ -109,6 +188,7 @@ public class PDFGeneratorService {
             throw new RuntimeException("Ошибка при создании PDF агенды", e);
         }
     }
+
     private float calculateCellHeight(String text, float columnWidth, PDType1Font font, float fontSize, float cellMargin) throws IOException {
         List<String> lines = wrapText(text, font, fontSize, columnWidth - 2 * cellMargin);
         return lines.size() * (fontSize * 1.5f); // Высота строки умножается на количество строк
@@ -140,7 +220,6 @@ public class PDFGeneratorService {
     }
 
 
-
     private List<String> wrapText(String text, PDType1Font font, float fontSize, float maxWidth) throws IOException {
         List<String> lines = new ArrayList<>();
         String[] words = text.split(" ");
@@ -166,15 +245,13 @@ public class PDFGeneratorService {
     }
 
 
-
-
-
     private String truncateText(String text, int maxLength) {
         if (text == null) {
             return "";
         }
         return text.length() > maxLength ? text.substring(0, maxLength - 3) + "..." : text;
     }
+
     public byte[] generatePdf(String data) {
         try (PDDocument document = new PDDocument();
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -255,6 +332,7 @@ public class PDFGeneratorService {
             throw new RuntimeException("Ошибка при создании PDF для события", e);
         }
     }
+
     public byte[] generateEventPDF(Event event) {
         try (PDDocument document = new PDDocument();
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
