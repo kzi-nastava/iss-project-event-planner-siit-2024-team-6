@@ -37,8 +37,6 @@ public class OfferController {
     @Autowired
     private EventService eventService;
     @Autowired
-    private OfferHistoryService offerHistoryService;
-    @Autowired
     private UserService userService;
     @Autowired
     private CategoryService categoryService;
@@ -117,12 +115,12 @@ public class OfferController {
     public ResponseEntity<Boolean> isPurchased(@PathVariable int offerId, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+           return ResponseEntity.ok(false);
         }
         String email = this.tokenUtils.getUsernameFromToken(jwtToken);
         Organizer user = organizerService.findByEmail(email);
         if (user == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.ok(false);
         }
         return new ResponseEntity<>(purchaseService.existsPurchase(user.getId(), offerId), HttpStatus.OK);
     }
@@ -224,13 +222,13 @@ public class OfferController {
     public ResponseEntity<Boolean> isOfferFavourited(@PathVariable int offerId, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+           return ResponseEntity.ok(false);
         }
 
         String email = this.tokenUtils.getUsernameFromToken(jwtToken);
         User user = userService.findByEmail(email);
         if (user == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.ok(false);
         }
 
         List<Offer> favourites = user.getFavouriteOffers();
@@ -412,70 +410,6 @@ public class OfferController {
         System.out.println("Filtered Offers: " + filteredOffers);
 
         return ResponseEntity.ok(filteredOffers);
-    }
-
-
-    @PostMapping("{offerId}/favorite")
-    public ResponseEntity<UserDTO> addOfferToFavorites(@PathVariable Integer offerId, HttpServletRequest request) {
-        // Проверка существования пользователя
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
-        User user = userService.findByEmail(email);
-
-        if (user == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // Проверка существования события
-        Offer offer = offerService.findById(offerId);
-
-        // Проверка, что событие уже добавлено в избранное
-        if (user.getFavouriteOffers().contains(offer)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Событие уже в избранном
-        }
-
-        // Добавление события в избранное
-        user.getFavouriteOffers().add(offer);
-        User updatedUser = userService.save(user);
-
-        // Преобразование в DTO
-        UserDTO updatedUserDTO = new UserDTO(updatedUser);
-
-        return ResponseEntity.ok(updatedUserDTO); // Возвращаем обновлённого пользователя
-    }
-    @DeleteMapping("{offerId}/favorite")
-    public ResponseEntity<UserDTO> removeEOfferFromFavorites(@PathVariable Integer offerId, HttpServletRequest request) {
-        // Проверка существования пользователя
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
-        User user = userService.findByEmail(email);
-
-        if (user == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // Проверка существования события
-        Offer offer = offerService.findById(offerId);
-
-        // Проверка, что событие уже добавлено в избранное
-        if (!user.getFavouriteOffers().contains(offer)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Событие уже в избранном
-        }
-
-        // Добавление события в избранное
-        user.getFavouriteOffers().remove(offer);
-        User updatedUser = userService.save(user);
-
-        // Преобразование в DTO
-        UserDTO updatedUserDTO = new UserDTO(updatedUser);
-
-        return ResponseEntity.ok(updatedUserDTO); // Возвращаем обновлённого пользователя
     }
 
     @GetMapping("favorites")
