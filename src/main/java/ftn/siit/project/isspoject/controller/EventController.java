@@ -27,7 +27,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController 
@@ -119,6 +121,21 @@ public class EventController {
                 .headers(headers)
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfContent);
+    }
+    @GetMapping("{eventId}/statistics")
+    public ResponseEntity<Map<String, Object>> getEventStatistics(@PathVariable Integer eventId) {
+        Event event = eventService.findById(eventId);
+
+        if (event == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Map<String, Object> statistics = new HashMap<>();
+        statistics.put("participants", event.getParticipants());
+        statistics.put("maxParticipants", event.getMaxParticipants());
+        statistics.put("rating", event.getRating());
+
+        return ResponseEntity.ok(statistics);
     }
     @PostMapping("{eventId}/favorite")
     public ResponseEntity<UserDTO> addEventToFavorites(@PathVariable Integer eventId, HttpServletRequest request) {
