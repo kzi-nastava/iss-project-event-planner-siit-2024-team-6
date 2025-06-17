@@ -99,13 +99,14 @@ public class OrganizerController {
         Event savedEvent = eventService.save(event);
         userService.save(organizer);
 
-        // invitations
-        if(eventDTO.getIsPublic() == false) {
-            eventService.sendInvitations(eventDTO);
-        }
+
         // Преобразование в DTO
         EventDTO responseDTO = toEventDTO(savedEvent);
 
+        // invitations
+        if(eventDTO.getIsPublic() == false) {
+            eventService.sendInvitations(responseDTO, eventDTO.getEmails());
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO); // Возвращаем созданное событие
     }
 
