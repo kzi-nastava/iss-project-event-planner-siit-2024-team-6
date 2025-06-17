@@ -26,7 +26,7 @@ public class TokenUtils {
     public String SECRET;
 
     // 30 m
-    @Value("1800000")
+    @Value("1800000000")
     private int EXPIRES_IN;
 
     @Value("X-Auth-Token")

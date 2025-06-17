@@ -75,20 +75,24 @@ public class UserController {
     }
 
     @PostMapping("/quick-register")
-    public  ResponseEntity<Map<String, String>> quicklyRegisterUser(@RequestBody QuickRegistrationDTO requestDTO) {
-        Map<String, String> response = new HashMap<>();
-
-        if (requestDTO.getEmail() == null) {
-            response.put("message", "Error, invalid user");
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<UserDTO> quicklyRegisterUser(@RequestBody QuickRegistrationDTO requestDTO) {
+        if (requestDTO.getEmail() == null || requestDTO.getEventId() == null) {
+            return ResponseEntity.badRequest().build();
         }
 
         requestDTO.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
+        User savedUser = userService.save(requestDTO.toUser());
 
-        userService.save(requestDTO.toUser());
-        response.put("message", "User was quickly registered, check out the activation code");
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        //add user to attendees for event
+        Event event = eventService.findById(requestDTO.getEventId());
+        savedUser.getAttends().add(event);
+        User updatedUser = userService.save(savedUser);
+
+        UserDTO userDTO = new UserDTO(updatedUser);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
     }
+
 
     @GetMapping("/profile")
     public ResponseEntity<UserDTO> getProfile(HttpServletRequest request) {

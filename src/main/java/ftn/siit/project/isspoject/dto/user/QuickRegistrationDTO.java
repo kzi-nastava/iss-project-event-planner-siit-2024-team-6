@@ -9,6 +9,7 @@ public class QuickRegistrationDTO {
     private String password;
     private String name;
     private String lastname;
+    private Integer eventId;
     public User toUser(){
         User user = new User();
         user.setEmail(email);
