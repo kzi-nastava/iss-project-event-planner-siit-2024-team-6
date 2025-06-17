@@ -89,8 +89,9 @@ public class OfferServiceImpl implements OfferService {
     @Override
     public Offer save(Offer offer) {
         offer.setLastChanged(LocalDateTime.now());
-        updateOfferHistory(offer);
-        return offerRepository.save(offer);
+        Offer o = offerRepository.save(offer);
+        updateOfferHistory(o);
+        return o;
     }
 
     @Override

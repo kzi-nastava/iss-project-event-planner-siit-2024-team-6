@@ -69,6 +69,14 @@ public class ProviderController {
 
         return ResponseEntity.ok(dtos);
     }
+//    @GetMapping("/api/providers/categories")
+//    public ResponseEntity<List<Category>> getCategoriesWithId() {
+//        List<Category> categories = categoryRepository.findAll(); // или через сервис
+//        List<CategoryDTO> categoryDTOs = categories.stream()
+//                .map(cat -> new CategoryDTO(cat.getId(), cat.getName()))
+//                .collect(Collectors.toList());
+//        return ResponseEntity.ok(categoryDTOs);
+//    }
 
     @GetMapping("price-list/export")
     public ResponseEntity<byte[]> downloadEventStatisticsPDF(HttpServletRequest request) {
@@ -210,7 +218,7 @@ public class ProviderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new OfferDTO(saved));
     }
 
-    @PostMapping("product")
+    @PostMapping("/product")
     public ResponseEntity<OfferDTO> createProduct(@RequestBody NewOfferDTO dto, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null) {
