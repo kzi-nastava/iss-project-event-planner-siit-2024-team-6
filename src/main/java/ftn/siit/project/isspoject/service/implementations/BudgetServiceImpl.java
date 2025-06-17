@@ -73,7 +73,7 @@ public class BudgetServiceImpl implements BudgetService {
         double currents = 0;
         for(NewBudgetItemDTO dto:budgetDTO.getBudgetItems()){
             BudgetItem budgetItem = new BudgetItem();
-            budgetItem.setCategory(categoryRepository.findByNameIgnoreCase(dto.getCategory()));
+            budgetItem.setCategory(categoryRepository.findByNameIgnoreCaseAndIsDeletedIsFalse(dto.getCategory()));
             budgetItem.setCurrPrice(dto.getCurrPrice());
             budgetItem.setMaxPrice(dto.getMaxPrice());
             budget.setTotal(budget.getTotal()+budgetItem.getMaxPrice());
@@ -111,7 +111,7 @@ public class BudgetServiceImpl implements BudgetService {
           existingBudget.getBudgetItems().clear();
           for(NewBudgetItemDTO dto:budgetDTO.getBudgetItems()){
               BudgetItem budgetItem = new BudgetItem();
-              budgetItem.setCategory(categoryRepository.findByNameIgnoreCase(dto.getCategory()));
+              budgetItem.setCategory(categoryRepository.findByNameIgnoreCaseAndIsDeletedIsFalse(dto.getCategory()));
               budgetItem.setCurrPrice(dto.getCurrPrice());
               budgetItem.setMaxPrice(dto.getMaxPrice());
               existingBudget.getBudgetItems().add(budgetItem);

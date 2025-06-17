@@ -80,7 +80,7 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public Offer save(NewOfferDTO dto) {
-        Offer offer = new Offer(dto, categoryRepository.findByNameIgnoreCase(dto.getCategory()));
+        Offer offer = new Offer(dto, categoryRepository.findByNameIgnoreCaseAndIsDeletedIsFalse(dto.getCategory()));
         offer.setLastChanged(LocalDateTime.now());
         updateOfferHistory(offer);
         return offerRepository.save(offer);
@@ -117,7 +117,7 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public Offer update(int id, NewOfferDTO dto) {
-        Offer offer = new Offer(dto, categoryRepository.findByNameIgnoreCase(dto.getCategory()));
+        Offer offer = new Offer(dto, categoryRepository.findByNameIgnoreCaseAndIsDeletedIsFalse(dto.getCategory()));
         offer.setId(id);
         return update(offer);
     }
@@ -160,7 +160,7 @@ public class OfferServiceImpl implements OfferService {
             List<Offer> visibleOffers = offers.stream()
                     .filter(offer -> (offer.getIsDeleted() == null || !offer.getIsDeleted()))
                     .filter(Offer::getIsVisible)
-                    .filter(offer -> (offer.getStatus() == Status.ACCEPTED))
+                    .filter(offer -> (offer.getIsDeleted() != null && offer.getStatus() == Status.ACCEPTED))
                     .collect(Collectors.toList());
 
             return paginateOffers(visibleOffers, pageable);
