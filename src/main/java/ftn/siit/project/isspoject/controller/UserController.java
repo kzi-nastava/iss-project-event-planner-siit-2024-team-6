@@ -272,7 +272,7 @@ public class UserController {
             this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
             String tokenValue = this.tokenUtils.generateToken((User) userDetails);
-            boolean muted = user.isNotificationsMuted();
+            Boolean muted = user.getNotificationsMuted();
             token.setToken(tokenValue);
             token.setMuted(muted);
             return new ResponseEntity<>(token, HttpStatus.OK);

@@ -83,7 +83,7 @@ public class User implements UserDetails {
     private List<Notification> notifications = new ArrayList<>();
 
     @Column(name = "notifications_muted")
-    private boolean notificationsMuted = false;
+    private Boolean notificationsMuted = false;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
