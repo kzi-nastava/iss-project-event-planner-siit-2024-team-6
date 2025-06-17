@@ -107,6 +107,27 @@ public class ReactionController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("provider/{id}")
+    public ResponseEntity<Page<ReactionDTO>> getProvidersReactions(@PathVariable Integer id, @PageableDefault(size = 10) Pageable pageable) {
+        Provider provider = providerService.findById(id);
+        if (provider == null) {
+            throw new NotFoundException("Provider not found");
+        }
+        Page<Reaction> reactions = reactionService.getAcceptedReactionsForProvider(pageable, provider);
+        Page<ReactionDTO> reactionDTOPage = reactions.map(ReactionDTO::new);
+        return ResponseEntity.ok(reactionDTOPage);
+    }
+
+    @GetMapping("rating-offer/{id}")
+    public ResponseEntity<Double> getOfferRating(@PathVariable Integer id) {
+        Offer offer = offerService.findById(id);
+        if (offer == null) {
+            throw new NotFoundException("Offer not found");
+        }
+        double rating = reactionService.findRatingForOffer(offer);
+        return ResponseEntity.ok(rating);
+    }
+
     @GetMapping("pending")
     public ResponseEntity<Page<ReactionDTO>> getPendingReactions(
             @PageableDefault(size = 10) Pageable pageable) {
