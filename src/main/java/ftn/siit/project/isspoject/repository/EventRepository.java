@@ -19,7 +19,8 @@ public interface EventRepository extends JpaRepository<Event, Integer>{
 //    @Query(value = "SELECT id, name, place, date FROM events WHERE organizer_id = :organizerId", nativeQuery = true)
 //    List<Object[]> findByOrganizerId(Integer organizerId);
 
-    List<Event> findTop5ByOrderByDateAsc();
+    List<Event> findTop5ByIsDeletedFalseOrderByDateDesc();
+    List<Event> findTop5ByIsDeletedFalseAndIsPublicTrueOrderByDateDesc();
 
     @Query("SELECT e FROM User u JOIN u.attends e WHERE u.id = :userId")
     List<Event> findEventsByUserId(@Param("userId") Integer userId);
@@ -31,7 +32,10 @@ public interface EventRepository extends JpaRepository<Event, Integer>{
 
     @Query("SELECT e FROM Event e WHERE e.id IN (SELECT ev.id FROM Organizer o JOIN o.myEvents ev WHERE o = :organizer)")
     List<Event> findByOrganizer(Organizer organizer);
-    @Query("SELECT e FROM Event  e WHERE e.isDeleted = false AND e.date > :now")
-    Page<Event> findByIsDeletedFalse(Pageable pageable,@Param("now") LocalDateTime now);
 
+    @Query("SELECT e FROM Event e WHERE e.isDeleted = false AND e.isPublic = true AND e.date > :now")
+    Page<Event> findByIsDeletedFalseAndIsPublicTrueAndDateAfter(Pageable pageable, @Param("now") LocalDateTime now);
+
+    @Query("SELECT e FROM Event e WHERE e.isDeleted = false AND e.isPublic = true AND e.date > :now")
+    List<Event> findByIsDeletedFalseAndIsPublicTrueAndDateAfter(@Param("now") LocalDateTime now);
 }
