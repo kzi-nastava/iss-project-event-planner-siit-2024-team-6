@@ -75,7 +75,7 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public List<Offer> findTopFive() {
-        return offerRepository.findTop5ByOrderByLastChangedAsc();
+        return offerRepository.findTop5ByIsDeletedFalseAndIsAvailableTrueAndStatusOrderByPriceAsc(Status.ACCEPTED);
     }
 
     @Override

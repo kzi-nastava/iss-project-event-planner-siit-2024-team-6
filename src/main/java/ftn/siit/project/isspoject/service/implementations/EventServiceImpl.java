@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 import ftn.siit.project.isspoject.dto.EmailDetails;
+import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.NewClosedEventDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
 import ftn.siit.project.isspoject.entity.*;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,7 +52,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Page<Event> findAll(Pageable page) {
-        return eventRepository.findByIsDeletedFalse(page,LocalDateTime.now());
+        return eventRepository.findByIsDeletedFalseAndIsPublicTrueAndDateAfter(page,LocalDateTime.now());
     }
 
 
@@ -81,7 +83,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<Event> findTopFive() {
-        List<Event> events = eventRepository.findTop5ByOrderByDateAsc();
+        List<Event> events = eventRepository.findTop5ByIsDeletedFalseAndIsPublicTrueOrderByDateDesc();
         if (events.isEmpty()) {
             throw new NotFoundException("No top 5 upcoming events found.");
         }
@@ -114,7 +116,7 @@ public class EventServiceImpl implements EventService {
         return events;
     }
 
-    public String generateInvitation(NewEventDTO dto) {
+    public String generateInvitation(EventDTO event) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy 'at' hh:mm a");
 
         return String.format(
@@ -124,18 +126,18 @@ public class EventServiceImpl implements EventService {
                         "📅 **Date and Time**: %s\n\n" +
                         "We would be delighted by your presence!\n\n" +
                         "Please mark your calendar and join us for this special event.",
-                dto.getName() != null ? dto.getName() : "Untitled Event",
-                dto.getDescription() != null ? dto.getDescription() : "No description available.",
-                dto.getPlace() != null ? dto.getPlace() : "Location not specified",
-                dto.getDate() != null ? dto.getDate().format(formatter) : "Date not specified"
+                event.getName() != null ? event.getName() : "Untitled Event",
+                event.getDescription() != null ? event.getDescription() : "No description available.",
+                event.getPlace() != null ? event.getPlace() : "Location not specified",
+                event.getDate() != null ? event.getDate().format(formatter) : "Date not specified"
         );
     }
-    public void sendInvitations(NewEventDTO dto) {
-        String invitation = generateInvitation(dto);
+    public void sendInvitations(EventDTO event, List<String> emails) {
+        String invitation = generateInvitation(event);
         String userLink;
-        for (String email : dto.getEmails()) {
+        for (String email : emails) {
             boolean userExists = userService.existsByEmail(email);
-            userLink = generateLink(userExists, email);
+            userLink = generateLink(userExists, email,event.getId());
             System.out.println(email);
             EmailDetails details = new EmailDetails();
             details.setRecipient(email);
@@ -147,13 +149,13 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    private String generateLink(boolean exists, String email) {
+    private String generateLink(boolean exists, String email, Integer eventId) {
         String baseUrl = "http://localhost:4200";
-
+        String encodedEmail = URLEncoder.encode(email, StandardCharsets.UTF_8);
         if (exists) {
-            return baseUrl + "/login?email=" + URLEncoder.encode(email, StandardCharsets.UTF_8) + "&disableEmail=true";
+            return baseUrl + "/login?email=" + encodedEmail + "&disableEmail=true&eventId=" + eventId;
         } else {
-            return baseUrl + "/quick-registration?email=" + URLEncoder.encode(email, StandardCharsets.UTF_8) + "&disableEmail=true";
+            return baseUrl + "/quick-registration?email=" + encodedEmail + "&disableEmail=true&eventId=" + eventId;
         }
     }
 
@@ -171,7 +173,8 @@ public class EventServiceImpl implements EventService {
         Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
         LocalDateTime now = LocalDateTime.now();
 
-        List<Event> events = eventRepository.findAll();
+        //List<Event> events = eventRepository.findAll();
+        List<Event> events = eventRepository.findByIsDeletedFalseAndIsPublicTrueAndDateAfter(LocalDateTime.now());
 
         List<Event> filteredEvents = events.stream()
                 .filter(event -> !event.getIsDeleted())
