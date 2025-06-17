@@ -200,7 +200,9 @@ public class EventController {
         Event event = eventService.findById(eventId);
         List<String> categories = new ArrayList<>();
         for (Category category : event.getEventType().getCategories()) {
-            categories.add(category.getName());
+            if(category.getIsDeleted() == false){
+                categories.add(category.getName());
+            }
         }
         if (categories.isEmpty()) {
             return ResponseEntity.noContent().build();

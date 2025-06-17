@@ -44,7 +44,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category findByName(String name) {
-        Category category = categoryRepository.findByNameIgnoreCase(name);
+        Category category = categoryRepository.findByNameIgnoreCaseAndIsDeletedIsFalse(name);
         if (category == null || category.getIsDeleted()) {
             throw new NotFoundException("Category not found with name: " + name);
         }

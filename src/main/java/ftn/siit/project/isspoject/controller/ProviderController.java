@@ -230,19 +230,14 @@ public class ProviderController {
         for (NewEventTypeDTO eventType : dto.getEventTypes()) {
             eventTypes.add(eventTypeService.findByName(eventType.getName()));
         }
-        Category category = null;
+        Product saved;
         if (dto.getCategorySuggestion() == null) {
-            category = categoryService.findByName(dto.getCategory());
-        }
-        Product saved = new Product(dto, category, eventTypes, provider);
-        offerService.save(saved);
-        if (dto.getCategorySuggestion() != null) {
+            saved = productService.save(dto, provider, eventTypes, categoryService.findByName(dto.getCategory()), Status.ACCEPTED);
+        } else{
+            saved = productService.save(dto, provider, eventTypes, null, Status.PENDING);
             categorySuggestionService.save(new CategorySuggestion(dto.getCategorySuggestion(), Status.PENDING, saved));
             notifyAdmins();
-
         }
-
-
         return ResponseEntity.status(HttpStatus.CREATED).body(new OfferDTO(saved));
     }
     private void notifyAdmins(){

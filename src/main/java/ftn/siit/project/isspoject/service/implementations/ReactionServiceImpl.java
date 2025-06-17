@@ -33,8 +33,14 @@ public class ReactionServiceImpl implements ReactionService {
     }
 
     @Override
-    public List<Reaction> findByOffer(Offer offer) {
-        return reactionRepository.findReactionsByOfferId(offer.getId());
+    public double findRatingForOffer(Offer offer) {
+        double rating = 0.0;
+        int i = 0;
+        for (Reaction reaction: reactionRepository.findReactionsByOfferId(offer.getId(), Status.ACCEPTED)){
+            i += 1;
+            rating += reaction.getRating();
+        }
+        return rating/i;
     }
 
     @Override
@@ -53,5 +59,10 @@ public class ReactionServiceImpl implements ReactionService {
     }
     public Page<Reaction> getPendingReactions(Pageable pageable) {
         return reactionRepository.findByStatusAndIsDeletedFalse(Status.PENDING,pageable);
+    }
+
+    @Override
+    public Page<Reaction> getAcceptedReactionsForProvider(Pageable pageable, Provider provider) {
+        return reactionRepository.findReactionsForProvider(provider.getId(), Status.ACCEPTED, pageable);
     }
 }

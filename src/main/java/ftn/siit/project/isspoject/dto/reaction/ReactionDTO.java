@@ -11,6 +11,7 @@ public class ReactionDTO {
     private Integer offerId;
     private Integer eventId;
     private Integer userId;
+    private String userName;
 
     public ReactionDTO(Reaction reaction) {
         this.id = reaction.getId();
@@ -24,5 +25,6 @@ public class ReactionDTO {
             this.eventId = reaction.getEvent().getId();
         }
         this.userId = reaction.getUser().getId();
+        this.userName = reaction.getUser().getName()+" "+reaction.getUser().getLastname();
     }
 }

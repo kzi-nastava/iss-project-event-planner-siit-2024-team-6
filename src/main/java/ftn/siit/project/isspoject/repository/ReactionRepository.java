@@ -21,6 +21,9 @@ public interface ReactionRepository extends JpaRepository<Reaction, Integer>{
     @Query("SELECT r FROM Reaction r WHERE r.event.id = :eventId")
     List<Reaction> findReactionsByEventId(@Param("eventId") Integer eventId);
 
-    @Query("SELECT r FROM Reaction r WHERE r.offer.id = :offerId")
-    List<Reaction> findReactionsByOfferId(@Param("offerId") Integer offerId);
+    @Query("SELECT r FROM Reaction r WHERE r.offer.id = :offerId AND r.isDeleted = false AND r.status = :status")
+    List<Reaction> findReactionsByOfferId(@Param("offerId") Integer offerId, @Param("status") Status status);
+
+    @Query("SELECT r FROM Reaction r WHERE r.offer.provider.id = :providerId AND r.isDeleted = false AND r.status = :status")
+    Page<Reaction> findReactionsForProvider(@Param("providerId") Integer providerId, @Param("status") Status status, Pageable pageable);
 }

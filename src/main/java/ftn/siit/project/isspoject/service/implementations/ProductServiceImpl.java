@@ -1,10 +1,7 @@
 package ftn.siit.project.isspoject.service.implementations;
 
 import ftn.siit.project.isspoject.dto.offer.NewOfferDTO;
-import ftn.siit.project.isspoject.entity.EventType;
-import ftn.siit.project.isspoject.entity.Offer;
-import ftn.siit.project.isspoject.entity.Product;
-import ftn.siit.project.isspoject.entity.Provider;
+import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.ProductRepository;
 import ftn.siit.project.isspoject.service.interfaces.ProductService;
@@ -86,6 +83,31 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<Product> findByProvider(Provider p, Pageable page) {
         return productRepository.findAllByProviderIdAndIsDeletedFalseOrIsDeletedIsNull(p.getId(), page);
+    }
+
+    @Override
+    public Product save(NewOfferDTO dto, Provider p, List<EventType> eventTypes, Category c, Status s) {
+        Product existingProduct = new Product();
+        existingProduct.setName(dto.getName());
+        if (c != null) {
+            existingProduct.setCategory(c);
+        }
+        existingProduct.setStatus(s);
+        existingProduct.setDescription(dto.getDescription());
+        existingProduct.setPrice(dto.getPrice());
+        existingProduct.setIsAvailable(dto.getIsAvailable());
+        if (dto.getSale() == null){
+            existingProduct.setSale(0.0);
+        }else{
+            existingProduct.setSale(dto.getSale());
+        }
+        existingProduct.setPhotos(dto.getPhotos());
+        existingProduct.setProvider(p);
+        existingProduct.setIsDeleted(false);
+        existingProduct.setIsVisible(dto.getIsVisible());
+        existingProduct.setEventTypes(eventTypes);
+        existingProduct.setLastChanged(LocalDateTime.now());
+        return productRepository.save(existingProduct);
     }
 
     @Override

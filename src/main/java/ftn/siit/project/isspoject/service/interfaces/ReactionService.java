@@ -11,11 +11,12 @@ public interface ReactionService {
     List<Reaction> findAll();
     Reaction findById(Integer eventId);
     List<Reaction> findByUser(User user);
-    List<Reaction> findByOffer(Offer offer);
+    double findRatingForOffer(Offer offer);
     List<Reaction> findByEvent(Event event);
 
 
     Reaction save(Reaction reaction);
     void delete(Reaction reaction);
     Page<Reaction> getPendingReactions(Pageable pageable);
+    Page<Reaction> getAcceptedReactionsForProvider(Pageable pageable, Provider provider);
 }

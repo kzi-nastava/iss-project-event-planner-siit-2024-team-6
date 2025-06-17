@@ -1,5 +1,6 @@
 package ftn.siit.project.isspoject.dto.offer;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import ftn.siit.project.isspoject.dto.category.NewCategoryDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventTypeDTO;
 import ftn.siit.project.isspoject.entity.*;
@@ -32,6 +33,7 @@ public class NewOfferDTO {
     private int preciseDuration;
     private int latestReservation;
     private int latestCancelation;
+     @JsonProperty("isReservationAutoApproved")
     private boolean isReservationAutoApproved;
 
     public NewOfferDTO() {}
