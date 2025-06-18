@@ -249,7 +249,7 @@ public class OrganizerController {
         eventDTO.setDate(event.getDate());
         eventDTO.setEventType(new EventTypeDTO(event.getEventType()));
         eventDTO.setPhotos(event.getPhotos());
-        eventDTO.setIsDeleted(false);
+        eventDTO.setIsDeleted(event.getIsDeleted());
         return eventDTO;
     }
 
