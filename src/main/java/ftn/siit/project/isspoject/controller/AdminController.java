@@ -83,6 +83,11 @@ public class AdminController {
         eventType.setName(eventTypeDTO.getName());
         eventType.setDescription(eventTypeDTO.getDescription());
         eventType.setIsDeleted(false);
+//        List<Category> cl = new ArrayList<>();
+//        for(Category c: eventTypeDTO.getCategories()){
+//            cl.add(categoryService.findById(c.getId()));
+//        }
+//        eventType.setCategories(cl);
         List<Category> categories = new ArrayList<>();
         for(Category c: eventTypeDTO.getCategories()){
             categories.add(categoryService.findById(c.getId()));
@@ -103,6 +108,7 @@ public class AdminController {
         eventTypeDTO.setId(eventType.getId());
         eventTypeDTO.setName(eventType.getName());
         eventTypeDTO.setDescription(eventType.getDescription());
+        eventTypeDTO.setCategories(eventType.getCategories());
         return eventTypeDTO;
     }
 
