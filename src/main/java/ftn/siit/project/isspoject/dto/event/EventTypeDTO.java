@@ -20,6 +20,7 @@ public class EventTypeDTO {
         this.id = eventType.getId();
         this.name = eventType.getName();
         this.description = eventType.getDescription();
-        this.isDeleted = this.getIsDeleted();
+        this.isDeleted = eventType.getIsDeleted();
+        this.categories = eventType.getCategories();
     }
 }
