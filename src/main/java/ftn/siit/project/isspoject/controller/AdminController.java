@@ -108,6 +108,7 @@ public class AdminController {
         eventTypeDTO.setId(eventType.getId());
         eventTypeDTO.setName(eventType.getName());
         eventTypeDTO.setDescription(eventType.getDescription());
+        eventTypeDTO.setIsDeleted(eventType.getIsDeleted());
         eventTypeDTO.setCategories(eventType.getCategories());
         return eventTypeDTO;
     }
