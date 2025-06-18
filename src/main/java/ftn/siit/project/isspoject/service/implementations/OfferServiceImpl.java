@@ -139,7 +139,7 @@ public class OfferServiceImpl implements OfferService {
                 .filter(offer -> maxPrice == null ||
                         (offer.getSale() != null && offer.getSale() > 0 ? offer.getSale() <= maxPrice : offer.getPrice() <= maxPrice)) //if it is on sale compare max price to sale price
                 .filter(offer -> isOnSale == null || (!isOnSale) || (isOnSale && offer.getSale() != null && offer.getSale() > 0)) //if isOnSale is false then return all
-                .filter(offer -> category == null || category.isEmpty() || category.toLowerCase().equals(offer.getCategory().getName().toLowerCase()))
+                .filter(offer -> category == null || category.isEmpty() || (offer.getCategory() != null && category.toLowerCase().equals(offer.getCategory().getName().toLowerCase())))
                 .filter(offer -> (offer.isService() == true))
                 .filter(offer -> ( isAvailable == null || offer.getIsAvailable() == null || offer.getIsAvailable() == isAvailable))
                 .filter(offer -> eventType == null || eventType.isEmpty() ||
