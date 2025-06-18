@@ -37,6 +37,9 @@ public class ReactionServiceImpl implements ReactionService {
         double rating = 0.0;
         int i = 0;
         for (Reaction reaction: reactionRepository.findReactionsByOfferId(offer.getId(), Status.ACCEPTED)){
+            if(reaction.getRating() == null){
+                continue;
+            }
             i += 1;
             rating += reaction.getRating();
         }
