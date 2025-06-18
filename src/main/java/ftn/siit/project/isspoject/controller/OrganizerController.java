@@ -5,6 +5,7 @@ import ftn.siit.project.isspoject.dto.activity.NewActivityDTO;
 import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
 import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
+import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.service.interfaces.*;
@@ -246,6 +247,8 @@ public class OrganizerController {
         eventDTO.setIsPublic(event.getIsPublic());
         eventDTO.setPlace(event.getPlace());
         eventDTO.setDate(event.getDate());
+        eventDTO.setEventType(new EventTypeDTO(event.getEventType()));
+        eventDTO.setPhotos(event.getPhotos());
         return eventDTO;
     }
 
