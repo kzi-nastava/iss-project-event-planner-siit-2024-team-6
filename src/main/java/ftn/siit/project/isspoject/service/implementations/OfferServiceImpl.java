@@ -160,7 +160,7 @@ public class OfferServiceImpl implements OfferService {
         if (dto.getBudgetItems() == null || dto.getBudgetItems().isEmpty()) {
             List<Offer> visibleOffers = offers.stream()
                     .filter(offer -> (offer.getIsDeleted() == null || !offer.getIsDeleted()))
-                    .filter(Offer::getIsVisible)
+                    .filter(offer -> offer.getIsVisible())
                     .filter(offer -> (offer.getIsDeleted() != null && offer.getStatus() == Status.ACCEPTED))
                     .collect(Collectors.toList());
 
@@ -179,7 +179,8 @@ public class OfferServiceImpl implements OfferService {
 
         List<Offer> filteredOffers = offers.stream()
                 .filter(offer -> (offer.getIsDeleted() == null || !offer.getIsDeleted()))
-                .filter(Offer::getIsVisible)
+                .filter(offer -> offer.getIsVisible())
+                .filter(offer -> (offer.getIsDeleted() != null && offer.getStatus() == Status.ACCEPTED))
                 .filter(offer -> {
                     String category = offer.getCategory().getName();
                     Double maxAllowed = categoryMaxPriceMap.get(category);
