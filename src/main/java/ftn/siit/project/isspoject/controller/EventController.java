@@ -71,6 +71,11 @@ public class EventController {
         if (jwtToken == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer user = organizerService.findByEmail(email);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         Event event = eventService.findById(eventId);
 
         if (event.getBudget() == null){
@@ -190,11 +195,15 @@ public class EventController {
     }
 
 
-    @GetMapping("{eventId}/getCategories")
+    @GetMapping("{eventId}/categories")
     public ResponseEntity<List<String>> getEventCategories(@PathVariable Integer eventId, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
-        System.out.println(jwtToken);
         if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer user = organizerService.findByEmail(email);
+        if (user == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Event event = eventService.findById(eventId);
