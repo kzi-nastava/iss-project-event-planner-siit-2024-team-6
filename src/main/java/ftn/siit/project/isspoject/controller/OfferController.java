@@ -168,7 +168,7 @@ public class OfferController {
         return new ResponseEntity<>(providerDTO, HttpStatus.OK);
     }
 
-    @PostMapping("{offerId}/add-favour")
+    @PostMapping("{offerId}/favourite")
     public ResponseEntity<Void> addOfferToFavourites(@PathVariable int offerId, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null) {
@@ -195,7 +195,7 @@ public class OfferController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("{offerId}/remove-favour")
+    @DeleteMapping("{offerId}/favourite")
     public ResponseEntity<Void> removeOfferFromFavourites(@PathVariable int offerId, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null) {
@@ -392,8 +392,6 @@ public class OfferController {
         if (filteredOffers.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        System.out.println("Filtered Offers: " + filteredOffers);
-
         return ResponseEntity.ok(filteredOffers);
     }
 
