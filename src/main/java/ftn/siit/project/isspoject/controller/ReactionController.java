@@ -69,16 +69,6 @@ public class ReactionController {
         }
         Reaction saved = reactionService.save(reaction);
 
-//        if (reaction.getEvent() != null) {
-//            User organizer = reaction.getEvent().getOrganizer();
-//            String message = "A new reaction has been added to your event: " + reaction.getEvent().getName();
-//            notificationService.notifyUser(organizer, message);
-//        } else if (reaction.getOffer() != null) {
-//            User provider = providerService.findByOffer(reaction.getOffer());
-//            String message = "A new reaction has been added to your offer: " + reaction.getOffer().getName();
-//            notificationService.notifyUser(provider, message);
-//        }
-
         return ResponseEntity.status(HttpStatus.CREATED).body(new ReactionDTO(saved));
     }
 
