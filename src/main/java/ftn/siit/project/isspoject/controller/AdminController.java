@@ -360,7 +360,10 @@ public class AdminController {
     }
 
     @PutMapping("suggestion/approve/{id}")
-    public ResponseEntity<CategorySuggestionDTO> approveSuggestion(@PathVariable int id) {
+    public ResponseEntity<CategorySuggestionDTO> approveSuggestion(@PathVariable int id, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         CategorySuggestion suggestion = categorySuggestionService.approve(id);
         Category c = categoryService.save(suggestion.getName(), suggestion.getDescription());
         serviceService.update(suggestion.getOffer().getId(), c, Status.ACCEPTED);
@@ -369,7 +372,10 @@ public class AdminController {
     }
 
     @PutMapping("suggestion/{id}")
-    public ResponseEntity<CategorySuggestionDTO> updateCategorySuggestion(@PathVariable int id, @RequestBody NewCategoryDTO dto) {
+    public ResponseEntity<CategorySuggestionDTO> updateCategorySuggestion(@PathVariable int id, @RequestBody NewCategoryDTO dto, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         CategorySuggestion updated = categorySuggestionService.update(id, dto);
         Category c = categoryService.save(updated.getName(), updated.getDescription());
         serviceService.update(updated.getOffer().getId(), c, Status.ACCEPTED);
@@ -378,9 +384,12 @@ public class AdminController {
     }
 
     @PutMapping("suggestion/reject/{id}")
-    public ResponseEntity<CategorySuggestionDTO> deleteCategorySuggestion(@PathVariable int id, @RequestParam String categoryName) {
+    public ResponseEntity<CategorySuggestionDTO> deleteCategorySuggestion(@PathVariable int id, @RequestParam String categoryName, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         if(categoryName == null || categoryName.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw new IllegalArgumentException("Category name cannot be null or empty");
         }
         CategorySuggestion cs = categorySuggestionService.reject(id);
         serviceService.update(cs.getOffer().getId(), categoryService.findByName(categoryName), Status.ACCEPTED);
