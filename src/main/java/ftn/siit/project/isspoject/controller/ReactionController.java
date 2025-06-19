@@ -132,7 +132,6 @@ public class ReactionController {
     public ResponseEntity<Page<ReactionDTO>> getPendingReactions(
             @PageableDefault(size = 10) Pageable pageable) {
 
-        // Assuming your service method supports Pageable
         Page<Reaction> pendingPage = reactionService.getPendingReactions(pageable);
 
         Page<ReactionDTO> reactionDTOPage = pendingPage.map(ReactionDTO::new);
