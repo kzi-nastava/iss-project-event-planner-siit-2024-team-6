@@ -141,11 +141,11 @@ public class OfferController {
         }
         Event event = eventService.findById(eventId);
         if (event == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw new NotFoundException("Event not found");
         }
         Offer o = offerService.findById(offerId);
         if (o == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+           throw new NotFoundException("Offer not found");
         }
         double price = o.getSale();
         if(price == 0){
