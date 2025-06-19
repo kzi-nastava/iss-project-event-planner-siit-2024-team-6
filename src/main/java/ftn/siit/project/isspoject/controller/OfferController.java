@@ -48,6 +48,9 @@ public class OfferController {
     private BudgetService budgetService;
     @Autowired
     private PurchaseService purchaseService;
+    @Autowired
+    private ReactionService reactionService;
+
     @GetMapping()
     public ResponseEntity<List<OfferDTO>> getAll() {
         List<Offer> offers = offerService.findAll();
@@ -323,6 +326,16 @@ public class OfferController {
         Offer offer = offerService.findById(id);
         if (offer == null) {throw new NotFoundException("Offer not found");}
         return ResponseEntity.ok(new OfferDTO(offer));
+    }
+
+    @GetMapping("{id}/rating")
+    public ResponseEntity<Double> getOfferRating(@PathVariable Integer id) {
+        Offer offer = offerService.findById(id);
+        if (offer == null) {
+            throw new NotFoundException("Offer not found");
+        }
+        double rating = reactionService.findRatingForOffer(offer);
+        return ResponseEntity.ok(rating);
     }
 
 
