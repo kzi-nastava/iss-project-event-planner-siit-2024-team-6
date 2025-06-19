@@ -259,9 +259,6 @@ public class AdminController {
 
     @GetMapping("category-names")
     public ResponseEntity<List<String>> getAllCategoryNames(HttpServletRequest request) {
-        if(!checkIfAdmin(request)){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         List<String> categories = categoryService.findAllNames();
         if (categories.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -278,10 +275,7 @@ public class AdminController {
         return ResponseEntity.ok(categories);
     }
     @GetMapping("categories")
-    public ResponseEntity<PagedResponse<Category>> getAllCategories(Pageable page, HttpServletRequest request) {
-        if(!checkIfAdmin(request)){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    public ResponseEntity<PagedResponse<Category>> getAllCategories(Pageable page) {
         Page<Category> categories = categoryService.findAll(page);
         PagedResponse<Category> response = new PagedResponse<>(
                 categories.stream().toList(),
