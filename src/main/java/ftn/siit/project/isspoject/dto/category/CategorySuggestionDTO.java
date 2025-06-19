@@ -12,6 +12,7 @@ public class CategorySuggestionDTO {
     String description;
     String offerName;
     String offerDescription;
+    Status status;
 
     public CategorySuggestionDTO() {}
 
@@ -21,5 +22,6 @@ public class CategorySuggestionDTO {
         this.description = cs.getDescription();
         this.offerName = cs.getOffer().getName();
         this.offerDescription = cs.getOffer().getDescription();
+        this.status = cs.getStatus();
     }
 }
