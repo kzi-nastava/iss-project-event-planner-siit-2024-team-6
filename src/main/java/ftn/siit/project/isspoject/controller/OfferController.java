@@ -408,7 +408,7 @@ public class OfferController {
         return ResponseEntity.ok(filteredOffers);
     }
 
-    @PostMapping("/searchByBudget")
+    @PostMapping("/search-by-budget")
     public ResponseEntity<Page<OfferDTO>> searchOffers(@RequestBody NewBudgetDTO budgetDTO, HttpServletRequest request, @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int pageSize){
         String jwtToken = this.tokenUtils.getToken(request);
