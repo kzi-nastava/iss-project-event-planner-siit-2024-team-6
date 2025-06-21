@@ -180,9 +180,6 @@ public class ProviderController {
 
     @GetMapping("{name}/category")
     public ResponseEntity<Category> findByName(@PathVariable String name, HttpServletRequest request) {
-        if(!checkIfProvider(request)){
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
         Category category = categoryService.findByName(name);
         if (category == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
