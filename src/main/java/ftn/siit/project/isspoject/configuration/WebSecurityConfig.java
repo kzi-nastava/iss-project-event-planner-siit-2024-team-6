@@ -140,6 +140,12 @@ public class WebSecurityConfig{
                     .requestMatchers(new AntPathRequestMatcher("/api/reactions/rating-offer/**")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/reactions/provider/**")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/reservations/**/reserved")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/reactions/pending")).hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/api/reactions/*/accept").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/api/reactions/*").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/api/report").hasAnyRole("ADMIN","ORGANIZER","PROVIDER","USER")
+                    .requestMatchers("/api/report/**").hasRole("ADMIN")
+
 //                    .requestMatchers(new AntPathRequestMatcher("/api/users")).permitAll()
 //                    .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll() my-products unPagedFavorites
 //            event-types-by-category-name

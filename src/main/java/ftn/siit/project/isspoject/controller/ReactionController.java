@@ -69,16 +69,6 @@ public class ReactionController {
         }
         Reaction saved = reactionService.save(reaction);
 
-//        if (reaction.getEvent() != null) {
-//            User organizer = reaction.getEvent().getOrganizer();
-//            String message = "A new reaction has been added to your event: " + reaction.getEvent().getName();
-//            notificationService.notifyUser(organizer, message);
-//        } else if (reaction.getOffer() != null) {
-//            User provider = providerService.findByOffer(reaction.getOffer());
-//            String message = "A new reaction has been added to your offer: " + reaction.getOffer().getName();
-//            notificationService.notifyUser(provider, message);
-//        }
-
         return ResponseEntity.status(HttpStatus.CREATED).body(new ReactionDTO(saved));
     }
 
@@ -123,7 +113,6 @@ public class ReactionController {
     public ResponseEntity<Page<ReactionDTO>> getPendingReactions(
             @PageableDefault(size = 10) Pageable pageable) {
 
-        // Assuming your service method supports Pageable
         Page<Reaction> pendingPage = reactionService.getPendingReactions(pageable);
 
         Page<ReactionDTO> reactionDTOPage = pendingPage.map(ReactionDTO::new);

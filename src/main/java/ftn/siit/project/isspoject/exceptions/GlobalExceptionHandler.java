@@ -18,7 +18,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-
+    // 404
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFoundException(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
                 )
         );
     }
-
+    //400
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidJson(HttpMessageNotReadableException ex) {
         ex.printStackTrace();
@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
                 )
         );
     }
-
+    //400
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
         logger.error("IllegalArgumentException caught in GlobalExceptionHandler", ex);
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
                 )
         );
     }
-
+    //400
     @ExceptionHandler(org.springframework.web.servlet.NoHandlerFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNoHandlerFoundException(NoHandlerFoundException ex) {
         ex.printStackTrace();
@@ -68,7 +68,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // Catch-all for any other exceptions
+    // Catch-all for any other exceptions, 500
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
         ex.printStackTrace(); // Log full stack trace for debugging
@@ -80,7 +80,7 @@ public class GlobalExceptionHandler {
                 )
         );
     }
-
+    //405
     @ExceptionHandler(UnsupportedOperationException.class)
     public ResponseEntity<Map<String, Object>> handleUnsupportedOperationException(UnsupportedOperationException ex) {
         ex.printStackTrace();

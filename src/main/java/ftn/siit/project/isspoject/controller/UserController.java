@@ -79,6 +79,9 @@ public class UserController {
         if (requestDTO.getEmail() == null || requestDTO.getEventId() == null) {
             return ResponseEntity.badRequest().build();
         }
+        if(userService.existsByEmail(requestDTO.getEmail())) {
+            throw new IllegalArgumentException("User with the given email already exists.");
+        }
 
         requestDTO.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
         User savedUser = userService.save(requestDTO.toUser());
