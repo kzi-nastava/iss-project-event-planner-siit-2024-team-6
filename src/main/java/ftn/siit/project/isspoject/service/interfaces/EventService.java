@@ -29,4 +29,5 @@ public interface EventService {
     List<Event> findByOrganizer(Organizer organizer);
     List<Event> getFutureEvents(Organizer organizer);
 
+    Page<Event> findByOrganizer(Pageable pageable, Organizer organizer);
 }

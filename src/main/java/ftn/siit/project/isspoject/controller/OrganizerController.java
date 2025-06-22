@@ -7,12 +7,17 @@ import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
+import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
 import ftn.siit.project.isspoject.entity.*;
 import ftn.siit.project.isspoject.service.interfaces.*;
 import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
 import ftn.siit.project.isspoject.util.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -160,6 +165,43 @@ public class OrganizerController {
         }
 
         return new ResponseEntity<>(eventDTOs, HttpStatus.OK);
+    }
+    @GetMapping("paged-events")
+    public ResponseEntity<PagedResponse<EventDTO>> getOrganizerPagedEvents(            @RequestParam(defaultValue = "0") int page,
+                                                                              @RequestParam(defaultValue = "10") int size,
+                                                                              @RequestParam(defaultValue = "asc") String sortDir,
+                                                                              HttpServletRequest request) {
+//        Organizer organizer = organizerService.findById(organizerId);
+//        if (organizer == null) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer user = (Organizer) userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "date"));
+
+        Page<Event> eventsPage = eventService.findByOrganizer(pageable, user);
+        List<Event> events = eventService.findByOrganizer(user);
+        List<EventDTO> eventDTOs = eventsPage.stream()
+                .map(EventDTO::new)
+                .toList();
+
+        PagedResponse<EventDTO> response = new PagedResponse<>(
+                eventDTOs,
+                eventsPage.getTotalPages(),
+                eventsPage.getTotalElements()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
     @GetMapping("{id}/events")
     public ResponseEntity<List<EventDTO>> getEvents(@PathVariable int id) {
