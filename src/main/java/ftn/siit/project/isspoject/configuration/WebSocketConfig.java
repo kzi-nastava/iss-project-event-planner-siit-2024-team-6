@@ -19,7 +19,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/socket") // Android client
-                .setAllowedOriginPatterns("*"); // Wildcard for dev, restrict in prod
+                .setAllowedOriginPatterns("*");
 
         registry.addEndpoint("/socket-web") // Angular browser SockJS fallback
                 .setAllowedOrigins("http://localhost:4200")

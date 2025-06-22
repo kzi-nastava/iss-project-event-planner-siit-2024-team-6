@@ -259,16 +259,13 @@ public class AdminController {
 
     @GetMapping("category-names")
     public ResponseEntity<List<String>> getAllCategoryNames(HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null || !userService.getUserRole(userService.findByEmail(this.tokenUtils.getUsernameFromToken(jwtToken)).getId()).equals("ROLE_ADMIN")) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
         List<String> categories = categoryService.findAllNames();
         if (categories.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(categories);
     }
+
     @GetMapping("categoriesNonPaged")
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = categoryService.findAll();
@@ -280,7 +277,6 @@ public class AdminController {
     @GetMapping("categories")
     public ResponseEntity<PagedResponse<Category>> getAllCategories(Pageable page) {
         Page<Category> categories = categoryService.findAll(page);
-
         PagedResponse<Category> response = new PagedResponse<>(
                 categories.stream().toList(),
                 categories.getTotalPages(),
@@ -305,13 +301,19 @@ public class AdminController {
 //        return ResponseEntity.ok(response);
 //    }
     @PostMapping("category")
-    public ResponseEntity<Category> addCategory(@RequestBody NewCategoryDTO dto) {
+    public ResponseEntity<Category> addCategory(@RequestBody NewCategoryDTO dto, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         Category savedCategory = categoryService.save(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
     }
 
     @PutMapping("category/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable int id, @RequestBody NewCategoryDTO dto) {
+    public ResponseEntity<Category> updateCategory(@PathVariable int id, @RequestBody NewCategoryDTO dto, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         Category oldCategory = categoryService.findById(id);
         Category updated = categoryService.update(id, dto);
         notificationService.notifyUsers(userService.findByRole("Provider"), "Updated category\nOLD:\n"+oldCategory.getName()+"\n"+oldCategory.getDescription()+"\nNEW:\n"+updated.getName()+"\n"+updated.getDescription());
@@ -319,7 +321,10 @@ public class AdminController {
     }
 
     @DeleteMapping("category/{id}")
-    public ResponseEntity<String> deleteCategory(@PathVariable int id) {
+    public ResponseEntity<String> deleteCategory(@PathVariable int id, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         Category oldCategory = categoryService.findById(id);
         if (!offerService.allOffersWithCategory(oldCategory).isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The category must not have any offers using it.");
@@ -329,7 +334,10 @@ public class AdminController {
     }
 
     @GetMapping("suggestions")
-    public ResponseEntity<PagedResponse<CategorySuggestionDTO>> getAllCategorySuggestions(Pageable page) {
+    public ResponseEntity<PagedResponse<CategorySuggestionDTO>> getAllCategorySuggestions(Pageable page, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         Page<CategorySuggestion> suggestions = categorySuggestionService.getPending(page);
         List<CategorySuggestionDTO> dtos = suggestions.stream()
                 .map(suggestion -> {
@@ -352,7 +360,10 @@ public class AdminController {
     }
 
     @PutMapping("suggestion/approve/{id}")
-    public ResponseEntity<CategorySuggestionDTO> approveSuggestion(@PathVariable int id) {
+    public ResponseEntity<CategorySuggestionDTO> approveSuggestion(@PathVariable int id, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         CategorySuggestion suggestion = categorySuggestionService.approve(id);
         Category c = categoryService.save(suggestion.getName(), suggestion.getDescription());
         serviceService.update(suggestion.getOffer().getId(), c, Status.ACCEPTED);
@@ -361,7 +372,10 @@ public class AdminController {
     }
 
     @PutMapping("suggestion/{id}")
-    public ResponseEntity<CategorySuggestionDTO> updateCategorySuggestion(@PathVariable int id, @RequestBody NewCategoryDTO dto) {
+    public ResponseEntity<CategorySuggestionDTO> updateCategorySuggestion(@PathVariable int id, @RequestBody NewCategoryDTO dto, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         CategorySuggestion updated = categorySuggestionService.update(id, dto);
         Category c = categoryService.save(updated.getName(), updated.getDescription());
         serviceService.update(updated.getOffer().getId(), c, Status.ACCEPTED);
@@ -370,13 +384,29 @@ public class AdminController {
     }
 
     @PutMapping("suggestion/reject/{id}")
-    public ResponseEntity<CategorySuggestionDTO> deleteCategorySuggestion(@PathVariable int id, @RequestParam String categoryName) {
+    public ResponseEntity<CategorySuggestionDTO> deleteCategorySuggestion(@PathVariable int id, @RequestParam String categoryName, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         if(categoryName == null || categoryName.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw new IllegalArgumentException("Category name cannot be null or empty");
         }
         CategorySuggestion cs = categorySuggestionService.reject(id);
         serviceService.update(cs.getOffer().getId(), categoryService.findByName(categoryName), Status.ACCEPTED);
         notificationService.notifyUser(cs.getOffer().getProvider(), "Your suggestion of new category has been rejected. This category is chosen instead ("+ categoryName+") ");
         return ResponseEntity.ok(new CategorySuggestionDTO(cs));
+    }
+
+    private boolean checkIfAdmin(HttpServletRequest request){
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return false;
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Admin admin = adminService.findByEmail(email);
+        if (admin == null) {
+            return false;
+        }
+        return true;
     }
 }

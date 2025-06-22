@@ -118,15 +118,6 @@ public class ReactionController {
         return ResponseEntity.ok(reactionDTOPage);
     }
 
-    @GetMapping("rating-offer/{id}")
-    public ResponseEntity<Double> getOfferRating(@PathVariable Integer id) {
-        Offer offer = offerService.findById(id);
-        if (offer == null) {
-            throw new NotFoundException("Offer not found");
-        }
-        double rating = reactionService.findRatingForOffer(offer);
-        return ResponseEntity.ok(rating);
-    }
 
     @GetMapping("pending")
     public ResponseEntity<Page<ReactionDTO>> getPendingReactions(
