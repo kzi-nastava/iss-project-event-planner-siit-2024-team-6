@@ -48,6 +48,9 @@ public class OfferController {
     private BudgetService budgetService;
     @Autowired
     private PurchaseService purchaseService;
+    @Autowired
+    private ReactionService reactionService;
+
     @GetMapping()
     public ResponseEntity<List<OfferDTO>> getAll() {
         List<Offer> offers = offerService.findAll();
@@ -138,11 +141,11 @@ public class OfferController {
         }
         Event event = eventService.findById(eventId);
         if (event == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw new NotFoundException("Event not found");
         }
         Offer o = offerService.findById(offerId);
         if (o == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+           throw new NotFoundException("Offer not found");
         }
         double price = o.getSale();
         if(price == 0){
@@ -168,7 +171,7 @@ public class OfferController {
         return new ResponseEntity<>(providerDTO, HttpStatus.OK);
     }
 
-    @PostMapping("{offerId}/add-favour")
+    @PostMapping("{offerId}/favourite")
     public ResponseEntity<Void> addOfferToFavourites(@PathVariable int offerId, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null) {
@@ -195,7 +198,7 @@ public class OfferController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("{offerId}/remove-favour")
+    @DeleteMapping("{offerId}/favourite")
     public ResponseEntity<Void> removeOfferFromFavourites(@PathVariable int offerId, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null) {
@@ -325,6 +328,16 @@ public class OfferController {
         return ResponseEntity.ok(new OfferDTO(offer));
     }
 
+    @GetMapping("{id}/rating")
+    public ResponseEntity<Double> getOfferRating(@PathVariable Integer id) {
+        Offer offer = offerService.findById(id);
+        if (offer == null) {
+            throw new NotFoundException("Offer not found");
+        }
+        double rating = reactionService.findRatingForOffer(offer);
+        return ResponseEntity.ok(rating);
+    }
+
 
     @GetMapping("/search")
     public ResponseEntity<Page<OfferDTO>> searchOffers(
@@ -392,12 +405,10 @@ public class OfferController {
         if (filteredOffers.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        System.out.println("Filtered Offers: " + filteredOffers);
-
         return ResponseEntity.ok(filteredOffers);
     }
 
-    @PostMapping("/searchByBudget")
+    @PostMapping("/search-by-budget")
     public ResponseEntity<Page<OfferDTO>> searchOffers(@RequestBody NewBudgetDTO budgetDTO, HttpServletRequest request, @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int pageSize){
         String jwtToken = this.tokenUtils.getToken(request);

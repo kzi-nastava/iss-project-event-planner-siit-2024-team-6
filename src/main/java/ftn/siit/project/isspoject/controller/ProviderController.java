@@ -122,9 +122,7 @@ public class ProviderController {
         }
         String email = this.tokenUtils.getUsernameFromToken(jwtToken);
         Provider p = providerService.findByEmail(email);
-        System.out.println("provider " + p.getName());
         Page<Service> services = serviceService.findByProvider(p, page);
-
 
         List<OfferDTO> dtos = services.stream()
                 .map(service -> {
@@ -182,10 +180,6 @@ public class ProviderController {
 
     @GetMapping("{name}/category")
     public ResponseEntity<Category> findByName(@PathVariable String name, HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
         Category category = categoryService.findByName(name);
         if (category == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -249,12 +243,9 @@ public class ProviderController {
     }
     @PutMapping("{offerId}")
     public ResponseEntity<OfferDTO> updateService(@PathVariable int offerId, @RequestBody NewOfferDTO dto, HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null) {
+        if(!checkIfProvider(request)){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
-        providerService.findByEmail(email);
         List<EventType> eventTypes = new ArrayList<>();
         for (NewEventTypeDTO eventType : dto.getEventTypes()) {
             eventTypes.add(eventTypeService.findByName(eventType.getName()));
@@ -281,15 +272,12 @@ public class ProviderController {
 
     @DeleteMapping("{offerId}")
     public ResponseEntity<Void> deleteOffer(@PathVariable int offerId, HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null) {
+        if(!checkIfProvider(request)){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
-        providerService.findByEmail(email);
         Offer offer = offerService.findById(offerId);
         if (offer instanceof Service && reservationService.existsFutureReservation((Service) offer)) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw new IllegalArgumentException("The offer has future reservations, cannot be deleted.");
         }
         offerService.delete(offer);
         return ResponseEntity.noContent().build();
@@ -348,5 +336,19 @@ public class ProviderController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(eventTypes);
+    }
+
+    private boolean checkIfProvider(HttpServletRequest request){
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return false;
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        providerService.findByEmail(email);
+        Provider provider = providerService.findByEmail(email);
+        if (provider == null) {
+            return false;
+        }
+        return true;
     }
 }

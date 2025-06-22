@@ -7,6 +7,7 @@ import ftn.siit.project.isspoject.dto.message.NewMessageDTO;
 import ftn.siit.project.isspoject.entity.Chat;
 import ftn.siit.project.isspoject.entity.Message;
 import ftn.siit.project.isspoject.entity.User;
+import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.service.interfaces.ChatService;
 import ftn.siit.project.isspoject.service.interfaces.NotificationService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
@@ -75,7 +76,10 @@ public class ChatsController {
         }
         User user2 = userService.findById(userId);
         if (user2 == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw new NotFoundException("The user does not exist");
+        }
+        if(user.getId() == user2.getId()) {
+            throw new IllegalArgumentException("The users are the same");
         }
         Chat chat = chatService.findChatByUsers(user, user2);
         if (chat == null) {

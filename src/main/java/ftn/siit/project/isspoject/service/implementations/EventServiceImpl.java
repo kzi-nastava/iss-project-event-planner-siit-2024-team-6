@@ -65,12 +65,6 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<Event> findByOrganizer(Organizer organizer) {
         List<Event> events = eventRepository.findByOrganizer(organizer);
-//        List<Event> onlyActiveEvents = new ArrayList<>();
-//        for(Event e: events){
-//            if(!e.getIsDeleted()){
-//                onlyActiveEvents.add()
-//            }
-//        }
         if (events.isEmpty()) {
             throw new NotFoundException("No events found for organizer: " + organizer.getName());
         }
@@ -79,6 +73,11 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<Event> getFutureEvents(Organizer organizer) {
         return eventRepository.findFutureEventsByOrganizer(organizer, LocalDateTime.now());
+    }
+
+    @Override
+    public Page<Event> findByOrganizer(Pageable pageable, Organizer organizer) {
+        return eventRepository.findByOrganizerPaginated(organizer, pageable);
     }
 
     @Override
