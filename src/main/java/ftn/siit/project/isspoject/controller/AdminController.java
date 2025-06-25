@@ -131,7 +131,7 @@ public class AdminController {
         }).collect(Collectors.toList());
         return new ResponseEntity<>(eventTypeDTOs, HttpStatus.OK);
     }
-    @GetMapping("event-types")
+    @GetMapping("event-types-paged")
     public ResponseEntity<PagedResponse<EventTypeDTO>> getAllEventTypesPaged(
             HttpServletRequest request,
             Pageable pageable
