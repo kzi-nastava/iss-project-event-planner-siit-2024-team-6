@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -158,6 +159,13 @@ public class AdminController {
 
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), eventTypeDTOs.size());
+
+        if (start >= eventTypeDTOs.size()) {
+            return ResponseEntity.ok(new PagedResponse<>(Collections.emptyList(),
+                    (int) Math.ceil((double) eventTypeDTOs.size() / pageable.getPageSize()),
+                    eventTypeDTOs.size()));
+        }
+
         List<EventTypeDTO> paginatedEventTypes = eventTypeDTOs.subList(start, end);
 
         PagedResponse<EventTypeDTO> response = new PagedResponse<>(
