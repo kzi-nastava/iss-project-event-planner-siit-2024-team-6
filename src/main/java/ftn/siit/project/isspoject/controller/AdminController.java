@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -130,6 +131,50 @@ public class AdminController {
             return dto;
         }).collect(Collectors.toList());
         return new ResponseEntity<>(eventTypeDTOs, HttpStatus.OK);
+    }
+    @GetMapping("event-types-paged")
+    public ResponseEntity<PagedResponse<EventTypeDTO>> getAllEventTypesPaged(
+            HttpServletRequest request,
+            Pageable pageable
+    ) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        List<EventType> eventTypes = eventTypeService.findAll();
+        if (eventTypes == null || eventTypes.isEmpty()) {
+            throw new NotFoundException("No event types found");
+        }
+
+        List<EventTypeDTO> eventTypeDTOs = eventTypes.stream().map(eventType -> {
+            EventTypeDTO dto = new EventTypeDTO();
+            dto.setId(eventType.getId());
+            dto.setName(eventType.getName());
+            dto.setDescription(eventType.getDescription());
+            dto.setIsDeleted(eventType.getIsDeleted());
+            dto.setCategories(eventType.getCategories());
+            return dto;
+        }).collect(Collectors.toList());
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), eventTypeDTOs.size());
+
+        if (start >= eventTypeDTOs.size()) {
+            return ResponseEntity.ok(new PagedResponse<>(Collections.emptyList(),
+                    (int) Math.ceil((double) eventTypeDTOs.size() / pageable.getPageSize()),
+                    eventTypeDTOs.size()));
+        }
+
+        List<EventTypeDTO> paginatedEventTypes = eventTypeDTOs.subList(start, end);
+
+        PagedResponse<EventTypeDTO> response = new PagedResponse<>(
+                paginatedEventTypes,
+                (int) Math.ceil((double) eventTypeDTOs.size() / pageable.getPageSize()),
+                eventTypeDTOs.size()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("event-types/{id}")

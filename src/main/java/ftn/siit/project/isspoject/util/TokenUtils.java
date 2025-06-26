@@ -25,7 +25,6 @@ public class TokenUtils {
     @Value("somesecret")
     public String SECRET;
 
-    // 30 m
     @Value("1800000000")
     private int EXPIRES_IN;
 

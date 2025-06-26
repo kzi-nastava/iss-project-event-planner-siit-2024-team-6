@@ -21,7 +21,6 @@ public class EmailServiceImpl implements EmailService {
 
     @Value("${spring.mail.username}") private String sender;
 
-    // Method 1
     // To send a simple email
     public String sendSimpleMail(EmailDetails details)
     {
@@ -34,7 +33,6 @@ public class EmailServiceImpl implements EmailService {
                 helper.setTo(details.getRecipient());
                 helper.setSubject(details.getSubject());
                 helper.setText(details.getMsgBody(), true);
-
                 System.out.println("Sending HTML body:\n" + details.getMsgBody());
 
                 javaMailSender.send(mimeMessage);
@@ -65,20 +63,17 @@ public class EmailServiceImpl implements EmailService {
         return status;
     }
 
-    // Method 2
     // To send an email with attachment
     public String
     sendMailWithAttachment(EmailDetails details)
     {
-        // Creating a mime message
         MimeMessage mimeMessage
                 = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper;
 
         try {
 
-            // Setting multipart as true for attachments to
-            // be send
+
             mimeMessageHelper
                     = new MimeMessageHelper(mimeMessage, true,"UTF-8");
             mimeMessageHelper.setFrom(sender);
@@ -87,7 +82,6 @@ public class EmailServiceImpl implements EmailService {
             mimeMessageHelper.setSubject(
                     details.getSubject());
 
-            // Adding the attachment
             FileSystemResource file
                     = new FileSystemResource(
                     new File(details.getAttachment()));
@@ -95,15 +89,12 @@ public class EmailServiceImpl implements EmailService {
             mimeMessageHelper.addAttachment(
                     file.getFilename(), file);
 
-            // Sending the mail
             javaMailSender.send(mimeMessage);
             return "Mail sent Successfully";
         }
 
-        // Catch block to handle MessagingException
         catch (MessagingException e) {
 
-            // Display message when exception occurred
             return "Error while sending mail!!!";
         }
     }
