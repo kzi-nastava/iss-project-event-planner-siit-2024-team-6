@@ -133,15 +133,16 @@ public class EventServiceImpl implements EventService {
     }
     public void sendInvitations(EventDTO event, List<String> emails) {
         String invitation = generateInvitation(event);
-        String userLink;
+        String routingLink;
         for (String email : emails) {
             boolean userExists = userService.existsByEmail(email);
-            userLink = generateLink(userExists, email,event.getId());
+            routingLink = generateLink(userExists, email,event.getId());
             System.out.println(email);
             EmailDetails details = new EmailDetails();
             details.setRecipient(email);
             details.setSubject("You're Invited!");
-            details.setMsgBody(invitation+"\n"+userLink);
+            details.setMsgBody(invitation.replace("\n", "<br>") + "<br><br>" + routingLink);
+            details.setHtml(true);
 
             String status = emailService.sendSimpleMail(details);
             System.out.println("Invitation sent to: " + email + " - Status: " + status);
@@ -149,13 +150,31 @@ public class EventServiceImpl implements EventService {
     }
 
     private String generateLink(boolean exists, String email, Integer eventId) {
-        String baseUrl = "http://localhost:4200";
+        String baseUrl = "http://192.168.1.57:8080/api/users";
         String encodedEmail = URLEncoder.encode(email, StandardCharsets.UTF_8);
+
+        String routingLink;
         if (exists) {
-            return baseUrl + "/login?email=" + encodedEmail + "&disableEmail=true&eventId=" + eventId;
+            routingLink = String.format(
+                    "%s/login-routing?email=%s&disableEmail=true&eventId=%d",
+                    baseUrl,
+                    encodedEmail,
+                    eventId
+            );
         } else {
-            return baseUrl + "/quick-registration?email=" + encodedEmail + "&disableEmail=true&eventId=" + eventId;
+            routingLink = String.format(
+                    "%s/quick-registration-routing?email=%s&disableEmail=true&eventId=%d",
+                    baseUrl,
+                    encodedEmail,
+                    eventId
+            );
         }
+
+        String html = "<p>Open (app or web): " +
+                "<a href=\"" + routingLink + "\">Join</a></p>";
+
+        System.out.println("Generated routing link: " + routingLink);
+        return html;
     }
 
     public Page<Event> searchEvents(String name, String description, String place, String eventType, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable, String sortDir) {
