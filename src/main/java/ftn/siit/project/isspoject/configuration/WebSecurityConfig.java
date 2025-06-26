@@ -102,6 +102,8 @@ public class WebSecurityConfig{
                     .requestMatchers(new AntPathRequestMatcher("/api/users/profile")).authenticated()
                     .requestMatchers(new AntPathRequestMatcher("/api/users")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/users/quick-register")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/users/quick-registration-routing")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/api/users/login-routing")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/events/event-types")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/events/top-five")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("api/events/**/event-type")).permitAll()
