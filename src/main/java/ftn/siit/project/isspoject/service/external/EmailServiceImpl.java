@@ -24,25 +24,35 @@ public class EmailServiceImpl implements EmailService {
     // To send a simple email
     public String sendSimpleMail(EmailDetails details)
     {
-
         try {
+            // If sending as HTML
+            if (details.isHtml()) {
+                MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+                helper.setFrom(sender);
+                helper.setTo(details.getRecipient());
+                helper.setSubject(details.getSubject());
+                helper.setText(details.getMsgBody(), true);
+                System.out.println("Sending HTML body:\n" + details.getMsgBody());
 
-            SimpleMailMessage mailMessage
-                    = new SimpleMailMessage();
+                javaMailSender.send(mimeMessage);
+            } else {
+                SimpleMailMessage mailMessage = new SimpleMailMessage();
+                mailMessage.setFrom(sender);
+                mailMessage.setTo(details.getRecipient());
+                mailMessage.setText(details.getMsgBody());
+                mailMessage.setSubject(details.getSubject());
 
-            mailMessage.setFrom(sender);
-            mailMessage.setTo(details.getRecipient());
-            mailMessage.setText(details.getMsgBody());
-            mailMessage.setSubject(details.getSubject());
+                javaMailSender.send(mailMessage);
+            }
 
-            javaMailSender.send(mailMessage);
             return "Mail Sent Successfully...";
-        }
-
-        catch (Exception e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             return "Error while Sending Mail";
         }
     }
+
     public String sendMail(User recipient, String subject, String text){
         EmailDetails details = new EmailDetails();
         //details.setRecipient(recipient.getEmail());
@@ -65,7 +75,7 @@ public class EmailServiceImpl implements EmailService {
 
 
             mimeMessageHelper
-                    = new MimeMessageHelper(mimeMessage, true);
+                    = new MimeMessageHelper(mimeMessage, true,"UTF-8");
             mimeMessageHelper.setFrom(sender);
             mimeMessageHelper.setTo(details.getRecipient());
             mimeMessageHelper.setText(details.getMsgBody());

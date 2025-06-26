@@ -11,6 +11,7 @@ import ftn.siit.project.isspoject.util.TokenUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +22,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -28,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.net.URI;
+
 
 @RestController
 @RequestMapping(value = "/api/users")
@@ -94,6 +99,68 @@ public class UserController {
         UserDTO userDTO = new UserDTO(updatedUser);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
+    }
+    @GetMapping("/quick-registration-routing")
+    public ResponseEntity<Void> quickRegistrationRouting(
+            @RequestParam String email,
+            @RequestParam boolean disableEmail,
+            @RequestParam Long eventId,
+            @RequestHeader("User-Agent") String userAgent) {
+        // deep link for app
+        String deepLink = String.format("eventure://quick-registration?email=%s&disableEmail=%s&eventId=%s",
+                URLEncoder.encode(email, StandardCharsets.UTF_8),
+                disableEmail,
+                eventId);
+
+        // web link
+        String webLink = String.format("http://localhost:4200/quick-registration?email=%s&disableEmail=%s&eventId=%s",
+                URLEncoder.encode(email, StandardCharsets.UTF_8),
+                disableEmail,
+                eventId);
+
+        HttpHeaders headers = new HttpHeaders();
+        if (userAgent.toLowerCase().contains("android")) {
+            headers.setLocation(URI.create(deepLink));
+            System.out.println("ANDROID LINK");
+        } else {
+            System.out.println("WEB LINK");
+            headers.setLocation(URI.create(webLink));
+        }
+
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
+    }
+
+    @GetMapping("/login-routing")
+    public ResponseEntity<Void> loginRouting(
+            @RequestParam String email,
+            @RequestParam boolean disableEmail,
+            @RequestParam Long eventId,
+            @RequestHeader("User-Agent") String userAgent) {
+
+        System.out.println("USLO U ROUTING");
+        //deep link for app
+        String deepLink = String.format("eventure://login?email=%s&disableEmail=%s&eventId=%s",
+                URLEncoder.encode(email, StandardCharsets.UTF_8),
+                disableEmail,
+                eventId);
+
+        // web link
+        String webLink = String.format("http://localhost:4200/login?email=%s&disableEmail=%s&eventId=%s",
+                URLEncoder.encode(email, StandardCharsets.UTF_8),
+                disableEmail,
+                eventId);
+
+        HttpHeaders headers = new HttpHeaders();
+        if (userAgent.toLowerCase().contains("android")) {
+            headers.setLocation(URI.create(deepLink));
+            System.out.println("ANDROID LINK");
+        } else {
+            System.out.println("WEB LINK");
+
+            headers.setLocation(URI.create(webLink));
+        }
+
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 
 
