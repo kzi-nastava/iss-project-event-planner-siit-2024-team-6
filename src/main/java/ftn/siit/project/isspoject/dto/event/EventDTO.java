@@ -21,6 +21,9 @@ public class EventDTO {
     private List<String> photos;
     private Boolean isDeleted;
     private Double rating;
+    private Double latitude;
+    private Double longitude;
+
     public EventDTO() {}
     public EventDTO(Event event) {
         if (event == null) {
@@ -38,6 +41,8 @@ public class EventDTO {
         this.eventType = new EventTypeDTO(event.getEventType());
         this.isDeleted = event.getIsDeleted();
         this.rating = event.getRating();
+        this.latitude = event.getLatitude();
+        this.longitude = event.getLongitude();
 //        this.eventType = event.getEventType();
     }
 }
