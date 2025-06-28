@@ -24,6 +24,11 @@ public class Event {
     private String place;
     private LocalDateTime date;
     private Double rating;
+    @Column(nullable = true)
+    private Double latitude;
+    @Column(nullable = true)
+    private Double longitude;
+
     @ElementCollection
     @CollectionTable(name = "event_photos", joinColumns = @JoinColumn(name = "event_id"))
     @Column(name = "photo_url")

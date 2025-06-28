@@ -346,6 +346,8 @@ public class EventController {
         eventDTO.setMaxParticipants(event.getMaxParticipants());
         eventDTO.setIsPublic(event.getIsPublic());
         eventDTO.setPlace(event.getPlace());
+        eventDTO.setLatitude(event.getLatitude());
+        eventDTO.setLongitude(event.getLongitude());
         eventDTO.setDate(event.getDate());
         eventDTO.setEventType(new EventTypeDTO(event.getEventType()));
         eventDTO.setParticipants(event.getParticipants());
