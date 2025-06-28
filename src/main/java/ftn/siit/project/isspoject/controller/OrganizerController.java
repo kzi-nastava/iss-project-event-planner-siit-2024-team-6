@@ -71,12 +71,6 @@ public class OrganizerController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-//        Organizer organizer = organizerService.findById(organizerId);
-//        if (organizer == null) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Организатор не найден
-//        }
-
-        // Создание нового события
         Event event = new Event();
         event.setName(eventDTO.getName());
         event.setDescription(eventDTO.getDescription());
@@ -98,22 +92,16 @@ public class OrganizerController {
         List<Event> myEvents = organizer.getMyEvents();
         myEvents.add(event);
         organizer.setMyEvents(myEvents);
-//        // Устанавливаем организатора
-//        event.setOrganizer(organizer);
 
-        // Сохраняем событие
         Event savedEvent = eventService.save(event);
         userService.save(organizer);
 
-
-        // Преобразование в DTO
         EventDTO responseDTO = toEventDTO(savedEvent);
 
-        // invitations
         if(eventDTO.getIsPublic() == false) {
             eventService.sendInvitations(responseDTO, eventDTO.getEmails());
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO); // Возвращаем созданное событие
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
     @GetMapping("category-names")
