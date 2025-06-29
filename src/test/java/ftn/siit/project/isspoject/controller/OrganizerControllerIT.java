@@ -49,7 +49,7 @@ public class OrganizerControllerIT {
     private UserService userService;
 
     @Test
-    @DisplayName("POST /api/events should create event successfully using preloaded DB")
+    @DisplayName("POST /api/organizers/events should create event successfully using preloaded DB")
     public void testCreateEvent() {
         NewEventDTO dto = new NewEventDTO();
         dto.setName("My test event");
@@ -62,17 +62,17 @@ public class OrganizerControllerIT {
         dto.setPhotos(new ArrayList<>());
         dto.setEmails(new ArrayList<>());
 
-        // Используем уже закинутого организатора: u2@gmail.com, id = 2
-        String token = tokenUtils.generateToken(userService.findByEmail("u2@gmail.com"));
+
+        String token = tokenUtils.generateToken(userService.findByEmail("organizer@test.com"));
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + token);
+        headers.set("X-Auth-Token", "Bearer " + token);
 
         HttpEntity<NewEventDTO> request = new HttpEntity<>(dto, headers);
 
         ResponseEntity<EventDTO> response = restTemplate.exchange(
-                "/api/events",
+                "/api/organizers/events",
                 HttpMethod.POST,
                 request,
                 EventDTO.class
