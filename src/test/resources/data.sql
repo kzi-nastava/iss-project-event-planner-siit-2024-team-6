@@ -3,7 +3,8 @@ INSERT INTO users (
     id, email, password, name, lastname, is_active, suspended_since, user_type
 ) VALUES (
              2, 'organizer@test.com', 'encodedpassword', 'John', 'Doe', true, CURRENT_TIMESTAMP, 'Organizer'
-         );
+         ),
+      (3, 'admin@test.com', 'pass', 'Mikhail', 'Doe', true, CURRENT_TIMESTAMP, 'Admin' );
 
 -- Создание общего типа события
 INSERT INTO event_types (
