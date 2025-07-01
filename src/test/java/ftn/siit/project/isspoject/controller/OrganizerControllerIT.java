@@ -3,6 +3,7 @@ package ftn.siit.project.isspoject.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
+import ftn.siit.project.isspoject.entity.Event;
 import ftn.siit.project.isspoject.entity.EventType;
 import ftn.siit.project.isspoject.entity.Organizer;
 //import ftn.siit.project.isspoject.entity.Role;
@@ -12,6 +13,7 @@ import ftn.siit.project.isspoject.entity.Organizer;
 import ftn.siit.project.isspoject.entity.User;
 import ftn.siit.project.isspoject.repository.EventRepository;
 import ftn.siit.project.isspoject.repository.UserRepository;
+import ftn.siit.project.isspoject.service.interfaces.EventService;
 import ftn.siit.project.isspoject.service.interfaces.EventTypeService;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
 import ftn.siit.project.isspoject.util.TokenUtils;
@@ -54,6 +56,8 @@ public class OrganizerControllerIT {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private EventService eventService;
     private NewEventDTO dto;
     private HttpHeaders headers;
     @Autowired
@@ -82,7 +86,7 @@ public class OrganizerControllerIT {
         headers.set("X-Auth-Token", "Bearer " + token);
     }
 
-        @Test
+    @Test
     @DisplayName("POST /api/organizers/events should create event successfully using preloaded DB")
     public void testCreateEvent_Success() {
         HttpEntity<NewEventDTO> request = new HttpEntity<>(dto, headers);
@@ -171,5 +175,34 @@ public class OrganizerControllerIT {
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("My test event", response.getBody().getName());
     }
+    @Test
+    @DisplayName("PUT /api/organizers/events/{id} - update existing event successfully")
+    public void testUpdateEvent_Success() {
+        Event event = eventService.findById(101);
+        EventDTO eventDTO = new EventDTO();
+        eventDTO.setId(event.getId());
+        eventDTO.setName(event.getName());
+        eventDTO.setDescription(event.getDescription());
+        eventDTO.setMaxParticipants(event.getMaxParticipants());
+        eventDTO.setParticipants(event.getParticipants());
+        eventDTO.setIsPublic(event.getIsPublic());
+        eventDTO.setPlace(event.getPlace());
+        eventDTO.setDate(event.getDate());
+        eventDTO.setIsDeleted(event.getIsDeleted());
+
+        eventDTO.setDescription("Updated description 123");
+
+        HttpEntity<EventDTO> updateRequest = new HttpEntity<>(eventDTO, headers);
+        ResponseEntity<EventDTO> updateResponse = restTemplate.exchange(
+                "/api/organizers/events/" + 101,
+                HttpMethod.PUT,
+                updateRequest,
+                EventDTO.class
+        );
+
+        assertEquals(HttpStatus.OK, updateResponse.getStatusCode());
+        assertEquals("Updated description 123", updateResponse.getBody().getDescription());
+    }
+
 }
 
