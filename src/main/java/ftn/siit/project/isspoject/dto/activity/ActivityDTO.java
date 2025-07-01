@@ -25,4 +25,6 @@ public class ActivityDTO {
         this.startTime = activity.getStartTime();
         this.endTime = activity.getEndTime();
     }
+    public ActivityDTO() {
+    }
 }

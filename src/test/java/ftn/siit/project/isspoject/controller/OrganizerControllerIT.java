@@ -1,6 +1,8 @@
 package ftn.siit.project.isspoject.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ftn.siit.project.isspoject.dto.activity.ActivityDTO;
+import ftn.siit.project.isspoject.dto.activity.NewActivityDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
 import ftn.siit.project.isspoject.entity.Event;
@@ -27,6 +29,7 @@ import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -203,6 +206,105 @@ public class OrganizerControllerIT {
         assertEquals(HttpStatus.OK, updateResponse.getStatusCode());
         assertEquals("Updated description 123", updateResponse.getBody().getDescription());
     }
+    @Test
+    @DisplayName("POST /api/organizers/events/{eventId}/activity - should create activity")
+    public void testAddActivity_Success() {
+        NewActivityDTO newActivity = new NewActivityDTO();
+        newActivity.setName("Presentation");
+        newActivity.setDescription("Best activity ever");
+        newActivity.setLocation("Mihaila Pupina 60");
+        newActivity.setStartTime(LocalDateTime.now().plusDays(1));
+        newActivity.setEndTime(LocalDateTime.now().plusDays(1).plusHours(1));
 
+        HttpEntity<NewActivityDTO> requestEntity = new HttpEntity<>(newActivity, headers);
+
+        ResponseEntity<ActivityDTO> response = restTemplate.exchange(
+                "/api/organizers/events/101/activity",
+                HttpMethod.POST,
+                requestEntity,
+                ActivityDTO.class
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Presentation", response.getBody().getName());
+    }
+    @Test
+    @DisplayName("GET /api/organizers/events/{eventId}/activity/{activityId} - should return activity")
+    public void testGetActivityById_Success() {
+        ResponseEntity<ActivityDTO> response = restTemplate.exchange(
+                "/api/organizers/events/101/activity/201",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                ActivityDTO.class
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(201, response.getBody().getId()); // ожидаемый ID
+    }
+    @Test
+    @DisplayName("GET /api/organizers/events/{eventId}/agenda - should return full agenda")
+    public void testGetAgenda_Success() {
+        ResponseEntity<ActivityDTO[]> response = restTemplate.exchange(
+                "/api/organizers/events/101/agenda",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                ActivityDTO[].class
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().length >= 0);
+    }
+    @Test
+    @DisplayName("GET /api/organizers/events/{eventId}/getAgendaPDF - should return PDF")
+    public void testGetAgendaPDF_Success() {
+        ResponseEntity<byte[]> response = restTemplate.exchange(
+                "/api/organizers/events/101/getAgendaPDF",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                byte[].class
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(MediaType.APPLICATION_PDF, response.getHeaders().getContentType());
+        assertTrue(response.getBody().length > 0);
+    }
+    @Test
+    @DisplayName("PUT /api/organizers/events/{eventId}/activity/{activityId} - should update activity")
+    public void testUpdateActivity_Success() {
+        NewActivityDTO updatedActivity = new NewActivityDTO();
+        updatedActivity.setName("Updated Name");
+        updatedActivity.setStartTime(LocalDateTime.now().plusDays(2));
+        updatedActivity.setEndTime(LocalDateTime.now().plusDays(2).plusHours(1));
+
+        HttpEntity<NewActivityDTO> requestEntity = new HttpEntity<>(updatedActivity, headers);
+
+        ResponseEntity<ActivityDTO> response = restTemplate.exchange(
+                "/api/organizers/events/101/activity/201",
+                HttpMethod.PUT,
+                requestEntity,
+                ActivityDTO.class
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Updated Name", response.getBody().getName());
+    }
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD) // return context after test
+    @Test
+    @DisplayName("DELETE /api/organizers/events/{eventId}/activity/{activityId} - should delete activity")
+    public void testDeleteActivity_Success() {
+        ResponseEntity<ActivityDTO> response = restTemplate.exchange(
+                "/api/organizers/events/101/activity/201",
+                HttpMethod.DELETE,
+                new HttpEntity<>(headers),
+                ActivityDTO.class
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(201, response.getBody().getId());
+    }
 }
 

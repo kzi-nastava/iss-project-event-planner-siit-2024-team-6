@@ -26,3 +26,14 @@ INSERT INTO events (
           102, 'Java Conference', 'Deep dive into Java 21 features', 100, 20, true, 'Auditorium B',
           CURRENT_TIMESTAMP, 4.8, 45.2672, 19.8336, 1, false, 2
       );
+INSERT INTO activities (
+    id, name, description, location, start_time, end_time, event_id
+) VALUES (
+             201,
+             'Opening Speech',
+             'Introduction to the conference',
+             'Main Hall A',
+             DATEADD('DAY', 1, CURRENT_TIMESTAMP),
+             DATEADD('HOUR', 1, DATEADD('DAY', 1, CURRENT_TIMESTAMP)),
+          101
+         );
