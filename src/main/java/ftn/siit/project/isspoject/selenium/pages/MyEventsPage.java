@@ -1,7 +1,6 @@
 package ftn.siit.project.isspoject.selenium.pages;
 
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
@@ -36,10 +35,20 @@ public class MyEventsPage {
         return eventCards.size();
     }
 
-    public void clickFirstEvent() {
-        if (!eventCards.isEmpty()) {
-            eventCards.get(0).click();
+//    public void clickFirstEvent() {
+//        if (!eventCards.isEmpty()) {
+//            eventCards.get(0).click();
+//        }
+//    }
+public void clickFirstEvent() {
+    if (!eventCards.isEmpty()) {
+        WebElement clickableArea = eventCards.get(0).findElement(By.cssSelector(".event-card-content"));
+        try {
+            clickableArea.click();
+        } catch (ElementClickInterceptedException e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", clickableArea);
         }
     }
+}
 }
 
