@@ -1,0 +1,45 @@
+package ftn.siit.project.isspoject.selenium.pages;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+
+import java.util.List;
+
+public class MyEventsPage {
+    WebDriver driver;
+
+    @FindBy(css = ".event-section-title")
+    private WebElement title;
+
+    @FindBy(css = "button.fab")
+    private WebElement addEventButton;
+
+    @FindBy(css = "app-event-card")
+    private List<WebElement> eventCards;
+
+    public MyEventsPage(WebDriver driver) {
+        this.driver = driver;
+        PageFactory.initElements(driver, this);
+    }
+
+    public boolean isAt() {
+        return title.getText().trim().equalsIgnoreCase("Events");
+    }
+
+    public void clickAddEvent() {
+        addEventButton.click();
+    }
+
+    public int getEventCount() {
+        return eventCards.size();
+    }
+
+    public void clickFirstEvent() {
+        if (!eventCards.isEmpty()) {
+            eventCards.get(0).click();
+        }
+    }
+}
+
