@@ -15,8 +15,11 @@ public class MyEventsPage {
     @FindBy(css = "button.fab")
     private WebElement addEventButton;
 
-    @FindBy(css = "app-event-card")
+//    @FindBy(css = "app-event-card")
+//    private List<WebElement> eventCards;
+    @FindBy(css = ".event-card")
     private List<WebElement> eventCards;
+
 
     public MyEventsPage(WebDriver driver) {
         this.driver = driver;

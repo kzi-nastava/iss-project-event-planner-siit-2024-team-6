@@ -4,6 +4,10 @@ package ftn.siit.project.isspoject.selenium.pages;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
 
 public class EventViewPage {
     WebDriver driver;
@@ -42,6 +46,25 @@ public class EventViewPage {
         this.driver = driver;
         PageFactory.initElements(driver, this);
     }
+    public String getEventName() {
+        return nameInput.getAttribute("value");
+    }
+
+    public String getEventDescription() {
+        return descriptionTextarea.getAttribute("value");
+    }
+
+    public String getEventLocation(){
+        return placeInput.getAttribute("value");
+    }
+
+    public String getEventParticipants(){
+        return participantsInput.getAttribute("value");
+    }
+
+    public String getEventDate(){
+        return dateInput.getAttribute("value");
+    }
 
     public void changeEventName(String newName) {
         nameInput.clear();
@@ -69,7 +92,8 @@ public class EventViewPage {
     }
 
     public void saveChanges() {
-        saveChangesButton.click();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        wait.until(ExpectedConditions.elementToBeClickable(saveChangesButton)).click();
     }
 
     public void deleteEvent() {

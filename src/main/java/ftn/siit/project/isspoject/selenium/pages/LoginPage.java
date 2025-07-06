@@ -3,6 +3,10 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
 
 public class LoginPage {
     WebDriver driver;
@@ -32,7 +36,9 @@ public class LoginPage {
     }
 
     public void clickLogin() {
-        loginButton.click();
+        new WebDriverWait(driver, Duration.ofSeconds(2))
+                .until(ExpectedConditions.elementToBeClickable(loginButton))
+                .click();
     }
 
     public void loginAs(String email, String password) {
