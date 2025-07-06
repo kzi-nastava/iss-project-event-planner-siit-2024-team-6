@@ -39,6 +39,7 @@ public class EventViewPage {
     @FindBy(css = "button.btn-budget")
     private WebElement budgetButton;
 
+
     @FindBy(xpath = "//button[text()='Manage agenda']")
     private WebElement manageAgendaButton;
 
@@ -111,4 +112,5 @@ public class EventViewPage {
     public void openAgendaManagement() {
         manageAgendaButton.click();
     }
+
 }
