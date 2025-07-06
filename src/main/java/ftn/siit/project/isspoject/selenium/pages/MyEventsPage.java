@@ -3,7 +3,10 @@ package ftn.siit.project.isspoject.selenium.pages;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.List;
 
 public class MyEventsPage {
@@ -31,7 +34,9 @@ public class MyEventsPage {
     }
 
     public void clickAddEvent() {
-        addEventButton.click();
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.elementToBeClickable(addEventButton))
+                .click();
     }
 
     public int getEventCount() {
@@ -53,5 +58,25 @@ public void clickFirstEvent() {
         }
     }
 }
+
+    public void clickEventByName(String name) {
+        for (WebElement card : eventCards) {
+            try {
+                String cardText = card.getText();
+                if (cardText.contains(name)) {
+                    WebElement clickableArea = card.findElement(By.cssSelector(".event-card-content"));
+                    try {
+                        clickableArea.click();
+                    } catch (ElementClickInterceptedException e) {
+                        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", clickableArea);
+                    }
+                    return;
+                }
+            } catch (StaleElementReferenceException e) {
+            }
+        }
+        throw new NoSuchElementException("No event card found with name: " + name);
+    }
+
 }
 
