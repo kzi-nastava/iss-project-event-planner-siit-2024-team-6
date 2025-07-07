@@ -50,7 +50,10 @@ public class EventViewPage {
     public String getEventName() {
         return nameInput.getAttribute("value");
     }
-
+    public void clearEventName() {
+        WebElement name = driver.findElement(By.cssSelector("input[placeholder='Event Name']"));
+        name.clear();
+    }
     public String getEventDescription() {
         return descriptionTextarea.getAttribute("value");
     }
