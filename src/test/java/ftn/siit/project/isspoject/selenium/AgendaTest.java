@@ -66,13 +66,101 @@ public class AgendaTest {
         );
         formPage.clickSave();
 
-        // Проверка: количество активностей увеличилось
         new WebDriverWait(driver, Duration.ofSeconds(5))
                 .until(ExpectedConditions.urlContains("/agenda"));
 
         AgendaPage refreshedPage = new AgendaPage(driver);
         int newCount = refreshedPage.getActivityCount();
         assertEquals(initialCount + 1, newCount, "Activity should be added");
+    }
+    @Test
+    public void testEditActivity() {
+        HomePage homePage = new HomePage(driver);
+        homePage.clickProfileIcon();
+
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.loginAs("organizer1@example.com", "123456789");
+
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.urlContains("/events"));
+
+        homePage.openSidebar();
+        homePage.clickMyEvents();
+
+        MyEventsPage myEventsPage = new MyEventsPage(driver);
+
+        myEventsPage.clickFirstEvent();
+
+        EventViewPage eventViewPage = new EventViewPage(driver);
+
+        eventViewPage.openAgendaManagement();
+
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.urlContains("/agenda"));
+
+        AgendaPage agendaPage = new AgendaPage(driver);
+        assertTrue(agendaPage.isAt(), "Should be on Agenda page");
+
+        int count = agendaPage.getActivityCount();
+        assertTrue(count > 0, "At least one activity should exist to edit");
+
+        agendaPage.clickEditOnFirstActivity();
+
+        ActivityFormPage formPage = new ActivityFormPage(driver);
+        assertTrue(formPage.isAt(), "Should be on Edit Activity form");
+
+        String newName = "Edited Activity Name";
+        formPage.fillForm(
+                newName,
+                "Updated description",
+                "Updated Location",
+                "2025-12-31T19:00",
+                "2025-12-31T19:30"
+        );
+        formPage.clickSave();
+
+        // Проверка что вернулись на agenda
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.urlContains("/agenda"));
+
+        assertTrue(new AgendaPage(driver).activityExistsWithName(newName), "Edited activity should be visible");
+    }
+    @Test
+    public void testDeleteActivity() {
+        HomePage homePage = new HomePage(driver);
+        homePage.clickProfileIcon();
+
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.loginAs("organizer1@example.com", "123456789");
+
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.urlContains("/events"));
+
+        homePage.openSidebar();
+        homePage.clickMyEvents();
+
+        MyEventsPage myEventsPage = new MyEventsPage(driver);
+
+        myEventsPage.clickFirstEvent();
+
+        EventViewPage eventViewPage = new EventViewPage(driver);
+
+        eventViewPage.openAgendaManagement();
+
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.urlContains("/agenda"));
+
+        AgendaPage agendaPage = new AgendaPage(driver);
+        assertTrue(agendaPage.isAt(), "Should be on Agenda page");
+
+        int initialCount = agendaPage.getActivityCount();
+        assertTrue(initialCount > 0, "There should be at least one activity to delete");
+
+        agendaPage.clickDeleteOnFirstActivity();
+
+        new WebDriverWait(driver, Duration.ofSeconds(5)).until(driver ->
+                agendaPage.getActivityCount() == initialCount - 1
+        );
     }
 
     @AfterEach

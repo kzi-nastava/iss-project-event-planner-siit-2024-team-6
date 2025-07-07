@@ -16,6 +16,29 @@ public class AgendaPage {
 
     @FindBy(css = "table.agenda-table tbody tr")
     private List<WebElement> activityRows;
+//    @FindBy(css = ".agenda-table tbody tr")
+//    private List<WebElement> activityRows;
+
+//    public int getActivityCount() {
+//        return activityRows.size();
+//    }
+
+    public void clickEditOnFirstActivity() {
+        WebElement firstRow = activityRows.get(0);
+        WebElement editBtn = firstRow.findElement(By.cssSelector(".btn-edit"));
+        editBtn.click();
+    }
+
+    public void clickDeleteOnFirstActivity() {
+        WebElement firstRow = activityRows.get(0);
+        WebElement deleteBtn = firstRow.findElement(By.cssSelector(".btn-delete"));
+        deleteBtn.click();
+    }
+
+    public boolean activityExistsWithName(String name) {
+        return activityRows.stream().anyMatch(row -> row.getText().contains(name));
+    }
+
 
     public AgendaPage(WebDriver driver) {
         this.driver = driver;
