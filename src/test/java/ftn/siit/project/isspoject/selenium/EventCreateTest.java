@@ -77,6 +77,73 @@ public class EventCreateTest {
         assertEquals(description, eventView.getEventDescription());
     }
 
+    // unhappy test
+    @Test
+    public void testCreateEvent_MissingName_ShouldFail() throws InterruptedException {
+        HomePage homePage = new HomePage(driver);
+        homePage.clickProfileIcon();
+
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.loginAs("organizer1@example.com", "123456789");
+
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.urlContains("/events"));
+
+        homePage.openSidebar();
+        homePage.clickMyEvents();
+
+        MyEventsPage myEventsPage = new MyEventsPage(driver);
+        myEventsPage.clickAddEvent();
+
+        CreateEventPage createPage = new CreateEventPage(driver);
+        assertTrue(createPage.isAt(), "Should be on Create Event page");
+
+        // Leave name empty
+        createPage.enterName("");
+        createPage.enterDescription("Description without name");
+        createPage.enterMaxParticipants(50);
+        createPage.setVisibilityPublic();
+        createPage.enterPlace("Belgrade");
+        createPage.enterDate("2025-12-31T18:00");
+        createPage.selectFirstEventType();
+        createPage.submitForm();
+
+        Thread.sleep(1500);
+
+        assertTrue(createPage.isAt(), "Should remain on Create Event page if name is missing");
+    }
+    @Test
+    public void testCreateEvent_InvalidMaxParticipants_ShouldFail() throws InterruptedException {
+        HomePage homePage = new HomePage(driver);
+        homePage.clickProfileIcon();
+
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.loginAs("organizer1@example.com", "123456789");
+
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.urlContains("/events"));
+
+        homePage.openSidebar();
+        homePage.clickMyEvents();
+
+        MyEventsPage myEventsPage = new MyEventsPage(driver);
+        myEventsPage.clickAddEvent();
+
+        CreateEventPage createPage = new CreateEventPage(driver);
+        assertTrue(createPage.isAt(), "Should be on Create Event page");
+
+        createPage.enterName("Invalid Participants Event");
+        createPage.enterDescription("Invalid max participants");
+        createPage.enterMaxParticipants(0); // Invalid input
+        createPage.setVisibilityPublic();
+        createPage.enterPlace("Nowhere");
+        createPage.enterDate("2025-12-31T21:00");
+        createPage.selectFirstEventType();
+        createPage.submitForm();
+        Thread.sleep(1500);
+        assertTrue(createPage.isAt(), "Should remain on Create Event page if max participants is invalid");
+    }
+
     @AfterEach
     public void tearDown() {
         driver.quit();
