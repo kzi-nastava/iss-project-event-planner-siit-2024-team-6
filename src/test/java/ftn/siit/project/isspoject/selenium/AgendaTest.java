@@ -163,6 +163,94 @@ public class AgendaTest {
         );
     }
 
+
+    //unhappy tests
+    @Test
+    public void testAddActivityMissingName_ShouldFail() {
+        HomePage homePage = new HomePage(driver);
+        homePage.clickProfileIcon();
+
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.loginAs("organizer1@example.com", "123456789");
+
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.urlContains("/events"));
+
+        homePage.openSidebar();
+        homePage.clickMyEvents();
+
+        MyEventsPage myEventsPage = new MyEventsPage(driver);
+        myEventsPage.clickFirstEvent();
+
+        EventViewPage eventViewPage = new EventViewPage(driver);
+        eventViewPage.openAgendaManagement();
+
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.urlContains("/agenda"));
+
+        AgendaPage agendaPage = new AgendaPage(driver);
+        agendaPage.clickAddActivity();
+
+        ActivityFormPage formPage = new ActivityFormPage(driver);
+        assertTrue(formPage.isAt(), "Should be on Add Activity form");
+
+        // Leave "name" blank
+        formPage.fillForm(
+                "",  // Missing name
+                "No name activity",
+                "Hall A",
+                "2025-12-31T10:00",
+                "2025-12-31T11:00"
+        );
+
+        formPage.clickSave();
+
+        // Assert we’re still on the form (did not navigate)
+        assertTrue(formPage.isAt(), "Should stay on form page if validation fails");
+    }
+    @Test
+    public void testAddActivityEndBeforeStart_ShouldFail() {
+        HomePage homePage = new HomePage(driver);
+        homePage.clickProfileIcon();
+
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.loginAs("organizer1@example.com", "123456789");
+
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.urlContains("/events"));
+
+        homePage.openSidebar();
+        homePage.clickMyEvents();
+
+        MyEventsPage myEventsPage = new MyEventsPage(driver);
+        myEventsPage.clickFirstEvent();
+
+        EventViewPage eventViewPage = new EventViewPage(driver);
+        eventViewPage.openAgendaManagement();
+
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.urlContains("/agenda"));
+
+        AgendaPage agendaPage = new AgendaPage(driver);
+        agendaPage.clickAddActivity();
+
+        ActivityFormPage formPage = new ActivityFormPage(driver);
+        assertTrue(formPage.isAt(), "Should be on Add Activity form");
+
+        formPage.fillForm(
+                "Invalid Time Activity",
+                "This one ends before it starts",
+                "Room X",
+                "2025-12-31T12:00",  // start
+                "2025-12-31T11:00"   // end before start
+        );
+
+        formPage.clickSave();
+
+        // Assert we’re still on the form (validation should fail)
+        assertTrue(formPage.isAt(), "Should stay on form page due to time validation");
+    }
+
     @AfterEach
     public void tearDown() {
         driver.quit();
