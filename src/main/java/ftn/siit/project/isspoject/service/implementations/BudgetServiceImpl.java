@@ -9,6 +9,7 @@ import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.BudgetRepository;
 import ftn.siit.project.isspoject.repository.CategoryRepository;
 import ftn.siit.project.isspoject.service.interfaces.BudgetService;
+import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hibernate.jdbc.Expectation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 @Service
@@ -25,9 +27,6 @@ public class BudgetServiceImpl implements BudgetService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-  //  public Page<Budget> findAll(Pageable page) {
-//        return budgetRepository.findAll(page);
-//    }
     @Override
     public Budget removeItem(int id, Category category) {
         Budget b = findById(id);
@@ -40,31 +39,38 @@ public class BudgetServiceImpl implements BudgetService {
         return b;
     }
 
-    @Override
+  @Override
     public BudgetItem addItemToBudget(int budgetId, String category, double price) {
-         Budget b = findById(budgetId);
-         for(BudgetItem bi : b.getBudgetItems()) {
-             if(bi.getCategory().getName().equals(category)){
-                 throw new IllegalArgumentException("Category already exists in budget");
-             }
-         }
-         BudgetItem budgetItem = new BudgetItem();
-         Category c = categoryRepository.findByNameIgnoreCaseAndIsDeletedIsFalse(category);
-         if (c == null){
-             throw new IllegalArgumentException("Category not found");
-         }
-         budgetItem.setCategory(c);
-         budgetItem.setMaxPrice(price);
-         budgetItem.setCurrPrice(0.0);
-         b.getBudgetItems().add(budgetItem);
-         Budget updated = save(b);
-         for(BudgetItem bi : updated.getBudgetItems()) {
-             if(bi.getCategory().equals(category)){
-                 return bi;
-             }
-         }
-         throw new NotFoundException("Budget item not found after update");
+        Budget b = findById(budgetId);
+
+        for (BudgetItem bi : b.getBudgetItems()) {
+            if (bi.getCategory().getName().equalsIgnoreCase(category)) {
+                throw new IllegalArgumentException("Category already exists in budget");
+            }
+        }
+
+        Category c = categoryRepository.findByNameIgnoreCaseAndIsDeletedIsFalse(category);
+        if (c == null) {
+            throw new IllegalArgumentException("Category not found");
+        }
+
+        BudgetItem budgetItem = new BudgetItem();
+        budgetItem.setCategory(c);
+        budgetItem.setMaxPrice(price);
+        budgetItem.setCurrPrice(0.0);
+        b.getBudgetItems().add(budgetItem);
+
+        Budget updated = save(b);
+        for (BudgetItem bi : updated.getBudgetItems()) {
+            if (bi.getCategory().getName().equalsIgnoreCase(category)) {
+                return bi;
+            }
+        }
+
+        throw new NotFoundException("Budget item not found after creation");
     }
+
+
 
     @Override
     public BudgetItem updateBudgetItem(int budgetId, int itemId, double price) {
@@ -91,19 +97,25 @@ public class BudgetServiceImpl implements BudgetService {
     @Override
     public void removeBudgetItem(int budgetId, int itemId) {
         Budget b = findById(budgetId);
-        for(BudgetItem bi : b.getBudgetItems()) {
-            if(bi.getId() == itemId){
-                if(bi.getCurrPrice() > 0.0){
+
+        Iterator<BudgetItem> iterator = b.getBudgetItems().iterator();
+        while (iterator.hasNext()) {
+            BudgetItem bi = iterator.next();
+            if (bi.getId() == itemId) {
+                if (bi.getCurrPrice() > 0.0) {
                     throw new IllegalArgumentException("Budget item cannot be deleted. Offers already purchased for this item.");
-                }else{
-                    b.getBudgetItems().remove(bi);
+                } else {
+                    iterator.remove();
+                    save(b);
                     return;
                 }
             }
         }
-        save(b);
+
         throw new IllegalArgumentException("Budget item not found");
     }
+
+
 
     @Override
     public Budget addNewItem(Category category, double price, int budgetId){
@@ -123,10 +135,8 @@ public class BudgetServiceImpl implements BudgetService {
         return save(b);
     }
 
-    @Override
     public Budget findById(Integer id) {
-        return budgetRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Budget not found with ID: " + id));
+         return budgetRepository.findByIdWithItems(id).orElseThrow(() -> new IllegalArgumentException("Budget not found"));
     }
 
     @Override
