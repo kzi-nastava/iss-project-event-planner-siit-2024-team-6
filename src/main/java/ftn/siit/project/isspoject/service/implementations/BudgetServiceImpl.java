@@ -132,7 +132,7 @@ public class BudgetServiceImpl implements BudgetService {
         Budget b = findById(budgetId);
         for(BudgetItem bi : b.getBudgetItems()) {
             if(bi.getCategory().equals(category)){
-                if (bi.getCurrPrice() + price > bi.getMaxPrice()) {
+                if (bi.getCurrPrice() + price > bi.getMaxPrice() && bi.getMaxPrice() != 0.0) {
                     throw new IllegalArgumentException("You do not have enough allocated funds to make this purchase.");
                 }
                 bi.setCurrPrice(bi.getCurrPrice() + price);
