@@ -15,6 +15,7 @@ import org.hibernate.jdbc.Expectation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
@@ -33,7 +34,7 @@ public class BudgetServiceImpl implements BudgetService {
         for(BudgetItem bi : b.getBudgetItems()) {
             if(bi.getCategory().equals(category)){
                 b.getBudgetItems().remove(bi);
-                return save(b);
+                return update(b);
             }
         }
         return b;
@@ -60,7 +61,7 @@ public class BudgetServiceImpl implements BudgetService {
         budgetItem.setCurrPrice(0.0);
         b.getBudgetItems().add(budgetItem);
 
-        Budget updated = save(b);
+        Budget updated = update(b);
         for (BudgetItem bi : updated.getBudgetItems()) {
             if (bi.getCategory().getName().equalsIgnoreCase(category)) {
                 return bi;
@@ -70,22 +71,28 @@ public class BudgetServiceImpl implements BudgetService {
         throw new NotFoundException("Budget item not found after creation");
     }
 
-
-
     @Override
     public BudgetItem updateBudgetItem(int budgetId, int itemId, double price) {
+        if (price <= 0){
+            throw new IllegalArgumentException("Price must be greater than zero");
+        }
         Budget b = findById(budgetId);
+        boolean found = false;
         for(BudgetItem bi : b.getBudgetItems()) {
             if(bi.getId() == itemId){
                 if(bi.getCurrPrice() > price){
                     throw new IllegalArgumentException("Spent amount cannot be greater than budget item amount");
                 }else{
                     bi.setMaxPrice(price);
+                    found = true;
                     break;
                 }
             }
         }
-        Budget updated = save(b);
+        if(!found){
+            throw new IllegalArgumentException("Budget item not found");
+        }
+        Budget updated = update(b);
         for(BudgetItem bi : updated.getBudgetItems()) {
              if(bi.getId() == itemId){
                  return bi;
@@ -106,12 +113,11 @@ public class BudgetServiceImpl implements BudgetService {
                     throw new IllegalArgumentException("Budget item cannot be deleted. Offers already purchased for this item.");
                 } else {
                     iterator.remove();
-                    save(b);
+                    update(b);
                     return;
                 }
             }
         }
-
         throw new IllegalArgumentException("Budget item not found");
     }
 
@@ -123,7 +129,7 @@ public class BudgetServiceImpl implements BudgetService {
         for(BudgetItem bi : b.getBudgetItems()) {
             if(bi.getCategory().equals(category)){
                 bi.setCurrPrice(bi.getCurrPrice() + price);
-                return save(b);
+                return update(b);
             }
         }
         BudgetItem i = new BudgetItem();
@@ -132,76 +138,26 @@ public class BudgetServiceImpl implements BudgetService {
         i.setMaxPrice(0);
         b.getBudgetItems().add(i);
         b.setBudgetItems(b.getBudgetItems());
-        return save(b);
+        return update(b);
     }
 
-    public Budget findById(Integer id) {
+    private Budget findById(Integer id) {
          return budgetRepository.findByIdWithItems(id).orElseThrow(() -> new IllegalArgumentException("Budget not found"));
     }
 
-    @Override
-    public Budget save(Budget budget) {
+    private Budget update(Budget budget) {
+        if (!budgetRepository.findById(budget.getId()).isPresent()) {
+            throw new IllegalArgumentException("Budget not found");
+        }
+        double total = 0.0;
+        double spent = 0.0;
+        for(BudgetItem bi : budget.getBudgetItems()) {
+            total += bi.getMaxPrice();
+            spent += bi.getCurrPrice();
+        }
+        budget.setAvailable(total - spent);
+        budget.setTotal(total);
         return budgetRepository.save(budget);
     }
 
-    @Override
-    public Budget save(NewBudgetDTO budgetDTO) {
-        Budget budget = new Budget();
-        budget.setTotal(0);
-        double currents = 0;
-        for(NewBudgetItemDTO dto:budgetDTO.getBudgetItems()){
-            BudgetItem budgetItem = new BudgetItem();
-            budgetItem.setCategory(categoryRepository.findByNameIgnoreCaseAndIsDeletedIsFalse(dto.getCategory()));
-            budgetItem.setCurrPrice(dto.getCurrPrice());
-            budgetItem.setMaxPrice(dto.getMaxPrice());
-            budget.setTotal(budget.getTotal()+budgetItem.getMaxPrice());
-            currents += budgetItem.getCurrPrice();
-            budget.getBudgetItems().add(budgetItem);
-        }
-        budget.setAvailable(budget.getTotal()-currents);
-        return budgetRepository.save(budget);
-    }
-
-
-    @Override
-    public Budget update(Budget updatedBudget) {
-        Budget existingBudget = budgetRepository.findById(updatedBudget.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Budget not found with ID: " + updatedBudget.getId()));
-
-        existingBudget.setTotal(updatedBudget.getTotal());
-        existingBudget.setAvailable(updatedBudget.getAvailable());
-
-        if (updatedBudget.getBudgetItems() != null) {
-            existingBudget.getBudgetItems().clear();
-            existingBudget.getBudgetItems().addAll(updatedBudget.getBudgetItems());
-        }
-
-        return budgetRepository.save(existingBudget);
-    }
-
-    @Override
-    public Budget update(int id, NewBudgetDTO budgetDTO) {
-          Budget existingBudget = budgetRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Budget not found with ID: " + id));
-
-          double currents = 0;
-          existingBudget.setTotal(0);
-          existingBudget.getBudgetItems().clear();
-          for(NewBudgetItemDTO dto:budgetDTO.getBudgetItems()){
-              BudgetItem budgetItem = new BudgetItem();
-              budgetItem.setCategory(categoryRepository.findByNameIgnoreCaseAndIsDeletedIsFalse(dto.getCategory()));
-              budgetItem.setCurrPrice(dto.getCurrPrice());
-              budgetItem.setMaxPrice(dto.getMaxPrice());
-              existingBudget.getBudgetItems().add(budgetItem);
-              existingBudget.setTotal(existingBudget.getTotal()+budgetItem.getMaxPrice());
-              currents += budgetItem.getCurrPrice();
-          }
-          existingBudget.setAvailable(existingBudget.getTotal()-currents);
-          return budgetRepository.save(existingBudget);
-    }
-
-    @Override
-    public void delete(int id) {
-        budgetRepository.deleteById(id);
-    }
 }

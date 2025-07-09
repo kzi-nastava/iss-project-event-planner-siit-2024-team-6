@@ -118,19 +118,6 @@ public class OrganizerController {
         }
         return ResponseEntity.ok(categories);
     }
-    @PutMapping("budget/{id}")
-    public ResponseEntity<BudgetDTO> updateBudget(@PathVariable int id, @RequestBody NewBudgetDTO budgetDTO, HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null ) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        try {
-            Budget updatedBudget = budgetService.update(id, budgetDTO);
-            return ResponseEntity.ok(new BudgetDTO(updatedBudget));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
 
     @PostMapping("budget/{budgetId}/items")
     public ResponseEntity<BudgetItemDTO> addItemToBudget(@PathVariable int budgetId, @RequestBody NewBudgetItemDTO budgetDTO, HttpServletRequest request) {
