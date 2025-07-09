@@ -178,20 +178,14 @@ public class OfferServiceImpl implements OfferService {
                             return max - curr;
                         }
                 ));
-        System.out.println(categoryMaxPriceMap.toString());
-        System.out.println("HEREE");
 
         List<Offer> filteredOffers = baseOffers.stream()
                 .filter(offer -> {
                     String category = offer.getCategory().getName();
                     Double maxAllowed = categoryMaxPriceMap.get(category);
-                    System.out.println(category);
-                    System.out.println(maxAllowed);
                     if (maxAllowed == null || maxAllowed < 0.0) return true; // unlimited
                     Double offerPrice = offer.getPrice() != 0.0 ? offer.getPrice() : Double.MAX_VALUE;
                     Double offerSale = offer.getSale() != 0.0 ? offer.getSale() : Double.MAX_VALUE;
-                    System.out.println(offerPrice);
-                    System.out.println(offerSale);
 
                     return offerPrice <= maxAllowed || offerSale <= maxAllowed;
                 })
