@@ -146,7 +146,7 @@ public class BudgetServiceImpl implements BudgetService {
     }
 
     private Budget findById(Integer id) {
-         return budgetRepository.findByIdWithItems(id).orElseThrow(() -> new IllegalArgumentException("Budget not found"));
+         return budgetRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Budget not found"));
     }
 
     private Budget update(Budget budget) {

@@ -10,6 +10,4 @@ import java.util.Optional;
 
 @Repository
 public interface BudgetRepository extends JpaRepository<Budget, Integer>{
-    @Query("SELECT b FROM Budget b LEFT JOIN FETCH b.budgetItems WHERE b.id = :id")
-    Optional<Budget> findByIdWithItems(@Param("id") Integer id);
 }
