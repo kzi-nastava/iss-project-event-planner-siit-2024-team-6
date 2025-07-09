@@ -122,6 +122,10 @@ public class BudgetServiceImpl implements BudgetService {
     }
 
 
+    @Override
+    public Budget save(Budget budget) {
+        return budgetRepository.save(budget);
+    }
 
     @Override
     public Budget addNewItem(Category category, double price, int budgetId){

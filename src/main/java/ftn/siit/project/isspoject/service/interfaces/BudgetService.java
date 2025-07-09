@@ -8,6 +8,7 @@ import ftn.siit.project.isspoject.entity.Category;
 import java.util.Optional;
 
 public interface BudgetService {
+    Budget save(Budget budget);
     Budget addNewItem(Category category, double price, int budgetId);
     Budget removeItem(int id, Category category);
     BudgetItem addItemToBudget(int budgetId, String category, double price);
