@@ -77,6 +77,9 @@ public class EventController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Event event = eventService.findById(eventId);
+        if(!event.getDate().isAfter(LocalDateTime.now())){
+            throw new IllegalArgumentException("Cannot access budget of an event that has passed.");
+        }
 
         if (event.getBudget() == null){
             event.setBudget(new Budget());

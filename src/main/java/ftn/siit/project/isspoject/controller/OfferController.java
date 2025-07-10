@@ -408,12 +408,20 @@ public class OfferController {
         return ResponseEntity.ok(filteredOffers);
     }
 
-    @PostMapping("/search-by-budget")
-    public ResponseEntity<Page<OfferDTO>> searchOffers(@RequestBody NewBudgetDTO budgetDTO, HttpServletRequest request, @RequestParam(defaultValue = "0") int page,
+    @PostMapping("/search-by-budget/{budgetId}")
+    public ResponseEntity<Page<OfferDTO>> searchOffers(@PathVariable int budgetId, @RequestBody NewBudgetDTO budgetDTO, HttpServletRequest request, @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int pageSize){
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer o = organizerService.findByEmail(email);
+        if (o == null){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if(eventService.checkIfEventHasPassed(budgetId, o)){
+            throw new IllegalArgumentException("Cannot filter offers by budget of an event that has passed.");
         }
         Pageable pageable = PageRequest.of(page, pageSize);
         Page<OfferDTO> filteredOffers = offerService.searchOffers(budgetDTO, pageable);

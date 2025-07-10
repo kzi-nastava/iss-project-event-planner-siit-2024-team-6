@@ -125,6 +125,14 @@ public class OrganizerController {
         if (jwtToken == null ) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer o = organizerService.findByEmail(email);
+        if (o == null) {
+             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if(eventService.checkIfEventHasPassed(budgetId, o)){
+            throw new IllegalArgumentException("Event has passed. Cannot access its budget.");
+        }
         BudgetItem bi = budgetService.addItemToBudget(budgetId, budgetDTO.getCategory(), budgetDTO.getMaxPrice());
         return ResponseEntity.ok(new BudgetItemDTO(bi));
     }
@@ -135,6 +143,14 @@ public class OrganizerController {
         if (jwtToken == null ) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer o = organizerService.findByEmail(email);
+        if (o == null) {
+             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if(eventService.checkIfEventHasPassed(budgetId, o)){
+            throw new IllegalArgumentException("Event has passed. Cannot access its budget.");
+        }
         BudgetItem bi = budgetService.updateBudgetItem(budgetId, itemId, price);
         return ResponseEntity.ok(new BudgetItemDTO(bi));
     }
@@ -144,6 +160,14 @@ public class OrganizerController {
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null ) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer o = organizerService.findByEmail(email);
+        if (o == null) {
+             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if(eventService.checkIfEventHasPassed(budgetId, o)){
+            throw new IllegalArgumentException("Event has passed. Cannot access its budget.");
         }
         budgetService.removeBudgetItem(budgetId, itemId);
         return ResponseEntity.ok().build();
