@@ -142,6 +142,8 @@ public class OfferController {
         Event event = eventService.findById(eventId);
         if (event == null) {
             throw new NotFoundException("Event not found");
+        } else if(event.getDate().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("You are trying to buy a product for an event that has passed.");
         }
         Offer o = offerService.findById(offerId);
         if (o == null) {
