@@ -28,6 +28,6 @@ public interface EventService {
     void sendInvitations(EventDTO dto, List<String> emails);
     List<Event> findByOrganizer(Organizer organizer);
     List<Event> getFutureEvents(Organizer organizer);
-
+    Boolean checkIfEventHasPassed(int budgetId, Organizer organizer);
     Page<Event> findByOrganizer(Pageable pageable, Organizer organizer);
 }

@@ -3,7 +3,9 @@ package ftn.siit.project.isspoject.controller;
 import ftn.siit.project.isspoject.dto.activity.ActivityDTO;
 import ftn.siit.project.isspoject.dto.activity.NewActivityDTO;
 import ftn.siit.project.isspoject.dto.budget.BudgetDTO;
+import ftn.siit.project.isspoject.dto.budget.BudgetItemDTO;
 import ftn.siit.project.isspoject.dto.budget.NewBudgetDTO;
+import ftn.siit.project.isspoject.dto.budget.NewBudgetItemDTO;
 import ftn.siit.project.isspoject.dto.event.EventDTO;
 import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
 import ftn.siit.project.isspoject.dto.event.NewEventDTO;
@@ -116,18 +118,59 @@ public class OrganizerController {
         }
         return ResponseEntity.ok(categories);
     }
-    @PutMapping("budget/{id}")
-    public ResponseEntity<BudgetDTO> updateBudget(@PathVariable int id, @RequestBody NewBudgetDTO budgetDTO, HttpServletRequest request) {
+
+    @PostMapping("budget/{budgetId}/items")
+    public ResponseEntity<BudgetItemDTO> addItemToBudget(@PathVariable int budgetId, @RequestBody NewBudgetItemDTO budgetDTO, HttpServletRequest request) {
         String jwtToken = this.tokenUtils.getToken(request);
         if (jwtToken == null ) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        try {
-            Budget updatedBudget = budgetService.update(id, budgetDTO);
-            return ResponseEntity.ok(new BudgetDTO(updatedBudget));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer o = organizerService.findByEmail(email);
+        if (o == null) {
+             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+        if(eventService.checkIfEventHasPassed(budgetId, o)){
+            throw new IllegalArgumentException("Event has passed. Cannot access its budget.");
+        }
+        BudgetItem bi = budgetService.addItemToBudget(budgetId, budgetDTO.getCategory(), budgetDTO.getMaxPrice());
+        return ResponseEntity.ok(new BudgetItemDTO(bi));
+    }
+
+    @PutMapping("budget/{budgetId}/items/{itemId}")
+    public ResponseEntity<BudgetItemDTO> updateBudgetItem(@PathVariable int budgetId, @PathVariable int itemId, @RequestBody double price, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null ) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer o = organizerService.findByEmail(email);
+        if (o == null) {
+             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if(eventService.checkIfEventHasPassed(budgetId, o)){
+            throw new IllegalArgumentException("Event has passed. Cannot access its budget.");
+        }
+        BudgetItem bi = budgetService.updateBudgetItem(budgetId, itemId, price);
+        return ResponseEntity.ok(new BudgetItemDTO(bi));
+    }
+
+    @DeleteMapping("budget/{budgetId}/items/{itemId}")
+    public ResponseEntity<Void> deleteBudgetItem(@PathVariable int budgetId, @PathVariable int itemId, HttpServletRequest request) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null ) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Organizer o = organizerService.findByEmail(email);
+        if (o == null) {
+             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if(eventService.checkIfEventHasPassed(budgetId, o)){
+            throw new IllegalArgumentException("Event has passed. Cannot access its budget.");
+        }
+        budgetService.removeBudgetItem(budgetId, itemId);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("events")

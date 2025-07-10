@@ -76,6 +76,20 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public Boolean checkIfEventHasPassed(int budgetId, Organizer organizer) {
+        for (Event event : eventRepository.findByOrganizer(organizer)) {
+            if(event.getBudget().getId() == budgetId) {
+                if(event.getDate().isAfter(LocalDateTime.now())) {
+                    return false;
+                }else{
+                    return true;
+                }
+            }
+        }
+        throw new NotFoundException("Event not found with budget ID: " + budgetId);
+    }
+
+    @Override
     public Page<Event> findByOrganizer(Pageable pageable, Organizer organizer) {
         return eventRepository.findByOrganizerPaginated(organizer, pageable);
     }

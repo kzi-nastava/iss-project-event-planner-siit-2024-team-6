@@ -154,46 +154,44 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public Page<OfferDTO> searchOffers(NewBudgetDTO dto, Pageable pageable) {
-
+        System.out.println(dto.toString());
         List<Offer> offers = offerRepository.findAll();
 
-        if (dto.getBudgetItems() == null || dto.getBudgetItems().isEmpty()) {
-            List<Offer> visibleOffers = offers.stream()
-                    .filter(offer -> (offer.getIsDeleted() == null || !offer.getIsDeleted()))
-                    .filter(offer -> offer.getIsVisible())
-                    .filter(offer -> (offer.getIsDeleted() != null && offer.getStatus() == Status.ACCEPTED))
-                    .collect(Collectors.toList());
+        // Shared filtering: accepted, visible, not deleted
+        List<Offer> baseOffers = offers.stream()
+                .filter(offer -> offer.getIsDeleted() == null || !offer.getIsDeleted())
+                .filter(Offer::getIsVisible)
+                .filter(offer -> offer.getStatus() == Status.ACCEPTED)
+                .collect(Collectors.toList());
 
-            return paginateOffers(visibleOffers, pageable);
+        if (dto.getBudgetItems() == null || dto.getBudgetItems().isEmpty()) {
+            return paginateOffers(baseOffers, pageable);
         }
-        // Build a map of category to max price
+
+        // Map: category -> remaining budget (max - current)
         Map<String, Double> categoryMaxPriceMap = dto.getBudgetItems().stream()
                 .collect(Collectors.toMap(
                         NewBudgetItemDTO::getCategory,
                         item -> {
-                            Double max = item.getMaxPrice() != 0.0 ? item.getMaxPrice() : 0.0;
-                            Double curr = item.getCurrPrice() != 0.0 ? item.getCurrPrice() : 0.0;
+                            double max = item.getMaxPrice() != 0.0 ? item.getMaxPrice() : 0.0;
+                            double curr = item.getCurrPrice() != 0.0 ? item.getCurrPrice() : 0.0;
                             return max - curr;
                         }
                 ));
 
-        List<Offer> filteredOffers = offers.stream()
-                .filter(offer -> (offer.getIsDeleted() == null || !offer.getIsDeleted()))
-                .filter(offer -> offer.getIsVisible())
-                .filter(offer -> (offer.getIsDeleted() != null && offer.getStatus() == Status.ACCEPTED))
+        List<Offer> filteredOffers = baseOffers.stream()
                 .filter(offer -> {
                     String category = offer.getCategory().getName();
                     Double maxAllowed = categoryMaxPriceMap.get(category);
-                    return maxAllowed != null && (
-                            (offer.getPrice() != null && offer.getPrice() <= maxAllowed) ||
-                                    (offer.getSale() != null && offer.getSale() <= maxAllowed)
-                    );
+                    if (maxAllowed == null || maxAllowed < 0.0) return true; // unlimited
+                    Double offerPrice = offer.getPrice() != 0.0 ? offer.getPrice() : Double.MAX_VALUE;
+                    Double offerSale = offer.getSale() != 0.0 ? offer.getSale() : Double.MAX_VALUE;
+
+                    return offerPrice <= maxAllowed || offerSale <= maxAllowed;
                 })
                 .collect(Collectors.toList());
 
-
         return paginateOffers(filteredOffers, pageable);
-
     }
 
     private Page<OfferDTO> paginateOffers(List<Offer> offers, Pageable pageable) {
