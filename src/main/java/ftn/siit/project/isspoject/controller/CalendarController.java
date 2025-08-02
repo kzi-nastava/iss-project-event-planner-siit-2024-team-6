@@ -53,10 +53,14 @@ public class CalendarController {
                     calendarItems.add(new CalendarItemDTO(e.getName(), e.getDate(), "MyEvent", e.getId()));
                 break;
             case "Provider":
-                for(Service s: (serviceService.findByProvider((Provider) user))){
-                    List<Reservation> rs = reservationService.findByServiceId(s.getId());
-                    for(Reservation r: rs)
-                        calendarItems.add(new CalendarItemDTO(s.getName(), r.getStartTime(), "MyService", s.getId()));
+                try {
+                    for (Service s : (serviceService.findByProvider((Provider) user))) {
+                        List<Reservation> rs = reservationService.findByServiceId(s.getId());
+                        for (Reservation r : rs)
+                            calendarItems.add(new CalendarItemDTO(s.getName(), r.getStartTime(), "MyService", s.getId()));
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
                 }
         }
 
