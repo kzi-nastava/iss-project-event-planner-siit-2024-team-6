@@ -257,6 +257,7 @@ public class OrganizerController {
         event.setPlace(eventDTO.getPlace());
         event.setDate(eventDTO.getDate());
         event.setIsDeleted(eventDTO.getIsDeleted());
+        event.setPhotos(eventDTO.getPhotos());
         Event updatedEvent = eventService.save(event);
         //notifications sending
         List<User> attendees = userService.findEventAttendees(eventId);
