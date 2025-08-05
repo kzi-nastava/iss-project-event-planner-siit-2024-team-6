@@ -164,7 +164,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private String generateLink(boolean exists, String email, Integer eventId) {
-        String baseUrl = "http://192.168.1.57:8080/api/users";
+        String baseUrl = "http://localhost:4200/api/users";
         String encodedEmail = URLEncoder.encode(email, StandardCharsets.UTF_8);
 
         String routingLink;
