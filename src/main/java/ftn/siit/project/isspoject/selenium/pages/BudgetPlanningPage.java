@@ -1,5 +1,7 @@
 package ftn.siit.project.isspoject.selenium.pages;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -22,8 +24,12 @@ public class BudgetPlanningPage {
     }
 
     public void clickGoBack() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        wait.until(ExpectedConditions.elementToBeClickable(goBackButton));
-        goBackButton.click();
+        WebElement backButton = new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("button.back-button")));
+
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", backButton);
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.elementToBeClickable(backButton));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", backButton);
     }
 }

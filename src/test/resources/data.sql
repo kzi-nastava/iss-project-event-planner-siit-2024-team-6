@@ -11,14 +11,12 @@ INSERT INTO users (
          ),
       (3, 'admin@test.com', 'pass', 'Mikhail', 'Doe', true, CURRENT_TIMESTAMP, 'Admin' );
 
--- Создание общего типа события
 INSERT INTO event_types (
     id, name, description, is_deleted
 ) VALUES (
              1, 'Conference', 'Professional Conference Events', false
          );
 
--- Создание двух событий, привязанных к organizer_id = 2 и event_type_id = 1
 INSERT INTO events (
     id, name, description, max_participants, participants, is_public, place, date, rating,
     latitude, longitude, event_type_id, is_deleted, organizer_id
@@ -48,14 +46,12 @@ INSERT INTO users (
              999999, 'testuser@dummy.com', 'pass', 'Test', 'User', true, CURRENT_TIMESTAMP, 'User'
          );
 
--- Добавляем отдельного организатора
 INSERT INTO users (
     id, email, password, name, lastname, is_active, suspended_since, user_type
 ) VALUES (
              999998, 'testorg@dummy.com', 'pass', 'Future', 'Org', true, CURRENT_TIMESTAMP, 'Organizer'
          );
 
--- Добавляем событие в будущем (для future тестов)
 INSERT INTO events (
     id, name, description, max_participants, participants, is_public, place, date, rating,
     latitude, longitude, event_type_id, is_deleted, organizer_id
@@ -64,7 +60,6 @@ INSERT INTO events (
              DATEADD('DAY', 7, CURRENT_TIMESTAMP), 5.0, 45.2700, 19.8350, 1, false, 999998
          );
 
--- Добавляем событие, привязанное к userId=999999 через activity
 INSERT INTO events (
     id, name, description, max_participants, participants, is_public, place, date, rating,
     latitude, longitude, event_type_id, is_deleted, organizer_id
@@ -73,7 +68,6 @@ INSERT INTO events (
              CURRENT_TIMESTAMP, 4.0, 45.2710, 19.8360, 1, false, 999998
          );
 
--- Активность для userId=999999 (связь с событием 999002)
 INSERT INTO activities (
     id, name, description, location, start_time, end_time, event_id
 ) VALUES (
