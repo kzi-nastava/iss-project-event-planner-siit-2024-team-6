@@ -296,7 +296,7 @@ class BudgetServiceUT {
         verify(budgetRepository).save(incoming);
     }
 
-    // ---------------------- negative: findById/update error paths ----------------------
+
 
     @Test
     @DisplayName("update path: throws if budget missing before save (consistency check)")
