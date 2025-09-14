@@ -50,6 +50,7 @@ public class OfferServiceSearchOffersBudgetUT {
         o.setIsVisible(visible);
         o.setIsDeleted(deleted);
         o.setStatus(status);
+        o.setEventTypes(new ArrayList<>());
         // other fields of no importance for these tests
         return o;
     }
@@ -120,7 +121,7 @@ public class OfferServiceSearchOffersBudgetUT {
 
         Offer priceZeroSaleZero   = offer(1, "VENUE", 0.0, 0.0, true, false, Status.ACCEPTED);
         Offer priceZeroSaleSmall  = offer(2, "VENUE", 0.0, 150.0, true, false, Status.ACCEPTED);
-        Offer priceSmallSaleZero  = offer(3, "VENUE", 150.0, 0.0, true, false, Status.ACCEPTED); 
+        Offer priceSmallSaleZero  = offer(3, "VENUE", 150.0, 0.0, true, false, Status.ACCEPTED);
 
         when(offerRepository.findAll()).thenReturn(List.of(priceZeroSaleZero, priceZeroSaleSmall, priceSmallSaleZero));
 
