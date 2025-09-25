@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 @Service
+//pROVERITI DA LI TREBAM DA TESTIRAM USER SERVICE OVERLAPS WITH CLOSED HOURS
 public class ReservationServiceImpl implements ReservationService {
 
     @Autowired
@@ -82,9 +83,15 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public Reservation addReservation(Event event, ftn.siit.project.isspoject.entity.Service service, Provider provider, Organizer organizer, NewReservationDTO dto, UserService userService) {
+        if (dto.getStartTime().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Reservation cannot start in the past");
+        }
+        checkBookingDeadline(dto,service);
         checkIfClosed(dto.getStartTime(), dto.getEndTime(), provider, userService);
         if(service.getPreciseDuration() == 0) {
             checkReservationDuration(dto.getStartTime(), dto.getEndTime(), service);
+        } else {
+            checkPreciseDuration(dto.getStartTime(), dto.getEndTime(), service);
         }
         checkAvailability(service.getId(), dto.getStartTime(), dto.getEndTime());
 
@@ -93,6 +100,19 @@ public class ReservationServiceImpl implements ReservationService {
         sendConfirmations(event,service,provider,organizer,dto);
         return created;
     }
+    private void checkBookingDeadline(NewReservationDTO dto, ftn.siit.project.isspoject.entity.Service service) {
+        if (service.getLatestReservation() != null) {
+            LocalDateTime deadline = dto.getStartTime().minusHours(service.getLatestReservation());
+
+            if (LocalDateTime.now().isAfter(deadline)) {
+                throw new IllegalArgumentException(
+                        "Reservation must be made at least " + service.getLatestReservation() +
+                                " hours before its start time (" + dto.getStartTime() + ")."
+                );
+            }
+        }
+    }
+
 
     @Override
     public boolean existsFutureReservation(ftn.siit.project.isspoject.entity.Service service) {
@@ -113,15 +133,32 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     private void checkReservationDuration(LocalDateTime start, LocalDateTime end, ftn.siit.project.isspoject.entity.Service service) {
+        if (service.getMinDuration() == null && service.getMaxDuration() == null) {
+            return;
+        }
         long reservationDurationMinutes = Duration.between(start, end).toMinutes();
-        int minDuration = service.getMinDuration();
-        int maxDuration = service.getMaxDuration();
 
-        if (reservationDurationMinutes < minDuration || reservationDurationMinutes > maxDuration) {
-            throw new IllegalArgumentException("Reservation duration must be between "
-                    + minDuration + " and " + maxDuration + " minutes.");
+        if (service.getMinDuration() != null && reservationDurationMinutes < service.getMinDuration()) {
+            throw new IllegalArgumentException("Reservation duration must be at least "
+                    + service.getMinDuration() + " minutes.");
+        }
+
+        if (service.getMaxDuration() != null && reservationDurationMinutes > service.getMaxDuration()) {
+            throw new IllegalArgumentException("Reservation duration must be at most "
+                    + service.getMaxDuration() + " minutes.");
         }
     }
+
+    private void checkPreciseDuration(LocalDateTime start, LocalDateTime end, ftn.siit.project.isspoject.entity.Service service) {
+        long actualMinutes = Duration.between(start, end).toMinutes();
+        int expectedMinutes = service.getPreciseDuration();
+
+        if (actualMinutes != expectedMinutes) {
+            throw new IllegalArgumentException("Reservation duration for this service must be exactly "
+                    + expectedMinutes + " minutes.");
+        }
+    }
+
     private void checkAvailability(Integer serviceId, LocalDateTime start, LocalDateTime end) {
         boolean isAvailable = this.isAvailable(serviceId, start, end);
         if (!isAvailable) {
