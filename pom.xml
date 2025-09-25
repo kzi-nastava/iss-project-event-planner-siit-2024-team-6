@@ -56,8 +56,10 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<scope>runtime</scope>
+			<version>2.2.224</version>
+			<scope>test</scope>
 		</dependency>
+
 
 
 		<dependency>
@@ -171,6 +173,14 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>io.github.bonigarcia</groupId>
+			<artifactId>webdrivermanager</artifactId>
+			<version>5.8.0</version>
+			<scope>test</scope>
+		</dependency>
+
 
 
 	</dependencies>
