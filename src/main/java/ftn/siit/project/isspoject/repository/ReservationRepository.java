@@ -12,9 +12,10 @@ import java.util.List;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Integer> {
-    @Query("SELECT r FROM Reservation r WHERE r.event.id = :eventId")
+    @Query("SELECT r FROM Reservation r WHERE r.event.id = :eventId AND r.isCanceled = false")
     List<Reservation> findReservationsByEventId(@Param("eventId") Integer eventId);
 
-    @Query("SELECT r FROM Reservation r WHERE r.offerService.id = :eventId")
-    List<Reservation> findReservationsByServiceId(@Param("eventId") Integer eventId);
+    @Query("SELECT r FROM Reservation r WHERE r.offerService.id = :serviceId AND r.isCanceled = false")
+    List<Reservation> findReservationsByServiceId(@Param("serviceId") Integer serviceId);
+
 }
