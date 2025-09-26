@@ -164,7 +164,9 @@ public class EventServiceImpl implements EventService {
     }
 
     private String generateLink(boolean exists, String email, Integer eventId) {
-        String baseUrl = "http://localhost:4200/api/users";
+        //String baseUrl = "http://localhost:4200/api/users";
+        //change this url whenever laptops ip addr changes
+        String baseUrl = "http://192.168.1.57:4200/api/users";
         String encodedEmail = URLEncoder.encode(email, StandardCharsets.UTF_8);
 
         String routingLink;
