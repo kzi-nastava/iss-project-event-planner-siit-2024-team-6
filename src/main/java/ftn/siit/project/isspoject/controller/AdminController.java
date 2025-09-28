@@ -1,101 +1,278 @@
 package ftn.siit.project.isspoject.controller;
 
-import ftn.siit.project.isspoject.dto.EventDTO;
-import ftn.siit.project.isspoject.dto.EventTypeDTO;
-import ftn.siit.project.isspoject.entity.Event;
-import ftn.siit.project.isspoject.entity.EventType;
-import ftn.siit.project.isspoject.service.EventService;
-import ftn.siit.project.isspoject.service.EventTypeService;
-import ftn.siit.project.isspoject.service.PDFGeneratorService;
+import ftn.siit.project.isspoject.dto.category.NewCategoryDTO;
+import ftn.siit.project.isspoject.dto.event.EventDTO;
+import ftn.siit.project.isspoject.dto.event.EventTypeDTO;
+import ftn.siit.project.isspoject.dto.event.NewEventTypeDTO;
+import ftn.siit.project.isspoject.dto.pagination.PagedResponse;
+import ftn.siit.project.isspoject.dto.user.UserDTO;
+import ftn.siit.project.isspoject.entity.User;
+import ftn.siit.project.isspoject.entity.*;
+import ftn.siit.project.isspoject.exceptions.NotFoundException;
+import ftn.siit.project.isspoject.service.interfaces.*;
+import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
+import ftn.siit.project.isspoject.dto.category.CategorySuggestionDTO;
+import ftn.siit.project.isspoject.service.interfaces.OfferService;
+import ftn.siit.project.isspoject.util.TokenUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "api/admins")
+@RequestMapping(value = "/api/admins/")
 public class AdminController {
 
     @Autowired
     private EventTypeService eventTypeService;
     @Autowired
+    private UserService userService;
+    @Autowired
     private EventService eventService;
     @Autowired
     private PDFGeneratorService pdfGeneratorService;
-    @PostMapping("event-types/add")
-    public ResponseEntity<String> addEventType(@RequestBody EventTypeDTO eventTypeDTO) {
-        if (eventTypeDTO == null || eventTypeDTO.getName() == null || eventTypeDTO.getDescription() == null) {
-            return new ResponseEntity<>("Invalid event type data", HttpStatus.BAD_REQUEST);
+    @Autowired
+    private CategoryService categoryService;
+    @Autowired
+    private OfferService offerService;
+    @Autowired
+    private ReportService reportService;
+    @Autowired
+    private CategorySuggestionService categorySuggestionService;
+    @Autowired
+    private TokenUtils tokenUtils;
+    @Autowired
+    private NotificationService notificationService;
+    @Autowired
+    private ServiceService serviceService;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private AdminService adminService;
+
+    @PostMapping("event-types")
+    public ResponseEntity<EventTypeDTO> addEventType(@RequestBody NewEventTypeDTO eventTypeDTO, HttpServletRequest request) {
+
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        User user = userService.findByEmail(email);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
+        if (!user.getUserType().equals("Admin") || eventTypeDTO == null || eventTypeDTO.getName() == null || eventTypeDTO.getDescription() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        // Создание нового типа события
         EventType eventType = new EventType();
         eventType.setName(eventTypeDTO.getName());
         eventType.setDescription(eventTypeDTO.getDescription());
-        eventType.setCategories(eventTypeDTO.getCategories());
         eventType.setIsDeleted(false);
+//        List<Category> cl = new ArrayList<>();
+//        for(Category c: eventTypeDTO.getCategories()){
+//            cl.add(categoryService.findById(c.getId()));
+//        }
+//        eventType.setCategories(cl);
+        List<Category> categories = new ArrayList<>();
+        for(Category c: eventTypeDTO.getCategories()){
+            categories.add(categoryService.findById(c.getId()));
+        }
+        eventType.setCategories(categories);
 
-        eventTypeService.save(eventType);
-        return new ResponseEntity<>("Event type added successfully", HttpStatus.CREATED);
+//        eventType.setCategories(categoryService.findById(eventTypeDTO.getCategories()));
+        // Сохранение типа события
+        EventType savedEventType = eventTypeService.save(eventType);
+
+        // Преобразование в DTO
+        EventTypeDTO responseDTO = toEventTypeDTO(savedEventType);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO); // Возвращаем созданный тип события
     }
-    @GetMapping("event-types/all")
+    private EventTypeDTO toEventTypeDTO(EventType eventType) {
+        EventTypeDTO eventTypeDTO = new EventTypeDTO();
+        eventTypeDTO.setId(eventType.getId());
+        eventTypeDTO.setName(eventType.getName());
+        eventTypeDTO.setDescription(eventType.getDescription());
+        eventTypeDTO.setIsDeleted(eventType.getIsDeleted());
+        eventTypeDTO.setCategories(eventType.getCategories());
+        return eventTypeDTO;
+    }
+
+
+    @GetMapping("event-types")
     public ResponseEntity<List<EventTypeDTO>> getAllEventTypes() {
         List<EventType> eventTypes = eventTypeService.findAll();
+        if(eventTypes == null || eventTypes.size() == 0) {
+            throw new NotFoundException("No events found");
+        }
         List<EventTypeDTO> eventTypeDTOs = eventTypes.stream().map(eventType -> {
             EventTypeDTO dto = new EventTypeDTO();
+            dto.setId(eventType.getId());
             dto.setName(eventType.getName());
             dto.setDescription(eventType.getDescription());
-            dto.setCategories(eventType.getCategories());
             dto.setIsDeleted(eventType.getIsDeleted());
+            dto.setCategories(eventType.getCategories());
+            return dto;
+        }).collect(Collectors.toList());
+        return new ResponseEntity<>(eventTypeDTOs, HttpStatus.OK);
+    }
+    @GetMapping("event-types-paged")
+    public ResponseEntity<PagedResponse<EventTypeDTO>> getAllEventTypesPaged(
+            HttpServletRequest request,
+            Pageable pageable
+    ) {
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        List<EventType> eventTypes = eventTypeService.findAll();
+        if (eventTypes == null || eventTypes.isEmpty()) {
+            throw new NotFoundException("No event types found");
+        }
+
+        List<EventTypeDTO> eventTypeDTOs = eventTypes.stream().map(eventType -> {
+            EventTypeDTO dto = new EventTypeDTO();
+            dto.setId(eventType.getId());
+            dto.setName(eventType.getName());
+            dto.setDescription(eventType.getDescription());
+            dto.setIsDeleted(eventType.getIsDeleted());
+            dto.setCategories(eventType.getCategories());
             return dto;
         }).collect(Collectors.toList());
 
-        return new ResponseEntity<>(eventTypeDTOs, HttpStatus.OK);
-    }
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), eventTypeDTOs.size());
 
-    @PutMapping("event-types/{id}/update")
-    public ResponseEntity<String> updateEventType(
-            @PathVariable Integer id,
-            @RequestBody EventTypeDTO eventTypeDTO) {
-        EventType eventType = eventTypeService.findById(id);
-        if (eventType == null) {
-            return new ResponseEntity<>("Event type not found", HttpStatus.NOT_FOUND);
+        if (start >= eventTypeDTOs.size()) {
+            return ResponseEntity.ok(new PagedResponse<>(Collections.emptyList(),
+                    (int) Math.ceil((double) eventTypeDTOs.size() / pageable.getPageSize()),
+                    eventTypeDTOs.size()));
         }
 
+        List<EventTypeDTO> paginatedEventTypes = eventTypeDTOs.subList(start, end);
+
+        PagedResponse<EventTypeDTO> response = new PagedResponse<>(
+                paginatedEventTypes,
+                (int) Math.ceil((double) eventTypeDTOs.size() / pageable.getPageSize()),
+                eventTypeDTOs.size()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("event-types/{id}")
+    public ResponseEntity<EventTypeDTO> updateEventType(
+            @PathVariable Integer id,
+            @RequestBody NewEventTypeDTO eventTypeDTO) {
+        EventType eventType = eventTypeService.findById(id);
+        if (eventType == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Тип события не найден
+        }
+
+        // Обновление полей типа события
         eventType.setDescription(eventTypeDTO.getDescription());
         eventType.setCategories(eventTypeDTO.getCategories());
-        eventTypeService.save(eventType);
+        EventType updatedEventType = eventTypeService.save(eventType);
 
-        return new ResponseEntity<>("Event type updated successfully", HttpStatus.OK);
+        // Преобразование в DTO
+        EventTypeDTO responseDTO = toEventTypeDTO(updatedEventType);
+
+        return ResponseEntity.ok(responseDTO); // Возвращаем обновлённый тип события
     }
+
+
     @PutMapping("event-types/{id}/activate")
-    public ResponseEntity<String> activateEventType(@PathVariable Integer id) {
+    public ResponseEntity<EventTypeDTO> activateEventType(@PathVariable Integer id) {
         EventType eventType = eventTypeService.findById(id);
         if (eventType == null) {
-            return new ResponseEntity<>("Event type not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Тип события не найден
         }
 
+        // Активация типа события
         eventType.setIsDeleted(false);
-        eventTypeService.save(eventType);
-        return new ResponseEntity<>("Event type activated", HttpStatus.OK);
+        EventType activatedEventType = eventTypeService.save(eventType);
+
+        // Преобразование в DTO
+        EventTypeDTO responseDTO = toEventTypeDTO(activatedEventType);
+
+        return ResponseEntity.ok(responseDTO); // Возвращаем активированный тип события
     }
-    @PutMapping("event-types/{id}/deactivate")
-    public ResponseEntity<String> deactivateEventType(@PathVariable Integer id) {
+    @PutMapping("event-types/{id}/change-status")
+    public ResponseEntity<EventTypeDTO> changeStatus(@PathVariable Integer id) {
         EventType eventType = eventTypeService.findById(id);
         if (eventType == null) {
-            return new ResponseEntity<>("Event type not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Тип события не найден
         }
 
+        // Активация типа события
+        eventType.setIsDeleted(!eventType.getIsDeleted());
+        EventType activatedEventType = eventTypeService.save(eventType);
+
+        // Преобразование в DTO
+        EventTypeDTO responseDTO = toEventTypeDTO(activatedEventType);
+
+        return ResponseEntity.ok(responseDTO); // Возвращаем активированный тип события
+    }
+//    @GetMapping
+//    public ResponseEntity<PagedResponse<EventTypeDTO>> getEventTypesPage(Pageable pageable) {
+//        Page<EventType> eventTypePage = eventTypeService.findAll(pageable);
+//
+//        List<EventTypeDTO> eventTypeDTOs = eventTypePage.stream()
+//        List<EventTypeDTO> eventTypeDTOs = eventTypePage.stream()
+//                .map(EventTypeDTO::new)
+//                .toList();
+//
+//        PagedResponse<EventTypeDTO> response = new PagedResponse<>(
+//                eventTypeDTOs,
+//                eventTypePage.getTotalPages(),
+//                eventTypePage.getTotalElements()
+//        );
+//
+//        return ResponseEntity.ok(response);
+//    }
+
+    @PutMapping("event-types/{id}/deactivate")
+    public ResponseEntity<EventTypeDTO> deactivateEventType(@PathVariable Integer id) {
+        // Проверка существования типа события
+        EventType eventType = eventTypeService.findById(id);
+        if (eventType == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Тип события не найден
+        }
+
+        // Деактивация типа события
         eventType.setIsDeleted(true);
-        eventTypeService.save(eventType);
-        return new ResponseEntity<>("Event type deactivated", HttpStatus.OK);
+        EventType deactivatedEventType = eventTypeService.save(eventType);
+
+        // Преобразование в DTO
+        EventTypeDTO responseDTO = toEventTypeDTO(deactivatedEventType);
+
+        return ResponseEntity.ok(responseDTO); // Возвращаем деактивированный тип события
     }
 
-    @GetMapping("/{eventId}/analytics")
+
+    @PutMapping("suspend/{id}")
+    public ResponseEntity<UserDTO> suspendUser(@PathVariable Integer id) {
+        User suspendedUser = userService.suspendUser(id);
+        return ResponseEntity.ok(new UserDTO(suspendedUser));
+    }
+    @GetMapping("{eventId}/analytics")
     public ResponseEntity<EventDTO> getEventAnalytics(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
         if (event == null) {
@@ -112,17 +289,169 @@ public class AdminController {
         return new ResponseEntity<>(analytics, HttpStatus.OK);
     }
 
-    @GetMapping("/{eventId}/generate-analytics-pdf")
+    @GetMapping("{eventId}/generate-analytics-pdf")
     public ResponseEntity<byte[]> generateAnalyticsPDF(@PathVariable Integer eventId) {
         Event event = eventService.findById(eventId);
         if (event == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
         byte[] pdf = pdfGeneratorService.generateEventAnalyticsPDF(event);
 
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename=event-analytics.pdf")
                 .body(pdf);
+    }
+
+    @GetMapping("category-names")
+    public ResponseEntity<List<String>> getAllCategoryNames(HttpServletRequest request) {
+        List<String> categories = categoryService.findAllNames();
+        if (categories.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("categoriesNonPaged")
+    public ResponseEntity<List<Category>> getAllCategories() {
+        List<Category> categories = categoryService.findAll();
+        if (categories.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(categories);
+    }
+    @GetMapping("categories")
+    public ResponseEntity<PagedResponse<Category>> getAllCategories(Pageable page) {
+        Page<Category> categories = categoryService.findAll(page);
+        PagedResponse<Category> response = new PagedResponse<>(
+                categories.stream().toList(),
+                categories.getTotalPages(),
+                categories.getTotalElements()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+//    @GetMapping("categoriesNonPaged")
+//    public ResponseEntity<PagedResponse<Category>> getAllCategories(Pageable page, HttpServletRequest request) {
+//        String jwtToken = this.tokenUtils.getToken(request);
+//        if (jwtToken == null ) {
+//            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+//        }
+//        Page<Category> categories = categoryService.findAll(page);
+//
+//        PagedResponse<Category> response = new PagedResponse<>(
+//                categories.stream().toList(),
+//                categories.getTotalPages(),
+//                categories.getTotalElements()
+//        );
+//        return ResponseEntity.ok(response);
+//    }
+    @PostMapping("category")
+    public ResponseEntity<Category> addCategory(@RequestBody NewCategoryDTO dto, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Category savedCategory = categoryService.save(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
+    }
+
+    @PutMapping("category/{id}")
+    public ResponseEntity<Category> updateCategory(@PathVariable int id, @RequestBody NewCategoryDTO dto, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Category oldCategory = categoryService.findById(id);
+        Category updated = categoryService.update(id, dto);
+        notificationService.notifyUsers(userService.findByRole("Provider"), "Updated category\nOLD:\n"+oldCategory.getName()+"\n"+oldCategory.getDescription()+"\nNEW:\n"+updated.getName()+"\n"+updated.getDescription());
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("category/{id}")
+    public ResponseEntity<String> deleteCategory(@PathVariable int id, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Category oldCategory = categoryService.findById(id);
+        if (!offerService.allOffersWithCategory(oldCategory).isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The category must not have any offers using it.");
+        }
+        categoryService.delete(oldCategory);
+        return ResponseEntity.ok("{\"message\": \"Category deleted successfully\"}");
+    }
+
+    @GetMapping("suggestions")
+    public ResponseEntity<PagedResponse<CategorySuggestionDTO>> getAllCategorySuggestions(Pageable page, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Page<CategorySuggestion> suggestions = categorySuggestionService.getPending(page);
+        List<CategorySuggestionDTO> dtos = suggestions.stream()
+                .map(suggestion -> {
+                    try {
+                        return new CategorySuggestionDTO(suggestion);
+                    } catch (Exception e) {
+                        System.err.println("Error converting suggestion to DTO: " + e.getMessage());
+                        return null;
+                    }
+                })
+                .filter(dto -> dto != null)
+                .toList();
+
+        PagedResponse<CategorySuggestionDTO> response = new PagedResponse<>(
+                dtos,
+                suggestions.getTotalPages(),
+                suggestions.getTotalElements()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("suggestion/approve/{id}")
+    public ResponseEntity<CategorySuggestionDTO> approveSuggestion(@PathVariable int id, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        CategorySuggestion suggestion = categorySuggestionService.approve(id);
+        Category c = categoryService.save(suggestion.getName(), suggestion.getDescription());
+        serviceService.update(suggestion.getOffer().getId(), c, Status.ACCEPTED);
+        notificationService.notifyUser(suggestion.getOffer().getProvider(), "Suggestion of new category ("+ suggestion.getName()+", "+suggestion.getDescription()+") has been approved");
+        return ResponseEntity.ok(new CategorySuggestionDTO(suggestion));
+    }
+
+    @PutMapping("suggestion/{id}")
+    public ResponseEntity<CategorySuggestionDTO> updateCategorySuggestion(@PathVariable int id, @RequestBody NewCategoryDTO dto, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        CategorySuggestion updated = categorySuggestionService.update(id, dto);
+        Category c = categoryService.save(updated.getName(), updated.getDescription());
+        serviceService.update(updated.getOffer().getId(), c, Status.ACCEPTED);
+        notificationService.notifyUser(updated.getOffer().getProvider(), "Your suggestion of new category has been changed to ("+ updated.getName()+", "+updated.getDescription()+") and approved");
+        return ResponseEntity.ok(new CategorySuggestionDTO(updated));
+    }
+
+    @PutMapping("suggestion/reject/{id}")
+    public ResponseEntity<CategorySuggestionDTO> deleteCategorySuggestion(@PathVariable int id, @RequestParam String categoryName, HttpServletRequest request) {
+        if(!checkIfAdmin(request)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if(categoryName == null || categoryName.isEmpty()) {
+            throw new IllegalArgumentException("Category name cannot be null or empty");
+        }
+        CategorySuggestion cs = categorySuggestionService.reject(id);
+        serviceService.update(cs.getOffer().getId(), categoryService.findByName(categoryName), Status.ACCEPTED);
+        notificationService.notifyUser(cs.getOffer().getProvider(), "Your suggestion of new category has been rejected. This category is chosen instead ("+ categoryName+") ");
+        return ResponseEntity.ok(new CategorySuggestionDTO(cs));
+    }
+
+    private boolean checkIfAdmin(HttpServletRequest request){
+        String jwtToken = this.tokenUtils.getToken(request);
+        if (jwtToken == null) {
+            return false;
+        }
+        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+        Admin admin = adminService.findByEmail(email);
+        if (admin == null) {
+            return false;
+        }
+        return true;
     }
 }

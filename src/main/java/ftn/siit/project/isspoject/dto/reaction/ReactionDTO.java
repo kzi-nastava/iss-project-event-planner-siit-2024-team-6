@@ -1,0 +1,30 @@
+package ftn.siit.project.isspoject.dto.reaction;
+
+import ftn.siit.project.isspoject.entity.Reaction;
+import lombok.Data;
+
+@Data
+public class ReactionDTO {
+    private Integer id;
+    private String text;
+    private Integer rating;
+    private Integer offerId;
+    private Integer eventId;
+    private Integer userId;
+    private String userName;
+
+    public ReactionDTO(Reaction reaction) {
+        this.id = reaction.getId();
+        this.text = reaction.getText();
+        this.rating = reaction.getRating();
+        this.eventId = null;
+        this.offerId = null;
+        if(reaction.getOffer() != null) {
+            this.offerId = reaction.getOffer().getId();
+        }else if(reaction.getEvent() != null) {
+            this.eventId = reaction.getEvent().getId();
+        }
+        this.userId = reaction.getUser().getId();
+        this.userName = reaction.getUser().getName()+" "+reaction.getUser().getLastname();
+    }
+}
