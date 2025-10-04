@@ -154,45 +154,59 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     public Page<OfferDTO> searchOffers(NewBudgetDTO dto, Pageable pageable) {
-        System.out.println(dto.toString());
         List<Offer> offers = offerRepository.findAll();
 
-        // Shared filtering: accepted, visible, not deleted
         List<Offer> baseOffers = offers.stream()
-                .filter(offer -> offer.getIsDeleted() == null || !offer.getIsDeleted())
-                .filter(Offer::getIsVisible)
-                .filter(offer -> offer.getStatus() == Status.ACCEPTED)
-                .collect(Collectors.toList());
+            .filter(o -> o.getIsDeleted() == null || !o.getIsDeleted())
+            .filter(Offer::getIsVisible)
+            .filter(o -> o.getStatus() == Status.ACCEPTED)
+            .toList();
 
         if (dto.getBudgetItems() == null || dto.getBudgetItems().isEmpty()) {
             return paginateOffers(baseOffers, pageable);
         }
 
-        // Map: category -> remaining budget (max - current)
-        Map<String, Double> categoryMaxPriceMap = dto.getBudgetItems().stream()
-                .collect(Collectors.toMap(
-                        NewBudgetItemDTO::getCategory,
-                        item -> {
-                            double max = item.getMaxPrice() != 0.0 ? item.getMaxPrice() : 0.0;
-                            double curr = item.getCurrPrice() != 0.0 ? item.getCurrPrice() : 0.0;
-                            return max - curr;
-                        }
-                ));
+        Map<String, Double> remainingByCategory = dto.getBudgetItems().stream()
+            .filter(it -> it.getCategory() != null && !it.getCategory().isBlank())
+            .collect(Collectors.toMap(
+                it -> it.getCategory().trim().toUpperCase(),
+                it -> {
+                    double max = it.getMaxPrice();
+                    double curr = it.getCurrPrice();
 
-        List<Offer> filteredOffers = baseOffers.stream()
-                .filter(offer -> {
-                    String category = offer.getCategory().getName();
-                    Double maxAllowed = categoryMaxPriceMap.get(category);
-                    if (maxAllowed == null || maxAllowed < 0.0) return true; // unlimited
-                    Double offerPrice = offer.getPrice() != 0.0 ? offer.getPrice() : Double.MAX_VALUE;
-                    Double offerSale = offer.getSale() != 0.0 ? offer.getSale() : Double.MAX_VALUE;
+                    if (max == 0.0) return Double.POSITIVE_INFINITY;
 
-                    return offerPrice <= maxAllowed || offerSale <= maxAllowed;
-                })
-                .collect(Collectors.toList());
+                    return max - curr; // may be negative if overspent
+                },
+                // Merge policy for duplicates: last-wins (or replace with Double::sum if that's desired)
+                (oldV, newV) -> newV
+            ));
 
-        return paginateOffers(filteredOffers, pageable);
+        List<Offer> filtered = baseOffers.stream()
+            .filter(offer -> {
+                String key = offer.getCategory() != null && offer.getCategory().getName() != null
+                    ? offer.getCategory().getName().trim().toUpperCase()
+                    : null;
+
+                // unlimited if category missing or mapped to +INF or remaining < 0 (overspent -> treat as unlimited)
+                if (key == null) return true;
+                Double remaining = remainingByCategory.get(key);
+                if (remaining == null || remaining.isInfinite() || remaining < 0.0) return true;
+
+                Double price = offer.getPrice(); // may be null if entity uses Double
+                Double sale  = offer.getSale();
+
+                // 0 or null mean "unknown/not applicable" → treat as very large (won't pass unless unlimited)
+                double effPrice = (price == null || price == 0.0) ? Double.MAX_VALUE : price;
+                double effSale  = (sale  == null || sale  == 0.0) ? Double.MAX_VALUE : sale;
+
+                return effPrice <= remaining || effSale <= remaining;
+            })
+            .toList();
+
+        return paginateOffers(filtered, pageable);
     }
+
 
     private Page<OfferDTO> paginateOffers(List<Offer> offers, Pageable pageable) {
         int start = (int) pageable.getOffset();

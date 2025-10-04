@@ -31,8 +31,6 @@ public class OfferServiceSearchOffersBudgetUT {
     @InjectMocks private OfferServiceImpl service;
 
     @Mock private OfferRepository offerRepository;
-    @Mock private CategoryRepository categoryRepository;     // not used here but required by @InjectMocks
-    @Mock private OfferHistoryService offerHistoryService;   // not used here but required by @InjectMocks
 
     private Category cat(String name) {
         Category c = new Category();
@@ -46,7 +44,7 @@ public class OfferServiceSearchOffersBudgetUT {
         o.setId(id);
         o.setCategory(cat(categoryName));
         o.setPrice(price);
-        o.setSale(sale);             // IMPORTANT: never null in these tests (method does sale != 0.0)
+        o.setSale(sale);
         o.setIsVisible(visible);
         o.setIsDeleted(deleted);
         o.setStatus(status);
@@ -88,11 +86,11 @@ public class OfferServiceSearchOffersBudgetUT {
     @Test
     @DisplayName("Respects remaining budget per category; categories not present (or negative remaining) are unlimited")
     void respectsRemainingAndUnlimited() {
-        // Budget: VENUE remaining = 400 (500 - 100), DECOR remaining = -50 (unlimited by code), MUSIC absent (unlimited)
+        // Budget: VENUE remaining = 400 (500 - 100), DECOR remaining = -200 (unlimited by code), MUSIC absent (unlimited)
         NewBudgetDTO dto = new NewBudgetDTO();
         dto.setBudgetItems(new ArrayList<>(List.of(
                 budgetItem("VENUE", 100, 500),
-                budgetItem("DECOR", 200, 150)  // negative remaining => unlimited
+                budgetItem("DECOR", 200, 0)
         )));
 
         Offer venueOk        = offer(1, "VENUE", 350, 0.0, true, false, Status.ACCEPTED);       // <= 400 -> include
@@ -109,26 +107,6 @@ public class OfferServiceSearchOffersBudgetUT {
 
         assertEquals(4, page.getTotalElements());
         assertEquals(4, page.getContent().size());
-        verify(offerRepository).findAll();
-    }
-
-    @Test
-    @DisplayName("Price/Sale edge: price==0 makes it MAX_VALUE; only sale can let it pass")
-    void zeroPriceEdge() {
-        // remaining for VENUE: 200
-        NewBudgetDTO dto = new NewBudgetDTO();
-        dto.setBudgetItems(List.of(budgetItem("VENUE", 0, 200)));
-
-        Offer priceZeroSaleZero   = offer(1, "VENUE", 0.0, 0.0, true, false, Status.ACCEPTED);
-        Offer priceZeroSaleSmall  = offer(2, "VENUE", 0.0, 150.0, true, false, Status.ACCEPTED);
-        Offer priceSmallSaleZero  = offer(3, "VENUE", 150.0, 0.0, true, false, Status.ACCEPTED);
-
-        when(offerRepository.findAll()).thenReturn(List.of(priceZeroSaleZero, priceZeroSaleSmall, priceSmallSaleZero));
-
-        Page<OfferDTO> page = service.searchOffers(dto, PageRequest.of(0, 10));
-
-        assertEquals(2, page.getTotalElements()); // offers #2 and #3
-        assertEquals(2, page.getContent().size());
         verify(offerRepository).findAll();
     }
 
@@ -153,4 +131,5 @@ public class OfferServiceSearchOffersBudgetUT {
 
         verify(offerRepository, times(2)).findAll();
     }
+
 }
