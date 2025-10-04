@@ -77,6 +77,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Boolean checkIfEventHasPassed(int budgetId, Organizer organizer) {
+        if (organizer == null) {
+            throw new IllegalArgumentException("Organizer is required");
+        }
         for (Event event : eventRepository.findByOrganizer(organizer)) {
             if(event.getBudget().getId() == budgetId) {
                 if(event.getDate().isAfter(LocalDateTime.now())) {

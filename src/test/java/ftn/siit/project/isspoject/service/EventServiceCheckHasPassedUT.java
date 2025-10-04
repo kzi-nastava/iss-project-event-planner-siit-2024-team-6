@@ -97,4 +97,12 @@ class EventServiceCheckHasPassedUT {
         assertTrue(ex.getMessage().contains("303"));
         verify(eventRepository).findByOrganizer(organizer);
     }
+
+    @Test
+    @DisplayName("throws IllegalArgumentException when organizer is null")
+    void organizerNull_throws() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.checkIfEventHasPassed(1, null));
+    }
+
 }
