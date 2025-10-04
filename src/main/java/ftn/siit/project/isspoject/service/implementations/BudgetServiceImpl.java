@@ -28,20 +28,12 @@ public class BudgetServiceImpl implements BudgetService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    @Override
-    public Budget removeItem(int id, Category category) {
-        Budget b = findById(id);
-        for(BudgetItem bi : b.getBudgetItems()) {
-            if(bi.getCategory().equals(category)){
-                b.getBudgetItems().remove(bi);
-                return update(b);
-            }
-        }
-        return b;
-    }
 
   @Override
     public BudgetItem addItemToBudget(int budgetId, String category, double price) {
+        if (price <= 0.0) {
+            throw new IllegalArgumentException("Price must be greater than zero");
+        }
         Budget b = findById(budgetId);
 
         for (BudgetItem bi : b.getBudgetItems()) {

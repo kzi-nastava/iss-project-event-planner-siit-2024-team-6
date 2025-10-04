@@ -10,7 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -44,10 +45,11 @@ class BudgetServiceUT {
         budget.setAvailable(0.0);
         budget.setTotal(0.0);
 
+        // Default behavior: findById returns our in-memory budget; save echoes input
         lenient().when(budgetRepository.findById(anyInt()))
-           .thenReturn(Optional.of(budget));
+            .thenReturn(Optional.of(budget));
         lenient().when(budgetRepository.save(any(Budget.class)))
-           .thenAnswer(inv -> inv.getArgument(0));
+            .thenAnswer(inv -> inv.getArgument(0));
     }
 
     private Category cat(String name) {
@@ -65,14 +67,12 @@ class BudgetServiceUT {
         return bi;
     }
 
-    // add new item to budget
     @Test
-    @DisplayName("addItemToBudget: adds new category item and recalculate totals")
+    @DisplayName("addItemToBudget: adds new category item and recalculates totals")
     void addItemToBudget_success() {
-        // create new category
         Category venue = cat("VENUE");
         when(categoryRepository.findByNameIgnoreCaseAndIsDeletedIsFalse(eq("VENUE")))
-                .thenReturn(venue);
+            .thenReturn(venue);
 
         BudgetItem created = budgetService.addItemToBudget(BUDGET_ID, "VENUE", 500.0);
 
@@ -95,38 +95,68 @@ class BudgetServiceUT {
         budget.getBudgetItems().add(item(10, venue, 0.0, 100.0));
 
         IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> budgetService.addItemToBudget(BUDGET_ID, "VENUE", 500.0)
+            IllegalArgumentException.class,
+            () -> budgetService.addItemToBudget(BUDGET_ID, "VENUE", 500.0)
         );
         assertTrue(ex.getMessage().toLowerCase().contains("already"));
-        verifyNoInteractions(categoryRepository); // repo shouldn’t be called once duplicate found
+        verifyNoInteractions(categoryRepository); // should not hit repository after duplicate detected
     }
 
     @Test
     @DisplayName("addItemToBudget: fails if category not found in master repo")
     void addItemToBudget_categoryNotFound_throws() {
         when(categoryRepository.findByNameIgnoreCaseAndIsDeletedIsFalse(eq("FOOD")))
-                .thenReturn(null);
+            .thenReturn(null);
 
         IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> budgetService.addItemToBudget(BUDGET_ID, "FOOD", 120.0)
+            IllegalArgumentException.class,
+            () -> budgetService.addItemToBudget(BUDGET_ID, "FOOD", 120.0)
         );
         assertTrue(ex.getMessage().toLowerCase().contains("not found"));
     }
 
-    // update budget item
+    @Test
+    @DisplayName("addItemToBudget: rejects non-positive price (<= 0)")
+    void addItemToBudget_nonPositivePrice_throws() {
+        IllegalArgumentException ex1 = assertThrows(
+            IllegalArgumentException.class,
+            () -> budgetService.addItemToBudget(BUDGET_ID, "STAGE", 0.0)
+        );
+        assertTrue(ex1.getMessage().toLowerCase().contains("greater than zero"));
+
+        IllegalArgumentException ex2 = assertThrows(
+            IllegalArgumentException.class,
+            () -> budgetService.addItemToBudget(BUDGET_ID, "STAGE", -50.0)
+        );
+        assertTrue(ex2.getMessage().toLowerCase().contains("greater than zero"));
+    }
+
+    @Test
+    @DisplayName("addItemToBudget: rejects null/blank category name")
+    void addItemToBudget_blankCategory_throws() {
+        IllegalArgumentException ex1 = assertThrows(
+            IllegalArgumentException.class,
+            () -> budgetService.addItemToBudget(BUDGET_ID, null, 100.0)
+        );
+        assertTrue(ex1.getMessage().toLowerCase().contains("category"));
+
+        IllegalArgumentException ex2 = assertThrows(
+            IllegalArgumentException.class,
+            () -> budgetService.addItemToBudget(BUDGET_ID, "   ", 100.0)
+        );
+        assertTrue(ex2.getMessage().toLowerCase().contains("category"));
+    }
+
 
     @Test
     @DisplayName("updateBudgetItem: updates max price when valid")
     void updateBudgetItem_success() {
         Category c = cat("MUSIC");
-        budget.getBudgetItems().add(item(7, c, 100.0, 150.0)); // curr<=price OK
+        budget.getBudgetItems().add(item(7, c, 100.0, 150.0)); // curr <= price OK
 
         BudgetItem updated = budgetService.updateBudgetItem(BUDGET_ID, 7, 200.0);
 
         assertEquals(200.0, updated.getMaxPrice(), 1e-6);
-        // totals recomputed: only one item [curr=100, max=200]
         assertEquals(200.0, budget.getTotal(), 1e-6);
         assertEquals(100.0, budget.getAvailable(), 1e-6);
     }
@@ -134,11 +164,17 @@ class BudgetServiceUT {
     @Test
     @DisplayName("updateBudgetItem: rejects non-positive price")
     void updateBudgetItem_nonPositivePrice_throws() {
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> budgetService.updateBudgetItem(BUDGET_ID, 1, 0.0)
+        IllegalArgumentException ex1 = assertThrows(
+            IllegalArgumentException.class,
+            () -> budgetService.updateBudgetItem(BUDGET_ID, 1, 0.0)
         );
-        assertTrue(ex.getMessage().toLowerCase().contains("greater than zero"));
+        assertTrue(ex1.getMessage().toLowerCase().contains("greater than zero"));
+
+        IllegalArgumentException ex2 = assertThrows(
+            IllegalArgumentException.class,
+            () -> budgetService.updateBudgetItem(BUDGET_ID, 1, -50.0)
+        );
+        assertTrue(ex2.getMessage().toLowerCase().contains("greater than zero"));
     }
 
     @Test
@@ -148,8 +184,8 @@ class BudgetServiceUT {
         budget.getBudgetItems().add(item(11, c, 80.0, 120.0));
 
         IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> budgetService.updateBudgetItem(BUDGET_ID, 11, 50.0)
+            IllegalArgumentException.class,
+            () -> budgetService.updateBudgetItem(BUDGET_ID, 11, 50.0)
         );
         assertTrue(ex.getMessage().toLowerCase().contains("spent"));
     }
@@ -161,16 +197,15 @@ class BudgetServiceUT {
         budget.getBudgetItems().add(item(11, c, 10.0, 20.0));
 
         IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> budgetService.updateBudgetItem(BUDGET_ID, 999, 50.0)
+            IllegalArgumentException.class,
+            () -> budgetService.updateBudgetItem(BUDGET_ID, 999, 50.0)
         );
         assertTrue(ex.getMessage().toLowerCase().contains("not found"));
     }
 
-    // removing an item of a budget
 
     @Test
-    @DisplayName("removeBudgetItem: removes item when not purchased")
+    @DisplayName("removeBudgetItem: removes item when nothing is purchased under it")
     void removeBudgetItem_success() {
         Category c = cat("DECOR");
         budget.getBudgetItems().add(item(5, c, 0.0, 300.0));
@@ -178,21 +213,20 @@ class BudgetServiceUT {
         budgetService.removeBudgetItem(BUDGET_ID, 5);
 
         assertTrue(budget.getBudgetItems().stream().noneMatch(bi -> bi.getId() == 5));
-        // totals recomputed (list now empty)
         assertEquals(0.0, budget.getTotal(), 1e-6);
         assertEquals(0.0, budget.getAvailable(), 1e-6);
         verify(budgetRepository, atLeastOnce()).save(budget);
     }
 
     @Test
-    @DisplayName("removeBudgetItem: fails if already purchased (currPrice > 0)")
+    @DisplayName("removeBudgetItem: fails if something has been already purchased (currPrice > 0)")
     void removeBudgetItem_purchased_throws() {
         Category c = cat("DECOR");
-        budget.getBudgetItems().add(item(5, c, 10.0, 300.0)); // purchased
+        budget.getBudgetItems().add(item(5, c, 10.0, 300.0));
 
         IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> budgetService.removeBudgetItem(BUDGET_ID, 5)
+            IllegalArgumentException.class,
+            () -> budgetService.removeBudgetItem(BUDGET_ID, 5)
         );
         assertTrue(ex.getMessage().toLowerCase().contains("cannot be deleted"));
     }
@@ -201,8 +235,8 @@ class BudgetServiceUT {
     @DisplayName("removeBudgetItem: fails if item not found")
     void removeBudgetItem_notFound_throws() {
         IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> budgetService.removeBudgetItem(BUDGET_ID, 123)
+            IllegalArgumentException.class,
+            () -> budgetService.removeBudgetItem(BUDGET_ID, 123)
         );
         assertTrue(ex.getMessage().toLowerCase().contains("not found"));
     }
@@ -217,9 +251,7 @@ class BudgetServiceUT {
 
         Budget updatedBudget = budgetService.addNewItem(c, 50.0, BUDGET_ID);
 
-        // existing modified in place
         assertEquals(90.0, existing.getCurrPrice(), 1e-6);
-        // totals recomputed
         assertEquals(100.0, updatedBudget.getTotal(), 1e-6);
         assertEquals(10.0, updatedBudget.getAvailable(), 1e-6);
     }
@@ -231,8 +263,8 @@ class BudgetServiceUT {
         budget.getBudgetItems().add(item(20, c, 90.0, 100.0));
 
         IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> budgetService.addNewItem(c, 20.0, BUDGET_ID) // 90 + 20 > 100
+            IllegalArgumentException.class,
+            () -> budgetService.addNewItem(c, 20.0, BUDGET_ID) // 90 + 20 > 100
         );
         assertTrue(ex.getMessage().toLowerCase().contains("enough allocated funds"));
     }
@@ -245,9 +277,9 @@ class BudgetServiceUT {
         Budget updated = budgetService.addNewItem(c, 75.0, BUDGET_ID);
 
         BudgetItem created = updated.getBudgetItems().stream()
-                .filter(bi -> bi.getCategory() == c) // SAME instance match by reference
-                .findFirst()
-                .orElseThrow();
+            .filter(bi -> bi.getCategory() == c) // match same instance for this test
+            .findFirst()
+            .orElseThrow();
 
         assertEquals(75.0, created.getCurrPrice(), 1e-6);
         assertEquals(0.0, created.getMaxPrice(), 1e-6);
@@ -256,31 +288,37 @@ class BudgetServiceUT {
     }
 
     @Test
-    @DisplayName("removeItem: removes first matching category and updates")
-    void removeItem_success() {
-        Category c = cat("SOUND");
-        budget.getBudgetItems().add(item(1, c, 0.0, 200.0));
-        budget.getBudgetItems().add(item(2, cat("OTHER"), 0.0, 50.0));
+    @DisplayName("addNewItem: unlimited max (0) allows any spend")
+    void addNewItem_unlimitedMax_allowsLargeSpend() {
+        Category c = cat("UNLIMITED");
+        budget.getBudgetItems().add(item(33, c, 10.0, 0.0)); // max=0 => unlimited
 
-        Budget updated = budgetService.removeItem(BUDGET_ID, c);
+        Budget updated = budgetService.addNewItem(c, 10_000.0, BUDGET_ID);
 
-        assertTrue(updated.getBudgetItems().stream().noneMatch(bi -> bi.getCategory() == c));
-        assertEquals(50.0, updated.getTotal(), 1e-6);
-        assertEquals(50.0, updated.getAvailable(), 1e-6);
+        BudgetItem bi = updated.getBudgetItems().stream()
+            .filter(x -> x.getCategory() == c)
+            .findFirst()
+            .orElseThrow();
+
+        assertEquals(10_010.0, bi.getCurrPrice(), 1e-6);
+        // total is sum of max (0), available = total - spent
+        assertEquals(0.0, updated.getTotal(), 1e-6);
+        assertEquals(-10_010.0, updated.getAvailable(), 1e-6);
     }
 
+
     @Test
-    @DisplayName("removeItem: no-op when category not present (returns same budget)")
-    void removeItem_categoryNotPresent_noop() {
-        budget.getBudgetItems().add(item(2, cat("OTHER"), 0.0, 50.0));
-        budget.setAvailable(50.0);
-        budget.setTotal(50.0);
+    @DisplayName("totals: recomputed across multiple items after updates")
+    void totals_recompute_multipleItems() {
+        Category c1 = cat("C1");
+        Category c2 = cat("C2");
+        budget.getBudgetItems().add(item(1, c1, 20.0, 100.0)); // available = 80
+        budget.getBudgetItems().add(item(2, c2, 10.0, 50.0));  // available = 40
 
-        Budget updated = budgetService.removeItem(BUDGET_ID, cat("NOPE"));
+        budgetService.updateBudgetItem(BUDGET_ID, 2, 70.0);
 
-        assertEquals(1, updated.getBudgetItems().size());
-        assertEquals(50.0, updated.getTotal(), 1e-6);
-        assertEquals(50.0, updated.getAvailable(), 1e-6);
+        assertEquals(170.0, budget.getTotal(), 1e-6);
+        assertEquals(140.0, budget.getAvailable(), 1e-6); // (100-20)+(70-10)=80+60
     }
 
 
@@ -296,8 +334,6 @@ class BudgetServiceUT {
         verify(budgetRepository).save(incoming);
     }
 
-
-
     @Test
     @DisplayName("update path: throws if budget missing before save (consistency check)")
     void update_missingBudget_throws() {
@@ -308,8 +344,8 @@ class BudgetServiceUT {
         when(budgetRepository.findById(eq(404))).thenReturn(Optional.empty());
 
         IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> budgetService.removeBudgetItem(404, 1)
+            IllegalArgumentException.class,
+            () -> budgetService.removeBudgetItem(404, 1)
         );
         assertTrue(ex.getMessage().toLowerCase().contains("not found"));
     }

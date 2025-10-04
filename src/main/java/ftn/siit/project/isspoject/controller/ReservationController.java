@@ -110,7 +110,6 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservation(@PathVariable Integer id) {
         Reservation reservation = reservationService.findById(id);
         reservation.setCanceled(true);
-        budgetService.removeItem(reservation.getEvent().getBudget().getId(), reservation.getOfferService().getCategory());
         reservationService.save(reservation);
         return ResponseEntity.noContent().build();
     }
