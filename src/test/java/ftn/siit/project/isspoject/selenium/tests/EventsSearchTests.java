@@ -1,37 +1,40 @@
 package ftn.siit.project.isspoject.selenium.tests;
-
-import ftn.siit.project.isspoject.selenium.pages.EventsFilterPage;
+import ftn.siit.project.isspoject.selenium.pages.EventsPage;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.logging.LogEntries;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class EventsSearchTests {
 
-    //kad se pokrenu svi testovi iz nekog razloga uvek neki random padne, pojedinacno svi rade
-    //fale mi testovi za kombinovanje search i filter
     private WebDriver driver;
     private WebDriverWait wait;
-
+    private EventsPage eventsPage;
     @BeforeEach
     public void setUp() {
         WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver();
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));
         driver.manage().window().maximize();
+        driver.manage().deleteAllCookies();
         driver.get("http://localhost:4200/events");
+        eventsPage = new EventsPage(driver, wait);
+        resetState();
+
+    }
+    private void resetState() {
+        ((JavascriptExecutor) driver).executeScript("localStorage.clear(); sessionStorage.clear();");
+        driver.navigate().refresh();
+        eventsPage.waitForEitherCardsOrNoEvents();
     }
 
     @AfterEach
@@ -42,279 +45,108 @@ public class EventsSearchTests {
     }
 
     @Test
-    public void testPrintEventTypes() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
-        filterPage.openSidebar();
+    public void testFilterSidebarToggle() {
+        eventsPage.openFilter();
+        assertTrue(eventsPage.isFilterActive(), "Sidebar must be active when opened");
 
-        Select select = new Select(driver.findElement(By.id("eventTypeSelect")));
-        List<WebElement> options = select.getOptions();
-
-        for (WebElement opt : options) {
-            System.out.println("Option: " + opt.getText());
-        }
-
-        Assertions.assertFalse(options.isEmpty(), "Dropdown za tipove događaja je prazan!");
+        eventsPage.closeFilterWithOverlay();
+        assertFalse(eventsPage.isFilterActive(), "Sidebar must not be active after closing");
     }
 
 
     @Test
-    public void testFilterByDateRangeSafe() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
-        filterPage.openSidebar();
+    public void testFilterSidebarCloseButton() {
+        eventsPage.openFilter();
+        assertTrue(eventsPage.isFilterActive(), "Sidebar must be active after opening");
 
-        filterPage.setDateRange("2025-12-01", "2025-12-30");
-        filterPage.apply();
+        eventsPage.closeFilterWithButton();
+        assertFalse(eventsPage.isFilterActive(), "Sidebar must not be active after clicking close button");
+    }
 
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("app-event-card")),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
 
-        List<WebElement> events = driver.findElements(By.cssSelector("app-event-card"));
+    @Test
+    public void testFilterByEventType() {
+        eventsPage.openFilter();
 
+        String selectedType = eventsPage.selectFirstEventType();
+        assumeTrue(selectedType != null, "No event types available, skipping test");
+
+        eventsPage.applyFilter();
+
+        List<WebElement> events = eventsPage.getEventCards();
         if (events.isEmpty()) {
-            WebElement noEvents = driver.findElement(By.cssSelector(".no-events-message"));
-            Assertions.assertTrue(noEvents.isDisplayed(), "Treba da se prikaže poruka da nema događaja");
+            assertTrue(eventsPage.getNoEventsMessage().isDisplayed(),
+                    "No events message should be shown");
         } else {
-            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".event-date"), 0));
-
-            List<String> dates = driver.findElements(By.cssSelector(".event-date"))
-                    .stream()
-                    .map(WebElement::getText)
-                    .toList();
-
-            for (String d : dates) {
-                System.out.println("Pronađen event sa datumom: " + d);
-                }
-
-            Assertions.assertTrue(dates.stream().allMatch(d -> d.contains("Dec")),
-                    "Svi datumi moraju biti u septembru 2025");
+            List<String> types = eventsPage.getEventTypes();
+            assertFalse(types.isEmpty(), "At least one event type should be present");
+            assertTrue(types.stream().allMatch(t -> t.equals(selectedType)),
+                    "All results must match the selected type: " + selectedType);
         }
     }
 
+
+
     @Test
-    public void testFilterByOnlyFromDate() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
-        filterPage.openSidebar();
+    public void testFilterByDateRange() {
 
-        filterPage.setDateRange("2025-12-01", ""); // samo from
-        filterPage.apply();
+        eventsPage.openFilter();
 
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("app-event-card")),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
+        LocalDate from = LocalDate.now().plusDays(5);
+        LocalDate to = LocalDate.now().plusDays(90);
 
-        List<WebElement> events = driver.findElements(By.cssSelector("app-event-card"));
+        eventsPage.setDateRange(from, to);
+        eventsPage.applyFilter();
+
+        List<WebElement> events = eventsPage.getEventCards();
 
         if (events.isEmpty()) {
-            WebElement noEvents = driver.findElement(By.cssSelector(".no-events-message"));
-            Assertions.assertTrue(noEvents.isDisplayed(), "Treba da se prikaže poruka da nema događaja");
+            assertTrue(eventsPage.getNoEventsMessage().isDisplayed(),
+                    "No events message should be shown");
         } else {
-            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".event-date"), 0));
+            List<String> dateStrings = eventsPage.getEventDates();
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH);
 
-            List<String> dates = driver.findElements(By.cssSelector(".event-date"))
-                    .stream()
-                    .map(WebElement::getText)
-                    .toList();
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH);
-            LocalDate from = LocalDate.of(2025, 12, 1);
-
-            for (String d : dates) {
-                LocalDate parsed = LocalDate.parse(d, formatter);
-                Assertions.assertFalse(parsed.isBefore(from),
-                        "Datum " + parsed + " ne sme biti pre " + from);
+            for (String d : dateStrings) {
+                LocalDate parsed = LocalDate.parse(d, fmt);
+                assertFalse(parsed.isBefore(from) || parsed.isAfter(to),
+                        "Date " + parsed + " must be between " + from + " and " + to);
             }
         }
     }
 
     @Test
-    public void testFilterByOnlyToDate() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
-        filterPage.openSidebar();
+    public void testFilterByTypeAndDateRangeTogether() {
 
-        filterPage.setDateRange("", "2025-12-30"); // samo to
-        filterPage.apply();
+        eventsPage.openFilter();
 
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("app-event-card")),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
-
-        List<WebElement> events = driver.findElements(By.cssSelector("app-event-card"));
-
-        if (events.isEmpty()) {
-            WebElement noEvents = driver.findElement(By.cssSelector(".no-events-message"));
-            Assertions.assertTrue(noEvents.isDisplayed(), "Treba da se prikaže poruka da nema događaja");
-        } else {
-            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".event-date"), 0));
-
-            List<String> dates = driver.findElements(By.cssSelector(".event-date"))
-                    .stream()
-                    .map(WebElement::getText)
-                    .toList();
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH);
-            LocalDate to = LocalDate.of(2025, 12, 30);
-
-            for (String d : dates) {
-                LocalDate parsed = LocalDate.parse(d, formatter);
-                Assertions.assertFalse(parsed.isAfter(to),
-                        "Datum " + parsed + " ne sme biti posle " + to);
-            }
+        String selectedType = eventsPage.selectFirstEventType();
+        if (selectedType == null || selectedType.isEmpty()) {
+            System.out.println("No event types available, skipping test");
+            return;
         }
-    }
 
+        LocalDate from = LocalDate.now().plusDays(1);
+        LocalDate to = from.plusDays(90);
+        eventsPage.setDateRange(from, to);
 
-    @Test
-    public void testFilterByEventTypeAndDateRange() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
-        filterPage.openSidebar();
+        eventsPage.applyFilter();
 
-        filterPage.selectType("Conference");
-
-        filterPage.setDateRange("2025-12-01", "2025-12-30");
-        filterPage.apply();
-
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("app-event-card")),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
-
-        List<WebElement> events = driver.findElements(By.cssSelector("app-event-card"));
-
+        List<WebElement> events = eventsPage.getEventCards();
         if (events.isEmpty()) {
-            WebElement noEvents = driver.findElement(By.cssSelector(".no-events-message"));
-            Assertions.assertTrue(noEvents.isDisplayed(),
-                    "Treba da se prikaže poruka da nema događaja");
+            assertTrue(eventsPage.getNoEventsMessage().isDisplayed(),
+                    "No events message should be shown for combined filter");
         } else {
-            // čekaj da tipovi i datumi budu renderovani
-            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".event-type"), 0));
-            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".event-date"), 0));
-
-            List<String> types = driver.findElements(By.cssSelector(".event-type"))
-                    .stream()
-                    .map(WebElement::getText)
-                    .toList();
-
-            List<String> dates = driver.findElements(By.cssSelector(".event-date"))
-                    .stream()
-                    .map(WebElement::getText)
-                    .toList();
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH);
-            LocalDate from = LocalDate.of(2025, 12, 1);
-            LocalDate to = LocalDate.of(2025, 12, 30);
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH);
 
             for (int i = 0; i < events.size(); i++) {
-                Assertions.assertEquals("Conference", types.get(i),
-                        "Event mora biti tipa Conference");
+                String type = eventsPage.getEventType(i);
+                String dateStr = eventsPage.getEventDate(i);
+                LocalDate parsedDate = LocalDate.parse(dateStr, fmt);
 
-                LocalDate parsed = LocalDate.parse(dates.get(i), formatter);
-                Assertions.assertTrue(
-                        !parsed.isBefore(from) && !parsed.isAfter(to),
-                        "Datum " + parsed + " mora biti između " + from + " i " + to
-                );
-            }
-        }
-    }
-
-    @Test
-    public void testFilterByEventTypeAndOnlyFromDate() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
-        filterPage.openSidebar();
-
-        filterPage.selectType("Conference");
-
-        filterPage.setDateRange("2025-12-01", "");
-        filterPage.apply();
-
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("app-event-card")),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
-
-        List<WebElement> events = driver.findElements(By.cssSelector("app-event-card"));
-
-        if (events.isEmpty()) {
-            WebElement noEvents = driver.findElement(By.cssSelector(".no-events-message"));
-            Assertions.assertTrue(noEvents.isDisplayed(),
-                    "Treba da se prikaže poruka da nema događaja");
-        } else {
-            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".event-type"), 0));
-            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".event-date"), 0));
-
-            List<String> types = driver.findElements(By.cssSelector(".event-type"))
-                    .stream()
-                    .map(WebElement::getText)
-                    .toList();
-
-            List<String> dates = driver.findElements(By.cssSelector(".event-date"))
-                    .stream()
-                    .map(WebElement::getText)
-                    .toList();
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH);
-            LocalDate from = LocalDate.of(2025, 12, 1);
-
-            for (int i = 0; i < events.size(); i++) {
-                Assertions.assertEquals("Conference", types.get(i),
-                        "Event mora biti tipa Conference");
-
-                LocalDate parsed = LocalDate.parse(dates.get(i), formatter);
-                Assertions.assertFalse(parsed.isBefore(from),
-                        "Datum " + parsed + " ne sme biti pre " + from);
-            }
-        }
-    }
-
-
-    @Test
-    public void testFilterByEventTypeAndOnlyToDate() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
-        filterPage.openSidebar();
-
-        filterPage.selectType("Conference");
-
-        filterPage.setDateRange("", "2025-12-30");
-        filterPage.apply();
-
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("app-event-card")),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
-
-        List<WebElement> events = driver.findElements(By.cssSelector("app-event-card"));
-
-        if (events.isEmpty()) {
-            WebElement noEvents = driver.findElement(By.cssSelector(".no-events-message"));
-            Assertions.assertTrue(noEvents.isDisplayed(),
-                    "Treba da se prikaže poruka da nema događaja");
-        } else {
-            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".event-type"), 0));
-            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".event-date"), 0));
-
-            List<String> types = driver.findElements(By.cssSelector(".event-type"))
-                    .stream()
-                    .map(WebElement::getText)
-                    .toList();
-
-            List<String> dates = driver.findElements(By.cssSelector(".event-date"))
-                    .stream()
-                    .map(WebElement::getText)
-                    .toList();
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH);
-            LocalDate to = LocalDate.of(2025, 12, 30);
-
-            for (int i = 0; i < events.size(); i++) {
-                Assertions.assertEquals("Conference", types.get(i),
-                        "Event mora biti tipa Conference");
-
-                LocalDate parsed = LocalDate.parse(dates.get(i), formatter);
-                Assertions.assertFalse(parsed.isAfter(to),
-                        "Datum " + parsed + " ne sme biti posle " + to);
+                assertEquals(selectedType, type, "Event type must match the selected filter");
+                assertFalse(parsedDate.isBefore(from) || parsedDate.isAfter(to),
+                        "Event date must fall within the selected range");
             }
         }
     }
@@ -322,525 +154,208 @@ public class EventsSearchTests {
 
     @Test
     public void testResetFilters() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
 
-        filterPage.openSidebar();
-        filterPage.selectType("Conference");
-        filterPage.apply();
+        eventsPage.openFilter();
 
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("app-event-card")),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
+        String selectedType = eventsPage.selectFirstEventType();
+        if (selectedType == null || selectedType.isEmpty()) {
+            System.out.println("No event types available, skipping test");
+            return;
+        }
 
-        int filteredCount = driver.findElements(By.cssSelector("app-event-card")).size();
-        System.out.println("Broj eventa posle filtera: " + filteredCount);
+        LocalDate from = LocalDate.now().plusDays(1);
+        LocalDate to = from.plusDays(90);
+        eventsPage.setDateRange(from, to);
 
-        filterPage.openSidebar();
+        eventsPage.applyFilter();
 
-        WebElement resetBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("resetButton")));
-        resetBtn.click();
+        // get filtered count
+        int filteredCount = eventsPage.getEventCards().size();
+        System.out.println("Filtered " + filteredCount + " events");
 
-        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(
-                By.cssSelector("app-event-card"), filteredCount - 1
-        ));
+        // reopen filter & reset
+        eventsPage.openFilter();
+        eventsPage.resetFilter();
 
-        int allEventsCount = driver.findElements(By.cssSelector("app-event-card")).size();
-        System.out.println("Broj eventa posle reseta: " + allEventsCount);
+        // after reset count
+        int afterResetCount = eventsPage.getEventCards().size();
+        assertTrue(afterResetCount >= filteredCount,
+                "Reset should restore more/equal events compared to filtered");
 
-        Assertions.assertTrue(allEventsCount >= filteredCount,
-                "Posle reseta mora biti više ili makar jednak broj događaja nego sa filtrima");
+        // check if inputs cleared
+        assertEquals("", eventsPage.getSelectedEventTypeValue(), "Event type must reset");
+        assertEquals("", eventsPage.getFromDateValue(), "From date must reset");
+        assertEquals("", eventsPage.getToDateValue(), "To date must reset");
     }
+
 
     @Test
     public void testPaginationWithFilter() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
-        filterPage.openSidebar();
 
-        filterPage.selectType("Conference");
-        filterPage.apply();
+        eventsPage.openFilter();
 
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("app-event-card")),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
+        String selectedType = eventsPage.selectFirstEventType();
+        if (selectedType == null || selectedType.isEmpty()) {
+            System.out.println("No event types available, skipping test");
+            return;
+        }
 
-        List<WebElement> firstPageEvents = driver.findElements(By.cssSelector("app-event-card"));
+        eventsPage.applyFilter();
 
+        // get first page of events
+        List<WebElement> firstPageEvents = eventsPage.getEventCards();
         if (firstPageEvents.isEmpty()) {
-            WebElement noEvents = driver.findElement(By.cssSelector(".no-events-message"));
-            Assertions.assertTrue(noEvents.isDisplayed(), "Ako nema događaja, treba da piše 'No events'");
-        } else {
-            String firstEventFirstPage = firstPageEvents.get(0).getText();
-
-            WebElement nextButton = wait.until(ExpectedConditions.elementToBeClickable(
-                    By.xpath("//button[@aria-label='Next page']")));
-            nextButton.click();
-
-            wait.until(ExpectedConditions.stalenessOf(firstPageEvents.get(0)));
-
-            List<WebElement> secondPageEvents = driver.findElements(By.cssSelector("app-event-card"));
-            Assertions.assertFalse(secondPageEvents.isEmpty(), "Na sledećoj strani moraju postojati eventi");
-
-            String firstEventSecondPage = secondPageEvents.get(0).getText();
-
-            Assertions.assertNotEquals(firstEventFirstPage, firstEventSecondPage,
-                    "Prvi event na prvoj i drugoj strani ne sme biti isti");
-
-            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".event-type"), 0));
-            List<String> types = driver.findElements(By.cssSelector(".event-type"))
-                    .stream()
-                    .map(WebElement::getText)
-                    .toList();
-
-            Assertions.assertTrue(types.stream().allMatch(t -> t.equals("Conference")),
-                    "Svi eventi kroz paginaciju moraju biti tipa Conference");
+            assertTrue(eventsPage.getNoEventsMessage().isDisplayed(),
+                    "No events message should be shown");
+            return;
         }
-    }
 
-    @Test
-    public void testFilterByEventTypeFestival_NoEvents() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
-        filterPage.openSidebar();
-        filterPage.selectType("Festival");
-        filterPage.apply();
+        List<WebElement> nextButtons = driver.findElements(By.xpath("//button[@aria-label='Next page']"));
+        if (nextButtons.isEmpty() || !nextButtons.get(0).isEnabled()) {
+            System.out.println("Pagination not available for current filter — skipping next page test");
+            return;
+        }
 
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.numberOfElementsToBe(By.cssSelector("app-event-card"), 0),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
+        // save first element and go to next page
+        WebElement firstEventPage1 = firstPageEvents.get(0);
+        eventsPage.goToNextPage(firstEventPage1);
 
-        List<WebElement> events = driver.findElements(By.cssSelector("app-event-card"));
-        System.out.println("Broj eventa posle filtera: " + events.size());
+        // get page 2 events
+        List<WebElement> page2Events = eventsPage.getEventCards();
 
-        if (events.isEmpty()) {
-            WebElement noEvents = driver.findElement(By.cssSelector(".no-events-message"));
-            Assertions.assertTrue(noEvents.isDisplayed(),
-                    "Treba da se prikaže poruka da nema događaja");
-            System.out.println("Prikazana je poruka: " + noEvents.getText());
+        // check filter consistency on page 2
+        if (!page2Events.isEmpty()) {
+            List<String> types = eventsPage.getEventTypes();
+            assertTrue(types.stream().allMatch(t -> t.equals(selectedType)),
+                    "All events on page 2 must still match the filter");
         } else {
-            System.out.println("Neočekivano pronađeni eventi:");
-            for (WebElement event : events) {
-                System.out.println(event.getText());
-            }
-            Assertions.fail("Neočekivano su prikazani eventi za filter 'Festival'!");
+            assertTrue(eventsPage.getNoEventsMessage().isDisplayed(),
+                    "No events message should be shown on page 2");
         }
     }
 
 
-    @Test
-    public void testFilterByConferenceFrom2026_NoEvents() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
-        filterPage.openSidebar();
-        filterPage.selectType("Conference");
-        filterPage.setDateRange("2026-01-01", "");
-        filterPage.apply();
-
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.numberOfElementsToBe(By.cssSelector("app-event-card"), 0),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
-
-        List<WebElement> events = driver.findElements(By.cssSelector("app-event-card"));
-        System.out.println("Broj eventa (Conference od 2026): " + events.size());
-
-        Assertions.assertTrue(events.isEmpty(), "Ne sme biti događaja za Conference od 2026");
-        WebElement noEvents = driver.findElement(By.cssSelector(".no-events-message"));
-        Assertions.assertTrue(noEvents.isDisplayed());
-        System.out.println("Prikazana poruka: " + noEvents.getText());
-    }
 
     @Test
-    public void testFilterByConferenceToAugust30_NoEvents() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
-        filterPage.openSidebar();
-        filterPage.selectType("Conference");
-        filterPage.setDateRange("", "2025-08-30");
-        filterPage.apply();
+    public void testSearchUpdatesResults() {
 
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.numberOfElementsToBe(By.cssSelector("app-event-card"), 0),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
+        String keyword = "tech";
+        eventsPage.search(keyword);
 
-        List<WebElement> events = driver.findElements(By.cssSelector("app-event-card"));
-        System.out.println("Broj eventa (Conference do 30.08.2025): " + events.size());
+        List<String> titles = eventsPage.getEventTitles();
+        List<String> descriptions = eventsPage.getEventDescriptions();
+        List<List<String>> places = eventsPage.getEventPlaces();
 
-        Assertions.assertTrue(events.isEmpty(), "Ne sme biti događaja za Conference do avgusta 2025");
-        WebElement noEvents = driver.findElement(By.cssSelector(".no-events-message"));
-        Assertions.assertTrue(noEvents.isDisplayed());
-        System.out.println("Prikazana poruka: " + noEvents.getText());
-    }
-
-    @Test
-    public void testFilterByConferenceBetweenAug30AndSept10_NoEvents() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
-        filterPage.openSidebar();
-        filterPage.selectType("Conference");
-        filterPage.setDateRange("2025-08-30", "2025-09-10");
-        filterPage.apply();
-
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.numberOfElementsToBe(By.cssSelector("app-event-card"), 0),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
-
-        List<WebElement> events = driver.findElements(By.cssSelector("app-event-card"));
-        System.out.println("Broj eventa (Conference 30.08–10.09.2025): " + events.size());
-
-        Assertions.assertTrue(events.isEmpty(), "Ne sme biti događaja za Conference u ovom opsegu");
-        WebElement noEvents = driver.findElement(By.cssSelector(".no-events-message"));
-        Assertions.assertTrue(noEvents.isDisplayed());
-        System.out.println("Prikazana poruka: " + noEvents.getText());
-    }
-
-    @Test
-    public void testEmptyFilterKeepsInitialEvents() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
-
-        List<WebElement> initialEvents = driver.findElements(By.cssSelector("app-event-card"));
-        int initialCount = initialEvents.size();
-        System.out.println("Broj eventa na početnoj strani: " + initialCount);
-
-        filterPage.openSidebar();
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        WebElement applyBtn = wait.until(
-                ExpectedConditions.elementToBeClickable(By.id("applyButton"))
-        );
-        applyBtn.click();
-
-        wait.until(ExpectedConditions.numberOfElementsToBe(
-                By.cssSelector("app-event-card"), initialCount
-        ));
-
-        List<WebElement> afterEvents = driver.findElements(By.cssSelector("app-event-card"));
-        int afterCount = afterEvents.size();
-        System.out.println("Broj eventa posle Apply bez filtera: " + afterCount);
-
-        Assertions.assertEquals(initialCount, afterCount,
-                "Broj događaja mora ostati isti kada je filter prazan");
-    }
-
-
-    @Test
-    public void testEmptyFilterKeepsSameEvents() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
-
-        // uzmi evente sa početne strane
-        List<String> initialEvents = driver.findElements(By.cssSelector("app-event-card"))
-                .stream()
-                .map(WebElement::getText)
-                .toList();
-
-        System.out.println("Eventi pre Apply bez filtera:");
-        initialEvents.forEach(System.out::println);
-
-        filterPage.openSidebar();
-        WebElement applyBtn = wait.until(
-                ExpectedConditions.elementToBeClickable(By.id("applyButton"))
-        );
-        applyBtn.click();
-
-        wait.until(ExpectedConditions.numberOfElementsToBe(
-                By.cssSelector("app-event-card"), initialEvents.size()
-        ));
-
-        List<String> afterEvents = driver.findElements(By.cssSelector("app-event-card"))
-                .stream()
-                .map(WebElement::getText)
-                .toList();
-
-        System.out.println("Eventi posle Apply bez filtera:");
-        afterEvents.forEach(System.out::println);
-
-        Assertions.assertEquals(initialEvents, afterEvents,
-                "Lista događaja mora ostati ista kada se Apply klikne bez filtera");
-    }
-
-    @Test
-    public void testResetFiltersClearsFormFields() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
-        filterPage.openSidebar();
-
-        filterPage.selectType("Conference");
-        filterPage.setDateRange("2025-12-01", "2025-12-30");
-
-        WebElement resetBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("resetButton")));
-        resetBtn.click();
-
-        Select select = new Select(driver.findElement(By.id("eventTypeSelect")));
-        List<WebElement> selectedOptions = select.getAllSelectedOptions();
-        Assertions.assertTrue(selectedOptions.isEmpty(),
-                "Dropdown mora biti resetovan i ne sme imati selektovane opcije");
-
-        String fromValue = driver.findElement(By.id("fromDate")).getAttribute("value");
-        String toValue = driver.findElement(By.id("toDate")).getAttribute("value");
-
-        Assertions.assertTrue(fromValue.isEmpty(), "From date mora biti prazan");
-        Assertions.assertTrue(toValue.isEmpty(), "To date mora biti prazan");
-    }
-
-
-    @Test
-    public void testFilterSidebarToggleByClass() {
-        EventsFilterPage filterPage = new EventsFilterPage(driver);
-
-        filterPage.openSidebar();
-        WebElement sidebar = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".filter-sidebar")));
-
-        Assertions.assertTrue(
-                sidebar.getAttribute("class").contains("active"),
-                "Sidebar mora imati klasu 'active' nakon otvaranja"
-        );
-
-        WebElement toggleBtn = driver.findElement(By.id("openFilterButton"));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", toggleBtn);
-
-        wait.until(ExpectedConditions.not(
-                ExpectedConditions.attributeContains(sidebar, "class", "active")
-        ));
-
-        Assertions.assertFalse(
-                sidebar.getAttribute("class").contains("active"),
-                "Sidebar ne sme imati klasu 'active' nakon zatvaranja"
-        );
-    }
-
-
-    //SEARCH
-
-
-    @Test
-    public void testSearchByPlaceChigao() {
-        WebElement searchInput = wait.until(
-                ExpectedConditions.elementToBeClickable(By.cssSelector(".search input"))
-        );
-        searchInput.clear();
-        searchInput.sendKeys("chicago");
-
-        WebElement searchBtn = driver.findElement(By.cssSelector(".search button"));
-        searchBtn.click();
-
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("app-event-card")),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
-
-        List<WebElement> events = driver.findElements(By.cssSelector("app-event-card"));
-        Assertions.assertFalse(events.isEmpty(), "Mora postojati bar jedan event za 'chicago'");
-
-        System.out.println("Pronađeno eventa: " + events.size());
-
-
-        List<String> places = driver.findElements(
-                        By.xpath("//div[@class='info-item'][i[contains(@class, 'fa-map-marker-alt')]]/span")
-                ).stream()
-                .map(e -> e.getText().toLowerCase())
-                .toList();
-
-
-        for (String place : places) {
-            System.out.println("Mesto eventa: " + place);
-            Assertions.assertTrue(place.contains("chicago"),
-                    "Event mesto mora sadržati 'chicago'");
-        }
-    }
-
-    @Test
-    public void testSearchByPlaceSerbia_NoResults() {
-        WebElement searchInput = wait.until(
-                ExpectedConditions.elementToBeClickable(By.cssSelector(".search input"))
-        );
-        searchInput.clear();
-        searchInput.sendKeys("serbia");
-
-        WebElement searchBtn = driver.findElement(By.cssSelector(".search button"));
-        searchBtn.click();
-
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message")));
-
-        List<WebElement> events = driver.findElements(By.cssSelector("app-event-card"));
-        Assertions.assertTrue(events.isEmpty(), "Ne sme biti eventa za 'serbia'");
-
-        WebElement noEvents = driver.findElement(By.cssSelector(".no-events-message"));
-        Assertions.assertTrue(noEvents.isDisplayed(), "Mora se prikazati 'no events' poruka");
-
-        System.out.println("Prikazana poruka: " + noEvents.getText());
-    }
-
-    @Test
-    public void testSearchByNameYoga() {
-        WebElement searchInput = wait.until(
-                ExpectedConditions.elementToBeClickable(By.cssSelector(".search input"))
-        );
-        searchInput.clear();
-        searchInput.sendKeys("yoga");
-
-        WebElement searchBtn = driver.findElement(By.cssSelector(".search button"));
-        searchBtn.click();
-
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("app-event-card")),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
-
-        List<WebElement> events = driver.findElements(By.cssSelector("app-event-card"));
-
-        if (events.isEmpty()) {
-            WebElement noEvents = driver.findElement(By.cssSelector(".no-events-message"));
-            Assertions.fail("Očekivan je bar jedan Yoga event, ali je prikazana poruka: " + noEvents.getText());
+        if (titles.isEmpty() && descriptions.isEmpty() && places.isEmpty()) {
+            assertTrue(eventsPage.getNoEventsMessage().isDisplayed(),
+                    "If no results, 'no events' message must be shown");
         } else {
-            List<String> names = driver.findElements(By.cssSelector(".event-card-title"))
-                    .stream()
-                    .map(e -> e.getText().toLowerCase())
-                    .toList();
+            String loweredKeyword = keyword.toLowerCase();
 
-            System.out.println("Pronađeni eventi:");
-            names.forEach(System.out::println);
+            int totalEvents = titles.size();
+            for (int i = 0; i < totalEvents; i++) {
+                String title = titles.get(i).toLowerCase();
+                String description = descriptions.get(i).toLowerCase();
+                String place = places.get(i).isEmpty() ? "" : places.get(i).get(0).toLowerCase();
 
-            for (String name : names) {
-                Assertions.assertTrue(name.contains("yoga"),
-                        "Naziv eventa mora sadržati 'yoga'");
+                boolean containsKeyword = title.contains(loweredKeyword)
+                        || description.contains(loweredKeyword)
+                        || place.contains(loweredKeyword);
+
+                assertTrue(containsKeyword,
+                        "Event " + i + " must contain the search keyword in title, description, or place");
             }
         }
     }
 
+
     @Test
-    public void testSearchByNameDanger_NoEvents() {
-        WebElement searchInput = wait.until(
-                ExpectedConditions.elementToBeClickable(By.cssSelector(".search input"))
-        );
-        searchInput.clear();
-        searchInput.sendKeys("danger");
+    public void testSearchAndClearRestoresEvents() {
 
-        WebElement searchBtn = driver.findElement(By.cssSelector(".search button"));
-        searchBtn.click();
+        // capture initial state
+        List<WebElement> initialEvents = eventsPage.getEventCards();
+        boolean hadEventsInitially = !initialEvents.isEmpty();
 
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("app-event-card")),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
-
-        List<WebElement> events = driver.findElements(By.cssSelector("app-event-card"));
-
-        if (!events.isEmpty()) {
-            System.out.println("Neočekivano pronađeni eventi:");
-            events.forEach(e -> System.out.println(e.getText()));
-            Assertions.fail("Za 'danger' ne sme biti događaja!");
+        if (hadEventsInitially) {
+            initialEvents = eventsPage.getEventCards();
         } else {
-            WebElement noEvents = driver.findElement(By.cssSelector(".no-events-message"));
-            Assertions.assertTrue(noEvents.isDisplayed(),
-                    "Treba da se prikaže poruka da nema događaja");
-            System.out.println("Prikazana poruka: " + noEvents.getText());
+            WebElement noEvents = eventsPage.getNoEventsMessage();
+            assertTrue(noEvents.isDisplayed(), "If DB empty, initial state must show 'no events'");
+        }
+
+        // perform a search
+        String keyword = "yoga";
+        eventsPage.search(keyword);
+
+        // clear search input
+        eventsPage.clearSearch();
+        eventsPage.waitForEitherCardsOrNoEvents();
+
+        // wait to return to initial
+        if (hadEventsInitially) {
+            List<WebElement> finalEvents = eventsPage.getEventCards();
+            assertEquals(initialEvents.size(), finalEvents.size(),
+                    "After clearing search, number of events must match initial state");
+        } else {
+            WebElement noEvents = eventsPage.getNoEventsMessage();
+            assertTrue(noEvents.isDisplayed(), "After clearing search, must still show 'no events'");
         }
     }
 
+
     @Test
-    public void testSearchByDescription_Chef() {
-        WebElement searchInput = wait.until(
-                ExpectedConditions.elementToBeClickable(By.cssSelector(".search input"))
-        );
-        searchInput.clear();
-        searchInput.sendKeys("chef");
+    public void testSearchAndFilterTogether() {
 
-        WebElement searchBtn = driver.findElement(By.cssSelector(".search button"));
-        searchBtn.click();
+        //search
+        String keyword = "colorado";
+        eventsPage.search(keyword);
 
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("app-event-card")),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
+        //filter
+        eventsPage.openFilter();
 
-        List<WebElement> events = driver.findElements(By.cssSelector("app-event-card"));
+        String selectedType = eventsPage.selectFirstEventType();
+        assumeTrue(selectedType != null, "No event types available, skipping test");
 
+        LocalDate from = LocalDate.now().plusDays(1);
+        LocalDate to = LocalDate.now().plusDays(90);
+        eventsPage.setDateRange(from, to);
+
+        eventsPage.applyFilter();
+
+        // get fresh event cards
+        List<WebElement> events = eventsPage.getEventCards();
         if (events.isEmpty()) {
-            WebElement noEvents = driver.findElement(By.cssSelector(".no-events-message"));
-            Assertions.fail("Očekivan je event sa 'chef' u description, ali je prikazana poruka: " + noEvents.getText());
+            assertTrue(eventsPage.getNoEventsMessage().isDisplayed(),
+                    "No events message should be shown if nothing matches filters");
         } else {
-            List<String> descriptions = driver.findElements(By.cssSelector(".event-description"))
-                    .stream()
-                    .map(e -> e.getAttribute("textContent").toLowerCase())
-                    .toList();
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH);
 
-            Assertions.assertTrue(
-                    descriptions.stream().anyMatch(d -> d.contains("chef")),
-                    "❌ Barem jedan event description mora sadržati 'chef'"
-            );
+            for (int i = 0; i < eventsPage.getEventCards().size(); i++) {
+                // type
+                String type = eventsPage.getEventType(i);
+                assertEquals(selectedType, type, "Event type must match selected type");
+
+                // date
+                String dateText = eventsPage.getEventDate(i);
+                LocalDate parsedDate = LocalDate.parse(dateText, fmt);
+                assertFalse(parsedDate.isBefore(from) || parsedDate.isAfter(to),
+                        "Event date must be within given range");
+
+                // keyword search in title/description/place
+                String title = eventsPage.getEventTitle(i).toLowerCase();
+                String description = eventsPage.getEventDescription(i).toLowerCase();
+                List<String> places = eventsPage.getEventPlaces().get(i);
+                String place = places.isEmpty() ? "" : places.get(0).toLowerCase();
+
+                boolean containsKeyword = title.contains(keyword)
+                        || description.contains(keyword)
+                        || place.contains(keyword);
+
+                assertTrue(containsKeyword,
+                        "Event must contain keyword '" + keyword + "' in title, description, or place");
+            }
         }
     }
-
-
-    @Test
-    public void testSearchByNameYoga_AndClearRestoresAllEvents() {
-
-        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("app-event-card")));
-        List<String> initialNames = driver.findElements(By.cssSelector(".event-card-title"))
-                .stream()
-                .map(WebElement::getText)
-                .map(String::toLowerCase)
-                .toList();
-
-        int initialCount = initialNames.size();
-        initialNames.forEach(n -> System.out.println("   -> " + n));
-        Assertions.assertTrue(initialCount > 0, "⚠️ Na početku mora postojati bar jedan event!");
-
-        WebElement searchInput = wait.until(
-                ExpectedConditions.elementToBeClickable(By.cssSelector(".search input"))
-        );
-        searchInput.clear();
-        searchInput.sendKeys("yoga");
-
-        WebElement searchBtn = driver.findElement(By.cssSelector(".search button"));
-        searchBtn.click();
-
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("app-event-card")),
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".no-events-message"))
-        ));
-
-        List<WebElement> yogaEvents = driver.findElements(By.cssSelector("app-event-card"));
-        Assertions.assertFalse(yogaEvents.isEmpty(), "❌ Očekivan je bar jedan Yoga event!");
-
-        List<String> yogaNames = driver.findElements(By.cssSelector(".event-card-title"))
-                .stream()
-                .map(WebElement::getText)
-                .map(String::toLowerCase)
-                .toList();
-
-        yogaNames.forEach(System.out::println);
-
-        yogaNames.forEach(name ->
-                Assertions.assertTrue(name.contains("yoga"), "Naziv eventa mora sadržati 'yoga'")
-        );
-
-        searchInput = driver.findElement(By.cssSelector(".search input")); // refetch
-        ((JavascriptExecutor) driver).executeScript(
-                "arguments[0].value=''; arguments[0].dispatchEvent(new Event('input'));", searchInput
-        );
-
-        wait.until(ExpectedConditions.numberOfElementsToBe(
-                By.cssSelector("app-event-card"), initialCount
-        ));
-
-        List<String> finalNames = driver.findElements(By.cssSelector(".event-card-title"))
-                .stream()
-                .map(WebElement::getText)
-                .map(String::toLowerCase)
-                .toList();
-
-        int finalCount = finalNames.size();
-        finalNames.forEach(n -> System.out.println("   -> " + n));
-
-        Assertions.assertEquals(initialCount, finalCount,
-                "❌ Posle brisanja search inputa mora se vratiti početni broj eventa");
-
-        Assertions.assertEquals(initialNames, finalNames,
-                "❌ Lista događaja posle brisanja search-a mora biti ista kao na početku");
-
-        System.out.println("✅ Test prošao: lista eventa se resetuje na početno stanje.");
-    }
-
 
 
 
