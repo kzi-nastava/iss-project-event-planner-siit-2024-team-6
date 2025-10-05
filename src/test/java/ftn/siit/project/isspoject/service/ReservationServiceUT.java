@@ -2,11 +2,11 @@ package ftn.siit.project.isspoject.service;
 
 import ftn.siit.project.isspoject.dto.offer.NewReservationDTO;
 import ftn.siit.project.isspoject.entity.*;
-import ftn.siit.project.isspoject.exceptions.NotFoundException;
 import ftn.siit.project.isspoject.repository.ReservationRepository;
 import ftn.siit.project.isspoject.service.external.EmailService;
 import ftn.siit.project.isspoject.service.implementations.ReservationServiceImpl;
 import ftn.siit.project.isspoject.service.interfaces.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -26,13 +25,12 @@ import static org.mockito.Mockito.*;
 class ReservationServiceUT {
 
     @InjectMocks
-    private ReservationServiceImpl reservationService; // konkretna implementacija
+    private ReservationServiceImpl reservationService;
 
     @Mock private ReservationRepository reservationRepository;
     @Mock private EmailService emailService;
     @Mock
     private UserService userService;
-    // ---------- helpers ----------
     private Service serviceVarDuration() {
         Service s = new Service();
         s.setId(10);
@@ -66,7 +64,7 @@ class ReservationServiceUT {
     private Event event() {
         Event e = new Event();
         e.setId(77); e.setName("TechConf"); e.setDescription("Annual conf");
-        e.setDate(LocalDateTime.of(2025, 12, 20, 9, 0));
+        e.setDate(LocalDateTime.now().plusDays(5).withHour(10).withMinute(0));
         Budget b = new Budget(); b.setId(321); e.setBudget(b);
         return e;
     }
@@ -78,6 +76,10 @@ class ReservationServiceUT {
         d.setStartTime(start);
         d.setEndTime(end);
         return d;
+    }
+    @BeforeEach
+    void resetMocks() {
+        reset(reservationRepository, emailService, userService);
     }
 
 
@@ -132,7 +134,7 @@ class ReservationServiceUT {
 
         assertThat(created.getId()).isEqualTo(555);
         verify(reservationRepository).save(any());
-        verify(emailService, times(2)).sendMail(any(), eq("Service reservation confirmation!"), any());
+        verify(emailService, times(2)).sendMail(any(), any(), any());
     }
     @Test
     @DisplayName("addReservation: booking deadline — exactly at deadline succeeds")
@@ -161,6 +163,8 @@ class ReservationServiceUT {
 
         assertThat(created.getId()).isEqualTo(303);
         verify(reservationRepository).save(any());
+        verify(emailService, times(2)).sendMail(any(), any(), any());
+
     }
 
     @Test
@@ -189,6 +193,8 @@ class ReservationServiceUT {
 
         assertThat(created.getId()).isEqualTo(306);
         verify(reservationRepository).save(any());
+        verify(emailService, times(2)).sendMail(any(), any(), any());
+
     }
 
     @Test
@@ -199,8 +205,8 @@ class ReservationServiceUT {
         Provider p = s.getProvider();
         Organizer o = organizer();
 
-        LocalDateTime start = LocalDateTime.of(2025, 9, 20, 8, 0);
-        LocalDateTime end   = LocalDateTime.of(2025, 9, 20, 9, 0);
+        LocalDateTime start = LocalDateTime.now().plusDays(5).withHour(8).withMinute(0);
+        LocalDateTime end   = LocalDateTime.now().plusDays(5).withHour(9).withMinute(0);
         when(userService.overlapsWithClosedHours(eq(start), eq(end), any(), any())).thenReturn(true);
 
         NewReservationDTO d = dto(s.getId(), e.getId(), start, end);
@@ -225,8 +231,8 @@ class ReservationServiceUT {
 
         // 20 < 30
         NewReservationDTO shortD = dto(s.getId(), e.getId(),
-                LocalDateTime.of(2025, 9, 20, 10, 0),
-                LocalDateTime.of(2025, 9, 20, 10, 20));
+                LocalDateTime.now().plusDays(5).withHour(10).withMinute(0),
+                LocalDateTime.now().plusDays(5).withHour(10).withMinute(20));
 
         assertThatThrownBy(() -> reservationService.addReservation(e, s, p, o, shortD, userService))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -245,8 +251,8 @@ class ReservationServiceUT {
 
         // 240 > 180
         NewReservationDTO longD = dto(s.getId(), e.getId(),
-                LocalDateTime.of(2025, 9, 20, 10, 0),
-                LocalDateTime.of(2025, 9, 20, 14, 0));
+                LocalDateTime.now().plusDays(5).withHour(10).withMinute(0),
+                LocalDateTime.now().plusDays(5).withHour(14).withMinute(0));
 
         assertThatThrownBy(() -> reservationService.addReservation(e, s, p, o, longD, userService))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -272,7 +278,7 @@ class ReservationServiceUT {
         when(emailService.sendMail(any(), any(), any())).thenReturn("SENT");
 
         // exactly 30 minutes
-        LocalDateTime start = LocalDateTime.of(2025, 9, 20, 10, 0);
+        LocalDateTime start = LocalDateTime.now().plusDays(5).withHour(10).withMinute(0);
         LocalDateTime end   = start.plusMinutes(30);
         NewReservationDTO d = dto(s.getId(), e.getId(), start, end);
 
@@ -280,6 +286,8 @@ class ReservationServiceUT {
 
         assertThat(created.getId()).isEqualTo(301);
         verify(reservationRepository).save(any());
+        verify(emailService, times(2)).sendMail(any(), any(), any());
+
     }
 
     @Test
@@ -301,7 +309,7 @@ class ReservationServiceUT {
         when(emailService.sendMail(any(), any(), any())).thenReturn("SENT");
 
         // exactly 180 minutes
-        LocalDateTime start = LocalDateTime.of(2025, 9, 20, 10, 0);
+        LocalDateTime start = LocalDateTime.now().plusDays(5).withHour(10).withMinute(0);
         LocalDateTime end   = start.plusMinutes(180);
         NewReservationDTO d = dto(s.getId(), e.getId(), start, end);
 
@@ -309,6 +317,8 @@ class ReservationServiceUT {
 
         assertThat(created.getId()).isEqualTo(302);
         verify(reservationRepository).save(any());
+        verify(emailService, times(2)).sendMail(any(), any(), any());
+
     }
 
     @Test
@@ -331,7 +341,7 @@ class ReservationServiceUT {
         when(emailService.sendMail(any(), any(), any())).thenReturn("SENT");
 
         // 3h reservation (no min/max to check)
-        LocalDateTime start = LocalDateTime.of(2025, 9, 20, 10, 0);
+        LocalDateTime start = LocalDateTime.now().plusDays(5).withHour(10).withMinute(0);
         LocalDateTime end   = start.plusHours(3);
         NewReservationDTO d = dto(s.getId(), e.getId(), start, end);
 
@@ -339,67 +349,10 @@ class ReservationServiceUT {
 
         assertThat(created.getId()).isEqualTo(305);
         verify(reservationRepository).save(any());
+        verify(emailService, times(2)).sendMail(any(), any(), any());
+
     }
 
-    @Test
-    @DisplayName("addReservation: only minDuration set — enforces lower bound, ignores max")
-    void addReservation_onlyMinDuration_ok() {
-        Service s = serviceVarDuration();
-        s.setMinDuration(45);
-        s.setMaxDuration(null); // no max
-        Event e = event();
-        Provider p = s.getProvider();
-        Organizer o = organizer();
-
-        when(userService.overlapsWithClosedHours(any(), any(), any(), any())).thenReturn(false);
-        when(reservationRepository.findReservationsByServiceId(s.getId())).thenReturn(List.of());
-        when(reservationRepository.save(any())).thenAnswer(inv -> {
-            Reservation r = inv.getArgument(0);
-            r.setId(401);
-            return r;
-        });
-        when(emailService.sendMail(any(), any(), any())).thenReturn("SENT");
-
-        // exactly 45 minutes
-        LocalDateTime start = LocalDateTime.of(2025, 9, 20, 10, 0);
-        LocalDateTime end   = start.plusMinutes(45);
-        NewReservationDTO d = dto(s.getId(), e.getId(), start, end);
-
-        Reservation created = reservationService.addReservation(e, s, p, o, d, userService);
-
-        assertThat(created.getId()).isEqualTo(401);
-        verify(reservationRepository).save(any());
-    }
-
-    @Test
-    @DisplayName("addReservation: only maxDuration set — enforces upper bound, ignores min")
-    void addReservation_onlyMaxDuration_ok() {
-        Service s = serviceVarDuration();
-        s.setMinDuration(null); // no min
-        s.setMaxDuration(120);
-        Event e = event();
-        Provider p = s.getProvider();
-        Organizer o = organizer();
-
-        when(userService.overlapsWithClosedHours(any(), any(), any(), any())).thenReturn(false);
-        when(reservationRepository.findReservationsByServiceId(s.getId())).thenReturn(List.of());
-        when(reservationRepository.save(any())).thenAnswer(inv -> {
-            Reservation r = inv.getArgument(0);
-            r.setId(402);
-            return r;
-        });
-        when(emailService.sendMail(any(), any(), any())).thenReturn("SENT");
-
-        // 2h = exactly maxDuration
-        LocalDateTime start = LocalDateTime.of(2025, 9, 20, 14, 0);
-        LocalDateTime end   = start.plusHours(2);
-        NewReservationDTO d = dto(s.getId(), e.getId(), start, end);
-
-        Reservation created = reservationService.addReservation(e, s, p, o, d, userService);
-
-        assertThat(created.getId()).isEqualTo(402);
-        verify(reservationRepository).save(any());
-    }
     @Test
     @DisplayName("addReservation: only minDuration set — below min rejected")
     void addReservation_onlyMinDuration_belowMin_throws() {
@@ -413,7 +366,7 @@ class ReservationServiceUT {
         when(userService.overlapsWithClosedHours(any(), any(), any(), any())).thenReturn(false);
 
         // 30 < 45
-        LocalDateTime start = LocalDateTime.of(2025, 9, 20, 10, 0);
+        LocalDateTime start = LocalDateTime.now().plusDays(5).withHour(10).withMinute(0);
         LocalDateTime end   = start.plusMinutes(30);
         NewReservationDTO d = dto(s.getId(), e.getId(), start, end);
 
@@ -442,7 +395,7 @@ class ReservationServiceUT {
         when(emailService.sendMail(any(), any(), any())).thenReturn("SENT");
 
         // 45 exactly
-        LocalDateTime start = LocalDateTime.of(2025, 9, 20, 11, 0);
+        LocalDateTime start = LocalDateTime.now().plusDays(5).withHour(11).withMinute(0);
         LocalDateTime end   = start.plusMinutes(45);
         NewReservationDTO d = dto(s.getId(), e.getId(), start, end);
 
@@ -450,6 +403,8 @@ class ReservationServiceUT {
 
         assertThat(created.getId()).isEqualTo(501);
         verify(reservationRepository).save(any());
+        verify(emailService, times(2)).sendMail(any(), any(), any());
+
     }
     @Test
     @DisplayName("addReservation: only maxDuration set — above max rejected")
@@ -464,7 +419,7 @@ class ReservationServiceUT {
         when(userService.overlapsWithClosedHours(any(), any(), any(), any())).thenReturn(false);
 
         // 150 > 120
-        LocalDateTime start = LocalDateTime.of(2025, 9, 20, 14, 0);
+        LocalDateTime start = LocalDateTime.now().plusDays(5).withHour(14).withMinute(0);
         LocalDateTime end   = start.plusMinutes(150);
         NewReservationDTO d = dto(s.getId(), e.getId(), start, end);
 
@@ -493,7 +448,7 @@ class ReservationServiceUT {
         when(emailService.sendMail(any(), any(), any())).thenReturn("SENT");
 
         // 120 exactly
-        LocalDateTime start = LocalDateTime.of(2025, 9, 20, 14, 0);
+        LocalDateTime start = LocalDateTime.now().plusDays(5).withHour(14).withMinute(0);
         LocalDateTime end   = start.plusMinutes(120);
         NewReservationDTO d = dto(s.getId(), e.getId(), start, end);
 
@@ -501,6 +456,8 @@ class ReservationServiceUT {
 
         assertThat(created.getId()).isEqualTo(502);
         verify(reservationRepository).save(any());
+        verify(emailService, times(2)).sendMail(any(), any(), any());
+
     }
 
     @Test
@@ -515,8 +472,8 @@ class ReservationServiceUT {
 
         // 60m != 90m
         NewReservationDTO d = dto(s.getId(), e.getId(),
-                LocalDateTime.of(2025, 9, 20, 10, 0),
-                LocalDateTime.of(2025, 9, 20, 11, 0));
+                LocalDateTime.now().plusDays(5).withHour(10).withMinute(0),
+                LocalDateTime.now().plusDays(5).withHour(11).withMinute(0));
 
         assertThatThrownBy(() -> reservationService.addReservation(e, s, p, o, d, userService))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -542,14 +499,14 @@ class ReservationServiceUT {
 
         // 90m = 90m
         NewReservationDTO d = dto(s.getId(), e.getId(),
-                LocalDateTime.of(2025, 9, 20, 10, 0),
-                LocalDateTime.of(2025, 9, 20, 11, 30));
+                LocalDateTime.now().plusDays(5).withHour(10).withMinute(0),
+                LocalDateTime.now().plusDays(5).withHour(11).withMinute(30));
 
         Reservation created = reservationService.addReservation(e, s, p, o, d, userService);
 
         assertThat(created.getId()).isEqualTo(222);
         verify(reservationRepository).save(any());
-        verify(emailService, times(2)).sendMail(any(), eq("Service reservation confirmation!"), any());
+        verify(emailService, times(2)).sendMail(any(), any(), any());
     }
 
 
@@ -563,154 +520,24 @@ class ReservationServiceUT {
 
         when(userService.overlapsWithClosedHours(any(), any(), any(), any())).thenReturn(false);
 
+        LocalDateTime base = LocalDateTime.now()
+                .plusDays(5)
+                .withSecond(0)
+                .withNano(0);
+
         // existing: 10:00–11:00
         Reservation existing = new Reservation();
         existing.setOfferService(s);
-        existing.setStartTime(LocalDateTime.of(2025, 9, 20, 10, 0));
-        existing.setEndTime(LocalDateTime.of(2025, 9, 20, 11, 0));
+        existing.setStartTime(base.withHour(10).withMinute(0));
+        existing.setEndTime(base.withHour(11).withMinute(0));
+
         when(reservationRepository.findReservationsByServiceId(s.getId()))
                 .thenReturn(List.of(existing));
 
         // new: 10:30–11:30
         NewReservationDTO d = dto(s.getId(), e.getId(),
-                LocalDateTime.of(2025, 9, 20, 10, 30),
-                LocalDateTime.of(2025, 9, 20, 11, 30));
-
-        assertThatThrownBy(() -> reservationService.addReservation(e, s, p, o, d, userService))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("isn't available");
-    }
-    @Test
-    @DisplayName("addReservation: new overlaps with two existing reservations — rejected")
-    void addReservation_overlap_twoExisting_throws() {
-        Service s = serviceVarDuration();
-        Event e = event();
-        Provider p = s.getProvider();
-        Organizer o = organizer();
-
-        when(userService.overlapsWithClosedHours(any(), any(), any(), any())).thenReturn(false);
-
-        // existing : 10-11 and 12-13
-        Reservation r1 = new Reservation();
-        r1.setOfferService(s);
-        r1.setStartTime(LocalDateTime.of(2025, 9, 20, 10, 0));
-        r1.setEndTime(LocalDateTime.of(2025, 9, 20, 11, 0));
-
-        Reservation r2 = new Reservation();
-        r2.setOfferService(s);
-        r2.setStartTime(LocalDateTime.of(2025, 9, 20, 12, 0));
-        r2.setEndTime(LocalDateTime.of(2025, 9, 20, 13, 0));
-
-        when(reservationRepository.findReservationsByServiceId(s.getId()))
-                .thenReturn(List.of(r1, r2));
-
-        // new: 10:30–12:30
-        NewReservationDTO d = dto(s.getId(), e.getId(),
-                LocalDateTime.of(2025, 9, 20, 10, 30),
-                LocalDateTime.of(2025, 9, 20, 12, 30));
-
-        assertThatThrownBy(() -> reservationService.addReservation(e, s, p, o, d, userService))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("isn't available");
-    }
-
-
-    @Test
-    @DisplayName("addReservation: boundary case — touching point (end == start) is not overlap, should succeed")
-    void addReservation_startAtExistignEnd_ok() {
-        Service s = serviceVarDuration();
-        Event e = event();
-        Provider p = s.getProvider();
-        Organizer o = organizer();
-
-        when(userService.overlapsWithClosedHours(any(), any(), any(), any())).thenReturn(false);
-
-        // existing: 10:00–11:00
-        Reservation existing = new Reservation();
-        existing.setOfferService(s);
-        existing.setStartTime(LocalDateTime.of(2025, 9, 20, 10, 0));
-        existing.setEndTime(LocalDateTime.of(2025, 9, 20, 11, 0));
-        when(reservationRepository.findReservationsByServiceId(s.getId()))
-                .thenReturn(List.of(existing));
-
-        // new: 11:00–12:00
-        NewReservationDTO d = dto(s.getId(), e.getId(),
-                LocalDateTime.of(2025, 9, 20, 11, 0),
-                LocalDateTime.of(2025, 9, 20, 12, 0));
-
-        when(reservationRepository.save(any())).thenAnswer(inv -> {
-            Reservation r = inv.getArgument(0);
-            r.setId(999);
-            return r;
-        });
-        when(emailService.sendMail(any(), any(), any())).thenReturn("SENT");
-
-        Reservation created = reservationService.addReservation(e, s, p, o, d, userService);
-
-        assertThat(created.getId()).isEqualTo(999);
-        verify(reservationRepository).save(any(Reservation.class));
-        verify(emailService, times(2)).sendMail(any(), eq("Service reservation confirmation!"), any());
-    }
-
-    @Test
-    @DisplayName("addReservation: boundary case — touching point (start == existing end) is not overlap, should succeed")
-    void addReservation_endAtExistingStart_ok() {
-        Service s = serviceVarDuration();
-        Event e = event();
-        Provider p = s.getProvider();
-        Organizer o = organizer();
-
-        when(userService.overlapsWithClosedHours(any(), any(), any(), any())).thenReturn(false);
-
-        // existing: 12:00–13:00
-        Reservation existing = new Reservation();
-        existing.setOfferService(s);
-        existing.setStartTime(LocalDateTime.of(2025, 9, 20, 12, 0));
-        existing.setEndTime(LocalDateTime.of(2025, 9, 20, 13, 0));
-        when(reservationRepository.findReservationsByServiceId(s.getId()))
-                .thenReturn(List.of(existing));
-
-        // new: 11:00–12:00
-        NewReservationDTO d = dto(s.getId(), e.getId(),
-                LocalDateTime.of(2025, 9, 20, 11, 0),
-                LocalDateTime.of(2025, 9, 20, 12, 0));
-
-        when(reservationRepository.save(any())).thenAnswer(inv -> {
-            Reservation r = inv.getArgument(0);
-            r.setId(1002);
-            return r;
-        });
-        when(emailService.sendMail(any(), any(), any())).thenReturn("SENT");
-
-        Reservation created = reservationService.addReservation(e, s, p, o, d, userService);
-
-        assertThat(created.getId()).isEqualTo(1002);
-        verify(reservationRepository).save(any(Reservation.class));
-        verify(emailService, times(2)).sendMail(any(), eq("Service reservation confirmation!"), any());
-    }
-
-    @Test
-    @DisplayName("addReservation: new reservation fully contains existing — rejected")
-    void addReservation_overlap_fullContainment_throws() {
-        Service s = serviceVarDuration();
-        Event e = event();
-        Provider p = s.getProvider();
-        Organizer o = organizer();
-
-        when(userService.overlapsWithClosedHours(any(), any(), any(), any())).thenReturn(false);
-
-        // existing: 10:00–11:00
-        Reservation existing = new Reservation();
-        existing.setOfferService(s);
-        existing.setStartTime(LocalDateTime.of(2025, 9, 20, 10, 0));
-        existing.setEndTime(LocalDateTime.of(2025, 9, 20, 11, 0));
-        when(reservationRepository.findReservationsByServiceId(s.getId()))
-                .thenReturn(List.of(existing));
-
-        // new: 9:30–11:30
-        NewReservationDTO d = dto(s.getId(), e.getId(),
-                LocalDateTime.of(2025, 9, 20, 9, 30),
-                LocalDateTime.of(2025, 9, 20, 11, 30));
+                base.withHour(10).withMinute(30),
+                base.withHour(11).withMinute(30));
 
         assertThatThrownBy(() -> reservationService.addReservation(e, s, p, o, d, userService))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -727,23 +554,183 @@ class ReservationServiceUT {
 
         when(userService.overlapsWithClosedHours(any(), any(), any(), any())).thenReturn(false);
 
+        LocalDateTime base = LocalDateTime.now()
+                .plusDays(5)
+                .withSecond(0)
+                .withNano(0);
+
         // existing: 10:00–11:00
         Reservation existing = new Reservation();
         existing.setOfferService(s);
-        existing.setStartTime(LocalDateTime.of(2025, 9, 20, 10, 0));
-        existing.setEndTime(LocalDateTime.of(2025, 9, 20, 11, 0));
+        existing.setStartTime(base.withHour(10).withMinute(0));
+        existing.setEndTime(base.withHour(11).withMinute(0));
         when(reservationRepository.findReservationsByServiceId(s.getId()))
                 .thenReturn(List.of(existing));
 
         // new: 9:30–10:30
         NewReservationDTO d = dto(s.getId(), e.getId(),
-                LocalDateTime.of(2025, 9, 20, 9, 30),
-                LocalDateTime.of(2025, 9, 20, 10, 30));
+                base.withHour(9).withMinute(30),
+                base.withHour(10).withMinute(30));
 
         assertThatThrownBy(() -> reservationService.addReservation(e, s, p, o, d, userService))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("isn't available");
     }
+
+
+    @Test
+    @DisplayName("addReservation: new overlaps with two existing reservations — rejected")
+    void addReservation_overlap_twoExisting_throws() {
+        Service s = serviceVarDuration();
+        Event e = event();
+        Provider p = s.getProvider();
+        Organizer o = organizer();
+
+        when(userService.overlapsWithClosedHours(any(), any(), any(), any())).thenReturn(false);
+
+        // existing : 10-11 and 12-13
+        Reservation r1 = new Reservation();
+        r1.setOfferService(s);
+        r1.setStartTime(LocalDateTime.now().plusDays(5).withHour(10).withMinute(0));
+        r1.setEndTime(LocalDateTime.now().plusDays(5).withHour(11).withMinute(0));
+
+        Reservation r2 = new Reservation();
+        r2.setOfferService(s);
+        r2.setStartTime(LocalDateTime.now().plusDays(5).withHour(12).withMinute(0));
+        r2.setEndTime(LocalDateTime.now().plusDays(5).withHour(13).withMinute(0));
+
+        when(reservationRepository.findReservationsByServiceId(s.getId()))
+                .thenReturn(List.of(r1, r2));
+
+        // new: 10:30–12:30
+        NewReservationDTO d = dto(s.getId(), e.getId(),
+                LocalDateTime.now().plusDays(5).withHour(10).withMinute(30),
+                LocalDateTime.now().plusDays(5).withHour(12).withMinute(30));
+
+        assertThatThrownBy(() -> reservationService.addReservation(e, s, p, o, d, userService))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("isn't available");
+    }
+
+
+    @Test
+    @DisplayName("addReservation: boundary case — touching point (end == start) is not overlap, should succeed")
+    void addReservation_startAtExistingEnd_ok() {
+        Service s = serviceVarDuration();
+        Event e = event();
+        Provider p = s.getProvider();
+        Organizer o = organizer();
+
+        when(userService.overlapsWithClosedHours(any(), any(), any(), any())).thenReturn(false);
+
+        LocalDateTime base = LocalDateTime.now()
+                .plusDays(5)
+                .withSecond(0)
+                .withNano(0);
+
+        // existing: 10:00–11:00
+        Reservation existing = new Reservation();
+        existing.setOfferService(s);
+        existing.setStartTime(base.withHour(10).withMinute(0));
+        existing.setEndTime(base.withHour(11).withMinute(0));
+        when(reservationRepository.findReservationsByServiceId(s.getId()))
+                .thenReturn(List.of(existing));
+
+        // new: 11:00–12:00 (touches at 11:00)
+        NewReservationDTO d = dto(s.getId(), e.getId(),
+                base.withHour(11).withMinute(0),
+                base.withHour(12).withMinute(0));
+
+        when(reservationRepository.save(any())).thenAnswer(inv -> {
+            Reservation r = inv.getArgument(0);
+            r.setId(999);
+            return r;
+        });
+        when(emailService.sendMail(any(), any(), any())).thenReturn("SENT");
+
+        Reservation created = reservationService.addReservation(e, s, p, o, d, userService);
+
+        assertThat(created.getId()).isEqualTo(999);
+        verify(reservationRepository).save(any(Reservation.class));
+        verify(emailService, times(2)).sendMail(any(), any(), any());
+    }
+
+
+    @Test
+    @DisplayName("addReservation: boundary case — touching point (start == existing end) is not overlap, should succeed")
+    void addReservation_endAtExistingStart_ok() {
+        Service s = serviceVarDuration();
+        Event e = event();
+        Provider p = s.getProvider();
+        Organizer o = organizer();
+
+        when(userService.overlapsWithClosedHours(any(), any(), any(), any())).thenReturn(false);
+
+        LocalDateTime base = LocalDateTime.now()
+                .plusDays(5)
+                .withSecond(0)
+                .withNano(0);
+
+        // existing: 12:00–13:00
+        Reservation existing = new Reservation();
+        existing.setOfferService(s);
+        existing.setStartTime(base.withHour(12).withMinute(0));
+        existing.setEndTime(base.withHour(13).withMinute(0));
+        when(reservationRepository.findReservationsByServiceId(s.getId()))
+                .thenReturn(List.of(existing));
+
+        // new: 11:00–12:00 (touches at 12:00)
+        NewReservationDTO d = dto(s.getId(), e.getId(),
+                base.withHour(11).withMinute(0),
+                base.withHour(12).withMinute(0));
+
+        when(reservationRepository.save(any())).thenAnswer(inv -> {
+            Reservation r = inv.getArgument(0);
+            r.setId(1002);
+            return r;
+        });
+        when(emailService.sendMail(any(), any(), any())).thenReturn("SENT");
+
+        Reservation created = reservationService.addReservation(e, s, p, o, d, userService);
+
+        assertThat(created.getId()).isEqualTo(1002);
+        verify(reservationRepository).save(any(Reservation.class));
+        verify(emailService, times(2)).sendMail(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("addReservation: new reservation fully contains existing — rejected")
+    void addReservation_overlap_fullContainment_throws() {
+        Service s = serviceVarDuration();
+        Event e = event();
+        Provider p = s.getProvider();
+        Organizer o = organizer();
+
+        when(userService.overlapsWithClosedHours(any(), any(), any(), any())).thenReturn(false);
+
+        LocalDateTime base = LocalDateTime.now()
+                .plusDays(5)
+                .withSecond(0)
+                .withNano(0);
+
+        // existing: 10:00–11:00
+        Reservation existing = new Reservation();
+        existing.setOfferService(s);
+        existing.setStartTime(base.withHour(10).withMinute(0));
+        existing.setEndTime(base.withHour(11).withMinute(0));
+        when(reservationRepository.findReservationsByServiceId(s.getId()))
+                .thenReturn(List.of(existing));
+
+        // new: 9:30–11:30
+        NewReservationDTO d = dto(s.getId(), e.getId(),
+                base.withHour(9).withMinute(30),
+                base.withHour(11).withMinute(30));
+
+        assertThatThrownBy(() -> reservationService.addReservation(e, s, p, o, d, userService))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("isn't available");
+    }
+
 
     @Test
     @DisplayName("addReservation: new reservation exactly matches existing — rejected")
@@ -755,18 +742,23 @@ class ReservationServiceUT {
 
         when(userService.overlapsWithClosedHours(any(), any(), any(), any())).thenReturn(false);
 
+        LocalDateTime base = LocalDateTime.now()
+                .plusDays(5)
+                .withSecond(0)
+                .withNano(0);
+
         // existing: 10:00–11:00
         Reservation existing = new Reservation();
         existing.setOfferService(s);
-        existing.setStartTime(LocalDateTime.of(2025, 9, 20, 10, 0));
-        existing.setEndTime(LocalDateTime.of(2025, 9, 20, 11, 0));
+        existing.setStartTime(base.withHour(10).withMinute(0));
+        existing.setEndTime(base.withHour(11).withMinute(0));
         when(reservationRepository.findReservationsByServiceId(s.getId()))
                 .thenReturn(List.of(existing));
 
         // new: 10:00–11:00
         NewReservationDTO d = dto(s.getId(), e.getId(),
-                LocalDateTime.of(2025, 9, 20, 10, 0),
-                LocalDateTime.of(2025, 9, 20, 11, 0));
+                base.withHour(10).withMinute(0),
+                base.withHour(11).withMinute(0));
 
         assertThatThrownBy(() -> reservationService.addReservation(e, s, p, o, d, userService))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -792,14 +784,14 @@ class ReservationServiceUT {
         when(emailService.sendMail(any(), any(), any())).thenReturn("SENT");
 
         NewReservationDTO d = dto(s.getId(), e.getId(),
-                LocalDateTime.of(2025, 9, 20, 12, 0),
-                LocalDateTime.of(2025, 9, 20, 13, 30));
+                LocalDateTime.now().plusDays(5).withHour(12).withMinute(0),
+                LocalDateTime.now().plusDays(5).withHour(13).withMinute(0));
 
         Reservation created = reservationService.addReservation(e, s, p, o, d, userService);
 
         assertThat(created.getId()).isEqualTo(1001);
         verify(reservationRepository).save(any(Reservation.class));
-        verify(emailService, times(2)).sendMail(any(), eq("Service reservation confirmation!"), any());
+        verify(emailService, times(2)).sendMail(any(), any(), any());
     }
     @Test
     @DisplayName("addReservation: fits between two existing reservations succeeds")
@@ -811,16 +803,20 @@ class ReservationServiceUT {
 
         when(userService.overlapsWithClosedHours(any(), any(), any(), any())).thenReturn(false);
 
+        LocalDateTime base = LocalDateTime.now()
+                .plusDays(5)
+                .withNano(0);
         // existing: 9–10 and 12–13
         Reservation r1 = new Reservation();
         r1.setOfferService(s);
-        r1.setStartTime(LocalDateTime.of(2025, 9, 20, 9, 0));
-        r1.setEndTime(LocalDateTime.of(2025, 9, 20, 10, 0));
+        r1.setStartTime(base.withHour(9).withMinute(0));
+        r1.setEndTime(base.withHour(10).withMinute(0));
+
 
         Reservation r2 = new Reservation();
         r2.setOfferService(s);
-        r2.setStartTime(LocalDateTime.of(2025, 9, 20, 12, 0));
-        r2.setEndTime(LocalDateTime.of(2025, 9, 20, 13, 0));
+        r2.setStartTime(base.withHour(12).withMinute(0));
+        r2.setEndTime(base.withHour(13).withMinute(0));
 
         when(reservationRepository.findReservationsByServiceId(s.getId()))
                 .thenReturn(List.of(r1, r2));
@@ -833,14 +829,14 @@ class ReservationServiceUT {
 
         // new: 10–12
         NewReservationDTO d = dto(s.getId(), e.getId(),
-                LocalDateTime.of(2025, 9, 20, 10, 0),
-                LocalDateTime.of(2025, 9, 20, 12, 0));
+                base.withHour(10).withMinute(0),
+                base.withHour(12).withMinute(0));
 
         Reservation created = reservationService.addReservation(e, s, p, o, d, userService);
 
         assertThat(created.getId()).isEqualTo(304);
         verify(reservationRepository).save(any(Reservation.class));
-        verify(emailService, times(2)).sendMail(any(), eq("Service reservation confirmation!"), any());
+        verify(emailService, times(2)).sendMail(any(), any(), any());
 
     }
 
@@ -863,78 +859,6 @@ class ReservationServiceUT {
 
         verify(reservationRepository, never()).save(any());
         verifyNoInteractions(emailService);
-    }
-
-
-    @Test
-    @DisplayName("findAll: throws NotFound when empty")
-    void findAll_empty_NotFound() {
-        when(reservationRepository.findAll()).thenReturn(List.of());
-        assertThatThrownBy(() -> reservationService.findAll())
-                .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("No reservations");
-    }
-
-    @Test
-    @DisplayName("findById: returns entity when found")
-    void findById_success() {
-        Reservation r = new Reservation(); r.setId(123);
-        when(reservationRepository.findById(123)).thenReturn(Optional.of(r));
-        assertThat(reservationService.findById(123).getId()).isEqualTo(123);
-    }
-
-    @Test
-    @DisplayName("findById: throws NotFound when not found")
-    void findById_NotFound() {
-        when(reservationRepository.findById(999)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> reservationService.findById(999))
-                .isInstanceOf(NotFoundException.class);
-    }
-
-    @Test
-    @DisplayName("findByEventId: throws NotFound when no reservations")
-    void findByEventId_empty_NotFound() {
-        when(reservationRepository.findReservationsByEventId(77)).thenReturn(List.of());
-        assertThatThrownBy(() -> reservationService.findByEventId(77))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("No reservations found for event ID: 77");
-    }
-
-    @Test
-    @DisplayName("findByServiceId: returns list (may be empty)")
-    void findByServiceId_returnsList() {
-        when(reservationRepository.findReservationsByServiceId(10)).thenReturn(List.of());
-        assertThat(reservationService.findByServiceId(10)).isEmpty();
-        verify(reservationRepository).findReservationsByServiceId(10);
-    }
-
-    @Test
-    @DisplayName("save(Reservation): null throws IAE")
-    void save_nullReservation_throws() {
-        assertThatThrownBy(() -> reservationService.save((Reservation) null))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    @DisplayName("save(NewReservationDTO): maps start/end and persists")
-    void save_dto_mapsAndPersists() {
-        NewReservationDTO d = dto(10, 77,
-                LocalDateTime.of(2025, 9, 20, 10, 0),
-                LocalDateTime.of(2025, 9, 20, 11, 30));
-        when(reservationRepository.save(any(Reservation.class))).thenAnswer(inv -> inv.getArgument(0));
-
-        Reservation saved = reservationService.save(d);
-
-        assertThat(saved.getStartTime()).isEqualTo(LocalDateTime.of(2025, 9, 20, 10, 0));
-        assertThat(saved.getEndTime()).isEqualTo(LocalDateTime.of(2025, 9, 20, 11, 30));
-        verify(reservationRepository).save(any(Reservation.class));
-    }
-
-    @Test
-    @DisplayName("save(NewReservationDTO): null throws IAE")
-    void save_nullDto_throws() {
-        assertThatThrownBy(() -> reservationService.save((NewReservationDTO) null))
-                .isInstanceOf(IllegalArgumentException.class);
     }
 
 

@@ -82,7 +82,6 @@ class ReservationControllerIT {
         reservation.setOfferService(service);
         reservation.setEvent(event);
 
-        // stubbing
         when(serviceService.findById(10)).thenReturn(service);
         when(eventService.findById(77)).thenReturn(event);
         when(userService.findById(provider.getId())).thenReturn(provider);
@@ -99,6 +98,34 @@ class ReservationControllerIT {
         verify(budgetService).addNewItem(service.getCategory(), 100.0, event.getBudget().getId());
     }
 
+
+    @Test
+    @DisplayName("POST /api/reservations - 400 when reservationService rejects reservation")
+    void addReservation_serviceThrows() throws Exception {
+        NewReservationDTO dto = new NewReservationDTO();
+        dto.setServiceId(10); dto.setEventId(77);
+        dto.setStartTime(LocalDateTime.of(2025,12,20,12,0));
+        dto.setEndTime(LocalDateTime.of(2025,12,20,13,0));
+
+        Service s = service();
+        Event e = event();
+        Provider p = s.getProvider();
+        Organizer o = organizer();
+
+        when(serviceService.findById(10)).thenReturn(s);
+        when(eventService.findById(77)).thenReturn(e);
+        when(userService.findById(p.getId())).thenReturn(p);
+        when(organizerService.findByEventId(77)).thenReturn(o);
+        when(reservationService.addReservation(eq(e), eq(s), eq(p), eq(o), any(), eq(userService)))
+                .thenThrow(new IllegalArgumentException("Invalid reservation"));
+
+        mockMvc.perform(post("/api/reservations/")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+    }
+
+
     @Test
     @DisplayName("POST /api/reservations - returns 400 when DTO is null")
     void addReservation_nullDto() throws Exception {
@@ -107,7 +134,102 @@ class ReservationControllerIT {
                         .content(""))
                 .andExpect(status().isBadRequest());
 
-        verifyNoInteractions(serviceService, eventService, reservationService);
+        verifyNoInteractions(serviceService, eventService,userService, organizerService, reservationService, budgetService);
+    }
+
+    @Test
+    @DisplayName("POST /api/reservations - 400 when DTO is present but empty JSON")
+    void addReservation_emptyJson() throws Exception {
+        mockMvc.perform(post("/api/reservations/")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(serviceService, eventService,userService, organizerService, reservationService, budgetService);
+    }
+
+    @Test
+    @DisplayName("POST /api/reservations - 400 when start time is null")
+    void addReservation_missingStartTime() throws Exception {
+        NewReservationDTO dto = new NewReservationDTO();
+        dto.setServiceId(10);
+        dto.setEventId(77);
+        dto.setStartTime(null);
+        dto.setEndTime(LocalDateTime.of(2025, 12, 20, 13, 0));
+
+        mockMvc.perform(post("/api/reservations/")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(serviceService, eventService, userService, organizerService, reservationService, budgetService);
+    }
+    @Test
+    @DisplayName("POST /api/reservations - 400 when end time is null")
+    void addReservation_missingEndTime() throws Exception {
+        NewReservationDTO dto = new NewReservationDTO();
+        dto.setServiceId(10);
+        dto.setEventId(77);
+        dto.setStartTime(LocalDateTime.of(2025, 12, 20, 12, 0));
+        dto.setEndTime(null);
+
+        mockMvc.perform(post("/api/reservations/")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(serviceService, eventService, userService, organizerService, reservationService, budgetService);
+    }
+
+
+    @Test
+    @DisplayName("POST /api/reservations - 400 when eventId is null")
+    void addReservation_missingEventId() throws Exception {
+        NewReservationDTO dto = new NewReservationDTO();
+        dto.setServiceId(10);
+        dto.setEventId(null);
+        dto.setStartTime(LocalDateTime.of(2025, 12, 20, 12, 0));
+        dto.setEndTime(LocalDateTime.of(2025, 12, 20, 13, 0));
+
+        mockMvc.perform(post("/api/reservations/")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(serviceService, eventService,userService, organizerService, reservationService, budgetService);
+    }
+
+    @Test
+    @DisplayName("POST /api/reservations - 400 when serviceId is null")
+    void addReservation_missingServiceId() throws Exception {
+        NewReservationDTO dto = new NewReservationDTO();
+        dto.setServiceId(null);
+        dto.setEventId(77);
+        dto.setStartTime(LocalDateTime.of(2025, 12, 20, 12, 0));
+        dto.setEndTime(LocalDateTime.of(2025, 12, 20, 13, 0));
+
+        mockMvc.perform(post("/api/reservations/")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(serviceService, eventService,userService, organizerService, reservationService, budgetService);
+    }
+    @Test
+    @DisplayName("POST /api/reservations - 400 when endTime is before startTime")
+    void addReservation_endBeforeStart() throws Exception {
+        NewReservationDTO dto = new NewReservationDTO();
+        dto.setServiceId(10);
+        dto.setEventId(77);
+        dto.setStartTime(LocalDateTime.of(2025, 12, 20, 14, 0));
+        dto.setEndTime(LocalDateTime.of(2025, 12, 20, 13, 0));
+
+        mockMvc.perform(post("/api/reservations/")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(serviceService, eventService,userService, organizerService, reservationService, budgetService);
     }
 
     @Test
@@ -190,110 +312,6 @@ class ReservationControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("POST /api/reservations - 400 when start or end time is null")
-    void addReservation_missingTimes() throws Exception {
-        NewReservationDTO dto = new NewReservationDTO();
-        dto.setServiceId(10);
-        dto.setEventId(77);
-        dto.setStartTime(null);
-        dto.setEndTime(null);
-
-        mockMvc.perform(post("/api/reservations/")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isBadRequest());
-
-        verifyNoInteractions(serviceService, eventService, reservationService);
-    }
-
-    @Test
-    @DisplayName("POST /api/reservations - 400 when endTime is before startTime")
-    void addReservation_endBeforeStart() throws Exception {
-        NewReservationDTO dto = new NewReservationDTO();
-        dto.setServiceId(10);
-        dto.setEventId(77);
-        dto.setStartTime(LocalDateTime.of(2025, 12, 20, 14, 0));
-        dto.setEndTime(LocalDateTime.of(2025, 12, 20, 13, 0));
-
-        mockMvc.perform(post("/api/reservations/")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isBadRequest());
-
-        verifyNoInteractions(serviceService, eventService, reservationService);
-    }
-    @Test
-    @DisplayName("POST /api/reservations - 400 when reservationService rejects reservation")
-    void addReservation_serviceThrows() throws Exception {
-        NewReservationDTO dto = new NewReservationDTO();
-        dto.setServiceId(10); dto.setEventId(77);
-        dto.setStartTime(LocalDateTime.of(2025,12,20,12,0));
-        dto.setEndTime(LocalDateTime.of(2025,12,20,13,0));
-
-        Service s = service();
-        Event e = event();
-        Provider p = s.getProvider();
-        Organizer o = organizer();
-
-        when(serviceService.findById(10)).thenReturn(s);
-        when(eventService.findById(77)).thenReturn(e);
-        when(userService.findById(p.getId())).thenReturn(p);
-        when(organizerService.findByEventId(77)).thenReturn(o);
-        when(reservationService.addReservation(eq(e), eq(s), eq(p), eq(o), any(), eq(userService)))
-                .thenThrow(new IllegalArgumentException("Invalid reservation"));
-
-        mockMvc.perform(post("/api/reservations/")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("POST /api/reservations - 400 when DTO is present but empty JSON")
-    void addReservation_emptyJson() throws Exception {
-        mockMvc.perform(post("/api/reservations/")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isBadRequest());
-
-        verifyNoInteractions(serviceService, eventService, reservationService);
-    }
-
-    @Test
-    @DisplayName("POST /api/reservations - 400 when DTO has serviceId but no eventId")
-    void addReservation_missingEventId() throws Exception {
-        NewReservationDTO dto = new NewReservationDTO();
-        dto.setServiceId(10);
-        dto.setEventId(null);
-        dto.setStartTime(LocalDateTime.of(2025, 12, 20, 12, 0));
-        dto.setEndTime(LocalDateTime.of(2025, 12, 20, 13, 0));
-
-        mockMvc.perform(post("/api/reservations/")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isBadRequest());
-
-        verifyNoInteractions(serviceService, eventService, reservationService);
-    }
-
-    @Test
-    @DisplayName("POST /api/reservations - 400 when DTO has eventId but no serviceId")
-    void addReservation_missingServiceId() throws Exception {
-        NewReservationDTO dto = new NewReservationDTO();
-        dto.setServiceId(null);
-        dto.setEventId(77);
-        dto.setStartTime(LocalDateTime.of(2025, 12, 20, 12, 0));
-        dto.setEndTime(LocalDateTime.of(2025, 12, 20, 13, 0));
-
-        mockMvc.perform(post("/api/reservations/")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isBadRequest());
-
-        verifyNoInteractions(serviceService, eventService, reservationService);
     }
 
 

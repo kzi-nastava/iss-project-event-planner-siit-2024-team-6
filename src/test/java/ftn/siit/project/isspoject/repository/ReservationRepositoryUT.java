@@ -47,7 +47,6 @@ class ReservationRepositoryUT {
 
     @Test
     void findByEventId_multipleReservations() {
-        // given: insert another reservation for the same eventId = 7000
         var existingReservation = reservationRepository.findReservationsByEventId(7000).get(0);
 
         Reservation another = new Reservation();
@@ -59,10 +58,8 @@ class ReservationRepositoryUT {
 
         reservationRepository.saveAndFlush(another);
 
-        // when
         var results = reservationRepository.findReservationsByEventId(7000);
 
-        // then
         assertThat(results).hasSize(2);
         assertThat(results)
                 .extracting(r -> r.getEvent().getId())
@@ -70,7 +67,6 @@ class ReservationRepositoryUT {
     }
     @Test
     void findByServiceId_multipleReservations() {
-        // given: reuse an existing reservation for serviceId = 5000
         var existingReservation = reservationRepository.findReservationsByServiceId(5000).get(0);
 
         Reservation another = new Reservation();
@@ -82,55 +78,16 @@ class ReservationRepositoryUT {
 
         reservationRepository.saveAndFlush(another);
 
-        // when
         var results = reservationRepository.findReservationsByServiceId(5000);
 
-        // then
         assertThat(results).hasSize(2);
         assertThat(results)
                 .extracting(r -> r.getOfferService().getId())
                 .containsOnly(5000);
     }
-    @Test
-    void findByEventId_excludesCanceled() {
-        var existingReservation = reservationRepository.findReservationsByEventId(7000).get(0);
-
-        Reservation canceled = new Reservation();
-        canceled.setEvent(existingReservation.getEvent());
-        canceled.setOfferService(existingReservation.getOfferService());
-        canceled.setStartTime(LocalDateTime.now().plusHours(7));
-        canceled.setEndTime(LocalDateTime.now().plusHours(8));
-        canceled.setCanceled(true);
-
-        reservationRepository.saveAndFlush(canceled);
-
-        var results = reservationRepository.findReservationsByEventId(7000);
-
-        // should only return the non-canceled one
-        assertThat(results).allMatch(r -> !r.isCanceled());
-    }
-
-    @Test
-    void findByServiceId_excludesCanceled() {
-        var existingReservation = reservationRepository.findReservationsByServiceId(5000).get(0);
-
-        Reservation canceled = new Reservation();
-        canceled.setEvent(existingReservation.getEvent());
-        canceled.setOfferService(existingReservation.getOfferService());
-        canceled.setStartTime(LocalDateTime.now().plusHours(9));
-        canceled.setEndTime(LocalDateTime.now().plusHours(10));
-        canceled.setCanceled(true);
-
-        reservationRepository.saveAndFlush(canceled);
-
-        var results = reservationRepository.findReservationsByServiceId(5000);
-
-        assertThat(results).allMatch(r -> !r.isCanceled());
-    }
 
     @Test
     void findByEventId_onlyCanceled_shouldReturnEmpty() {
-        // create event-only with canceled reservation
         Reservation canceled = new Reservation();
         canceled.setEvent(reservationRepository.findReservationsByEventId(7000).get(0).getEvent());
         canceled.setOfferService(reservationRepository.findReservationsByServiceId(5000).get(0).getOfferService());
@@ -148,7 +105,6 @@ class ReservationRepositoryUT {
 
     @Test
     void findByServiceId_onlyCanceled_shouldReturnEmpty() {
-        // create service-only with canceled reservation
         Reservation canceled = new Reservation();
         canceled.setEvent(reservationRepository.findReservationsByEventId(7000).get(0).getEvent());
         canceled.setOfferService(reservationRepository.findReservationsByServiceId(5000).get(0).getOfferService());

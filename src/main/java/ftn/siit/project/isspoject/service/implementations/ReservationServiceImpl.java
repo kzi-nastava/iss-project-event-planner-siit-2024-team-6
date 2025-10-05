@@ -19,7 +19,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 @Service
-//pROVERITI DA LI TREBAM DA TESTIRAM USER SERVICE OVERLAPS WITH CLOSED HOURS
 public class ReservationServiceImpl implements ReservationService {
 
     @Autowired
