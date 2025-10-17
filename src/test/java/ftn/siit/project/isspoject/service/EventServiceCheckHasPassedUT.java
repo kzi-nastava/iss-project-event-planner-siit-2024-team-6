@@ -105,4 +105,15 @@ class EventServiceCheckHasPassedUT {
                 () -> service.checkIfEventHasPassed(1, null));
     }
 
+    @Test
+    @DisplayName("throws NotFoundException when organizer has no events")
+    void noEvents_throws() {
+        Organizer organizer = org(9, "EmptyOrg");
+        when(eventRepository.findByOrganizer(organizer)).thenReturn(List.of());
+
+        assertThrows(NotFoundException.class,
+                () -> service.checkIfEventHasPassed(100, organizer));
+    }
+
+
 }

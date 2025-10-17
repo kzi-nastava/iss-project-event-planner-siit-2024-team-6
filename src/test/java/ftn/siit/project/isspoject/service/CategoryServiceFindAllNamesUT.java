@@ -48,4 +48,20 @@ class CategoryServiceFindAllNamesUT {
         verify(categoryRepository).findAllNames();
         verifyNoMoreInteractions(categoryRepository);
     }
+
+    @Test
+    @DisplayName("returns empty list when repository returns null")
+    void findAllNames_nullBecomesEmpty() {
+        when(categoryRepository.findAllNames()).thenReturn(null);
+        List<String> result = service.findAllNames();
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("bubbles up repository exceptions")
+    void findAllNames_repoThrows_bubblesUp() {
+        when(categoryRepository.findAllNames()).thenThrow(new RuntimeException("db down"));
+        assertThrows(RuntimeException.class, () -> service.findAllNames());
+    }
 }

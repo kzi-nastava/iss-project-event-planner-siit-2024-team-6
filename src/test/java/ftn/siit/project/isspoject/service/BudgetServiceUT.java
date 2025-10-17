@@ -191,6 +191,18 @@ class BudgetServiceUT {
     }
 
     @Test
+    @DisplayName("updateBudgetItem: new price equal to spent is allowed (>) check only")
+    void updateBudgetItem_equalToSpent_success() {
+        Category c = cat("MUSIC");
+        budget.getBudgetItems().add(item(7, c, 150.0, 200.0));
+        BudgetItem updated = budgetService.updateBudgetItem(BUDGET_ID, 7, 150.0);
+        assertEquals(150.0, updated.getMaxPrice(), 1e-6);
+        assertEquals(150.0, budget.getTotal(), 1e-6);
+        assertEquals(0.0, budget.getAvailable(), 1e-6);
+    }
+
+
+    @Test
     @DisplayName("updateBudgetItem: rejects when itemId not in budget")
     void updateBudgetItem_itemNotFound_throws() {
         Category c = cat("FOOD");
@@ -254,6 +266,18 @@ class BudgetServiceUT {
         assertEquals(90.0, existing.getCurrPrice(), 1e-6);
         assertEquals(100.0, updatedBudget.getTotal(), 1e-6);
         assertEquals(10.0, updatedBudget.getAvailable(), 1e-6);
+    }
+
+    @Test
+    @DisplayName("addNewItem: exactly fills remaining budget succeeds (== max)")
+    void addNewItem_equalToMax_success() {
+        Category c = cat("PHOTO");
+        budget.getBudgetItems().add(item(20, c, 40.0, 100.0)); // remaining = 60
+        Budget updated = budgetService.addNewItem(c, 60.0, BUDGET_ID);
+        BudgetItem bi = updated.getBudgetItems().stream().filter(x -> x.getCategory()==c).findFirst().orElseThrow();
+        assertEquals(100.0, bi.getCurrPrice(), 1e-6);
+        assertEquals(100.0, updated.getTotal(), 1e-6);
+        assertEquals(0.0, updated.getAvailable(), 1e-6);
     }
 
     @Test
@@ -349,4 +373,5 @@ class BudgetServiceUT {
         );
         assertTrue(ex.getMessage().toLowerCase().contains("not found"));
     }
+
 }

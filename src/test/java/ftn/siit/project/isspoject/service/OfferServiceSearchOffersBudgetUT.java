@@ -132,4 +132,41 @@ public class OfferServiceSearchOffersBudgetUT {
         verify(offerRepository, times(2)).findAll();
     }
 
+    @Test
+    @DisplayName("Category matching is case-insensitive and trims whitespace")
+    void categoryMatching_caseAndTrim() {
+        // Remaining VENUE = 100
+        NewBudgetDTO dto = new NewBudgetDTO();
+        dto.setBudgetItems(new ArrayList<>(List.of(
+            budgetItem("  venue  ", 0, 100)
+        )));
+
+        Offer ok   = offer(1, "VENUE", 100, 0.0, true, false, Status.ACCEPTED); // == boundary allowed
+        Offer over = offer(2, "venue", 101, 0.0, true, false, Status.ACCEPTED); // > remaining
+
+        when(offerRepository.findAll()).thenReturn(List.of(ok, over));
+
+        Page<OfferDTO> page = service.searchOffers(dto, PageRequest.of(0, 10));
+        assertEquals(1, page.getTotalElements());
+        assertEquals(ok.getId(), page.getContent().get(0).getId());
+    }
+
+    @Test
+    @DisplayName("Price or sale equal to remaining passes")
+    void equalityBoundary_passes() {
+        NewBudgetDTO dto = new NewBudgetDTO();
+        dto.setBudgetItems(new ArrayList<>(List.of(
+            budgetItem("MUSIC", 50, 150) // remaining = 100
+        )));
+
+        Offer priceEq = offer(1, "MUSIC", 100, 0.0, true, false, Status.ACCEPTED);
+        Offer saleEq  = offer(2, "MUSIC", 999, 100.0, true, false, Status.ACCEPTED);
+        Offer over    = offer(3, "MUSIC", 101, 0.0, true, false, Status.ACCEPTED);
+
+        when(offerRepository.findAll()).thenReturn(List.of(priceEq, saleEq, over));
+
+        Page<OfferDTO> page = service.searchOffers(dto, PageRequest.of(0, 10));
+        assertEquals(List.of(1, 2), page.getContent().stream().map(OfferDTO::getId).toList());
+    }
+
 }
