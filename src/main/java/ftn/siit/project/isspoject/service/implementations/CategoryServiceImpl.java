@@ -71,7 +71,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<String> findAllNames() {
-        return categoryRepository.findAllNames();
+        List<String> names = categoryRepository.findAllNames();
+        return names != null ? names : List.of();
     }
 
     @Override
