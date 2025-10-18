@@ -120,44 +120,6 @@ public class OrganizerController {
         return ResponseEntity.ok(categories);
     }
 
-    @PostMapping("budget/{budgetId}/items")
-    public ResponseEntity<BudgetItemDTO> addItemToBudget(@PathVariable int budgetId, @RequestBody NewBudgetItemDTO budgetDTO,  @AuthenticationPrincipal(expression = "username") String email) {
-        Organizer o = organizerService.findByEmail(email);
-        if (o == null) {
-             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        if(eventService.checkIfEventHasPassed(budgetId, o)){
-            throw new IllegalArgumentException("Event has passed. Cannot access its budget.");
-        }
-        BudgetItem bi = budgetService.addItemToBudget(budgetId, budgetDTO.getCategory(), budgetDTO.getMaxPrice());
-        return ResponseEntity.ok(new BudgetItemDTO(bi));
-    }
-
-    @PutMapping("budget/{budgetId}/items/{itemId}")
-    public ResponseEntity<BudgetItemDTO> updateBudgetItem(@PathVariable int budgetId, @PathVariable int itemId, @RequestBody double price, @AuthenticationPrincipal(expression = "username") String email) {
-        Organizer o = organizerService.findByEmail(email);
-        if (o == null) {
-             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        if(eventService.checkIfEventHasPassed(budgetId, o)){
-            throw new IllegalArgumentException("Event has passed. Cannot access its budget.");
-        }
-        BudgetItem bi = budgetService.updateBudgetItem(budgetId, itemId, price);
-        return ResponseEntity.ok(new BudgetItemDTO(bi));
-    }
-
-    @DeleteMapping("budget/{budgetId}/items/{itemId}")
-    public ResponseEntity<Void> deleteBudgetItem(@PathVariable int budgetId, @PathVariable int itemId, @AuthenticationPrincipal(expression = "username") String email) {
-        Organizer o = organizerService.findByEmail(email);
-        if (o == null) {
-             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        if(eventService.checkIfEventHasPassed(budgetId, o)){
-            throw new IllegalArgumentException("Event has passed. Cannot access its budget.");
-        }
-        budgetService.removeBudgetItem(budgetId, itemId);
-        return ResponseEntity.ok().build();
-    }
 
     @GetMapping("events")
     public ResponseEntity<List<EventDTO>> getOrganizerEvents(HttpServletRequest request) {

@@ -137,6 +137,7 @@ public class WebSecurityConfig{
                     .requestMatchers(new AntPathRequestMatcher("/api/providers/product")).hasAnyRole("ADMIN","PROVIDER")
                     .requestMatchers(new AntPathRequestMatcher("/api/messages**")).authenticated()
                     .requestMatchers(new AntPathRequestMatcher("/api/providers/my-products")).hasRole("PROVIDER")
+                    .requestMatchers(new AntPathRequestMatcher("/api/budgets/**")).hasRole("ORGANIZER")
                     .requestMatchers(new AntPathRequestMatcher("/socket/**")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/socket-web/**")).permitAll()
                     .requestMatchers(new AntPathRequestMatcher("/api/reactions/rating-offer/**")).permitAll()
