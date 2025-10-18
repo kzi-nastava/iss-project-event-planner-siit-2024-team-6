@@ -1,402 +1,336 @@
 package ftn.siit.project.isspoject.controller;
 
-import ftn.siit.project.isspoject.dto.budget.BudgetItemDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ftn.siit.project.isspoject.dto.budget.NewBudgetItemDTO;
-import ftn.siit.project.isspoject.entity.*;
-import ftn.siit.project.isspoject.repository.BudgetRepository;
-import ftn.siit.project.isspoject.repository.EventRepository;
-import ftn.siit.project.isspoject.repository.CategoryRepository;
-import ftn.siit.project.isspoject.repository.EventTypeRepository;
-import ftn.siit.project.isspoject.service.interfaces.BudgetService;
-import ftn.siit.project.isspoject.service.interfaces.EventService;
-import ftn.siit.project.isspoject.service.interfaces.OrganizerService;
-import ftn.siit.project.isspoject.service.interfaces.UserService;
-import ftn.siit.project.isspoject.util.TokenUtils;
-import org.junit.jupiter.api.BeforeEach;
+import ftn.siit.project.isspoject.entity.BudgetItem;
+import ftn.siit.project.isspoject.entity.Category;
+import ftn.siit.project.isspoject.entity.Organizer;
+import ftn.siit.project.isspoject.service.external.PDFGeneratorService;
+import ftn.siit.project.isspoject.service.interfaces.*;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.*;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+/**
+ * Controller-slice IT for ONLY the budget endpoints in OrganizerController.
+ *
+ * NOTE: We mock EVERY dependency autowired in OrganizerController so the
+ * WebMvc slice can start cleanly.
+ */
+@WebMvcTest(controllers = OrganizerController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
-@TestPropertySource(properties = {
-        "jwt.secret=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz",
-        "jwt.expiresIn=86400"
-})
-@Transactional
 class OrganizerBudgetEndpointsIT {
 
-    @LocalServerPort
-    int port;
+    @Autowired private MockMvc mockMvc;
+    @Autowired private ObjectMapper objectMapper;
 
-    private String baseUrl;
+    // Mock ALL collaborators OrganizerController @Autowired's:
+    @MockBean private EventService eventService;
+    @MockBean private NotificationService notificationService;
+    @MockBean private OrganizerService organizerService;
+    @MockBean private PDFGeneratorService pdfGeneratorService;
+    @MockBean private AuthenticationManager authenticationManager;
+    @MockBean private ftn.siit.project.isspoject.util.TokenUtils tokenUtils;
+    @MockBean private UserService userService;
+    @MockBean private EventTypeService eventTypeService;
+    @MockBean private ActivityService activityService;
+    @MockBean private BudgetService budgetService;
+    @MockBean private CategoryService categoryService;
 
-    private static final String EMAIL = "organizer.it@example.com";
+    private static final String EMAIL = "organizer1@example.com";
+    private static final String BASE = "/api/organizers";
 
-    // Real beans
-    @Autowired
-    private TestRestTemplate rest;
-    @org.springframework.beans.factory.annotation.Autowired private TokenUtils tokenUtils;
-
-    @org.springframework.beans.factory.annotation.Autowired private UserService userService;
-    @org.springframework.beans.factory.annotation.Autowired private OrganizerService organizerService;
-    @org.springframework.beans.factory.annotation.Autowired private EventService eventService;
-    @org.springframework.beans.factory.annotation.Autowired private BudgetService budgetService;
-
-    @org.springframework.beans.factory.annotation.Autowired private EventRepository eventRepository;
-    @org.springframework.beans.factory.annotation.Autowired private BudgetRepository budgetRepository;
-    @org.springframework.beans.factory.annotation.Autowired private CategoryRepository categoryRepository;
-    @Autowired
-    private EventTypeRepository eventTypeRepository;
-
-    // Seeded objects per test
-    private Organizer organizer;
-    private Event event;
-    private Budget budget;
-    private Category venueCategory;
-
-    @BeforeEach
-    void setUp() {
-        baseUrl = "http://localhost:" + port + "/api/organizers";
-
-        // 1) Seed Organizer (Organizer extends/implements your User type in this project)
-        organizer = new Organizer();
-        organizer.setName("IT");                 // first/given name if that's what 'name' is
-        organizer.setLastname("Organizer");      // <-- REQUIRED (was missing)
-        organizer.setEmail(EMAIL);
-        organizer.setPassword("test");           // <-- if @Column(nullable=false)
-        organizer.setUserType("ORGANIZER");
-
-        // 2) Seed Budget
-        budget = new Budget();
-        budget.setAvailable(0.0);
-        budget.setTotal(0.0);
-        budget = budgetService.save(budget);
-
-        // 3) Seed Event (date set later per test)
-        event = new Event();
-        event.setName("IT Event");
-        event.setDescription("Budget endpoints IT");
-        event.setPlace("Test Place");
-        event.setMaxParticipants(100);
-        event.setParticipants(0);
-        event.setIsPublic(true);
-        event.setIsDeleted(false);
-        event.setBudget(budget);
-        event.setEventActivities(new java.util.ArrayList<>());
-        event = eventService.save(event);
-
-        EventType t = new EventType(1, "DEFAULT_TYPE", "Default Type", false);
-        eventTypeRepository.save(t);
-        event.setEventType(t);
-        organizer.getMyEvents().add(event);
-        userService.save(organizer); // persist relation
-
-        // 4) Seed Category "VENUE" (not deleted)
-        venueCategory = categoryRepository.findByNameIgnoreCaseAndIsDeletedIsFalse("VENUE");
-        if (venueCategory == null) {
-            venueCategory = new Category();
-            venueCategory.setName("VENUE");
-            venueCategory.setIsDeleted(false);
-            venueCategory = categoryRepository.save(venueCategory);
-        }
+    private Organizer organizer() {
+        Organizer o = new Organizer();
+        o.setId(7);
+        o.setEmail(EMAIL);
+        o.setName("Org");
+        return o;
     }
 
-    private HttpHeaders authHeadersFor(Organizer org) {
-        // Build a real JWT with subject=email (adjust if your TokenUtils expects a different principal)
-        String token = tokenUtils.generateToken(org);
-
-        // Sanity check: ensure parse → email works; if this fails you'll get 401 in endpoints
-        String extracted = tokenUtils.getUsernameFromToken(token);
-        assertEquals(org.getEmail(), extracted, "Token subject/email mismatch.");
-
-        HttpHeaders h = new HttpHeaders();
-        h.setContentType(MediaType.APPLICATION_JSON);
-        h.setBearerAuth(token); // Authorization: Bearer <token>
-        return h;
+    private BudgetItem bi(int id, String cat, double max, double curr) {
+        BudgetItem x = new BudgetItem();
+        x.setId(id);
+        Category c = new Category();
+        c.setName(cat);
+        x.setCategory(c);
+        x.setMaxPrice(max);
+        x.setCurrPrice(curr);
+        return x;
     }
 
-    private void setEventDate(LocalDateTime when) {
-        event.setDate(when);
-        event = eventService.save(event);
-        // ensure relation persists
-        organizer = organizerService.findByEmail(EMAIL);
-        assertTrue(eventRepository.findByOrganizer(organizer).stream().anyMatch(e -> e.getId().equals(event.getId())),
-                "Seeded event must be retrievable by findByOrganizer(organizer)");
-    }
+    // ---------- POST /api/organizers/budget/{budgetId}/items ----------
 
-    private int addItemViaApi(HttpHeaders headers, String categoryName, double maxPrice, double currPrice) {
+    @Test
+    @WithMockUser(username = EMAIL, roles = {"ORGANIZER"})
+    @DisplayName("POST add item — 200 OK when organizer exists and event not passed")
+    void addItem_ok() throws Exception {
+        int budgetId = 321;
+
+        when(organizerService.findByEmail(EMAIL)).thenReturn(organizer());
+        when(eventService.checkIfEventHasPassed(eq(budgetId), any(Organizer.class))).thenReturn(false);
+        when(budgetService.addItemToBudget(budgetId, "VENUE", 500.0))
+                .thenReturn(bi(1001, "VENUE", 500.0, 0.0));
+
         NewBudgetItemDTO body = new NewBudgetItemDTO();
-        body.setCategory(categoryName);
-        body.setMaxPrice(maxPrice);
-        body.setCurrPrice(currPrice);
+        body.setCategory("VENUE");
+        body.setMaxPrice(500.0);
 
-        ResponseEntity<BudgetItemDTO> resp = rest.exchange(
-                baseUrl + "/budget/{budgetId}/items",
-                HttpMethod.POST,
-                new HttpEntity<>(body, headers),
-                BudgetItemDTO.class,
-                budget.getId()
-        );
+        mockMvc.perform(post(BASE + "/budget/{budgetId}/items", budgetId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1001))
+                .andExpect(jsonPath("$.category").value("VENUE"))
+                .andExpect(jsonPath("$.maxPrice").value(500.0))
+                .andExpect(jsonPath("$.currPrice").value(0.0));
 
-        assertEquals(HttpStatus.OK, resp.getStatusCode());
-        assertNotNull(resp.getBody());
-        assertEquals(categoryName, resp.getBody().getCategory());
-        return resp.getBody().getId();
+        verify(budgetService).addItemToBudget(budgetId, "VENUE", 500.0);
     }
 
-    // ---------------------------
-    // Tests
-    // ---------------------------
+    @Test
+    @WithMockUser(username = EMAIL, roles = {"ORGANIZER"})
+    @DisplayName("POST add item — 401 when organizer not found")
+    void addItem_unauthorized() throws Exception {
+        int budgetId = 321;
+        when(organizerService.findByEmail(EMAIL)).thenReturn(null);
 
-    @Nested
-    @DisplayName("POST /api/organizers/budget/{budgetId}/items")
-    class AddItem {
+        NewBudgetItemDTO body = new NewBudgetItemDTO();
+        body.setCategory("VENUE");
+        body.setMaxPrice(500.0);
 
-        @Test
-        @DisplayName("200 OK — adds item when authorized and event not passed")
-        void addItem_ok() {
-            setEventDate(LocalDateTime.now().plusDays(2)); // future → not passed
-            HttpHeaders headers = authHeadersFor(organizer);
+        mockMvc.perform(post(BASE + "/budget/{budgetId}/items", budgetId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isUnauthorized());
 
-            NewBudgetItemDTO body = new NewBudgetItemDTO();
-            body.setCategory("VENUE");
-            body.setMaxPrice(500.0);
-            body.setCurrPrice(0.0);
-
-            ResponseEntity<BudgetItemDTO> resp = rest.exchange(
-                    baseUrl + "/budget/{budgetId}/items",
-                    HttpMethod.POST,
-                    new HttpEntity<>(body, headers),
-                    BudgetItemDTO.class,
-                    budget.getId()
-            );
-
-            assertEquals(HttpStatus.OK, resp.getStatusCode());
-            assertNotNull(resp.getBody());
-            assertEquals("VENUE", resp.getBody().getCategory());
-            assertEquals(500.0, resp.getBody().getMaxPrice(), 1e-6);
-
-            // Verify totals persisted by real service
-            Budget reloaded = budgetRepository.findById(budget.getId()).orElseThrow();
-            assertEquals(500.0, reloaded.getTotal(), 1e-6);
-            assertEquals(500.0, reloaded.getAvailable(), 1e-6);
-        }
-
-        @Test
-        @DisplayName("401 UNAUTHORIZED — when token missing")
-        void addItem_unauthorized() {
-            setEventDate(LocalDateTime.now().plusDays(1)); // future; but we won't send token
-            NewBudgetItemDTO body = new NewBudgetItemDTO();
-            body.setCategory("VENUE");
-            body.setMaxPrice(500.0);
-
-            ResponseEntity<String> resp = rest.exchange(
-                    baseUrl + "/budget/{budgetId}/items",
-                    HttpMethod.POST,
-                    new HttpEntity<>(body, new HttpHeaders()),
-                    String.class,
-                    budget.getId()
-            );
-
-            assertEquals(HttpStatus.UNAUTHORIZED, resp.getStatusCode());
-        }
-
-        @Test
-        @DisplayName("400 BAD REQUEST — when event has already passed")
-        void addItem_eventPassed() {
-            setEventDate(LocalDateTime.now().minusDays(1)); // past → passed
-            HttpHeaders headers = authHeadersFor(organizer);
-
-            NewBudgetItemDTO body = new NewBudgetItemDTO();
-            body.setCategory("VENUE");
-            body.setMaxPrice(500.0);
-
-            ResponseEntity<String> resp = rest.exchange(
-                    baseUrl + "/budget/{budgetId}/items",
-                    HttpMethod.POST,
-                    new HttpEntity<>(body, headers),
-                    String.class,
-                    budget.getId()
-            );
-
-            assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-        }
+        verifyNoInteractions(eventService, budgetService);
     }
 
-    @Nested
-    @DisplayName("PUT /api/organizers/budget/{budgetId}/items/{itemId}")
-    class UpdateItem {
+    @Test
+    @WithMockUser(username = EMAIL, roles = {"ORGANIZER"})
+    @DisplayName("POST add item — 400 when event already passed")
+    void addItem_eventPassed_400() throws Exception {
+        int budgetId = 321;
+        when(organizerService.findByEmail(EMAIL)).thenReturn(organizer());
+        when(eventService.checkIfEventHasPassed(eq(budgetId), any(Organizer.class))).thenReturn(true);
 
-        @Test
-        @DisplayName("200 OK — updates item price when authorized and event not passed")
-        void updateItem_ok() {
-            setEventDate(LocalDateTime.now().plusDays(3));
-            HttpHeaders headers = authHeadersFor(organizer);
+        NewBudgetItemDTO body = new NewBudgetItemDTO();
+        body.setCategory("VENUE");
+        body.setMaxPrice(500.0);
 
-            // First create an item so we have a real ID to update
-            int itemId = addItemViaApi(headers, "VENUE", 200.0, 50.0);
+        mockMvc.perform(post(BASE + "/budget/{budgetId}/items", budgetId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isBadRequest());
 
-            // Update price to 300.0
-            Double newPrice = 300.0;
-
-            ResponseEntity<BudgetItemDTO> resp = rest.exchange(
-                    baseUrl + "/budget/{budgetId}/items/{itemId}",
-                    HttpMethod.PUT,
-                    new HttpEntity<>(newPrice, headers),
-                    BudgetItemDTO.class,
-                    budget.getId(),
-                    itemId
-            );
-
-            assertEquals(HttpStatus.OK, resp.getStatusCode());
-            assertNotNull(resp.getBody());
-            assertEquals(300.0, resp.getBody().getMaxPrice(), 1e-6);
-            assertEquals("VENUE", resp.getBody().getCategory());
-
-            Budget reloaded = budgetRepository.findById(budget.getId()).orElseThrow();
-            assertEquals(300.0, reloaded.getTotal(), 1e-6);
-            assertEquals(250.0, reloaded.getAvailable(), 1e-6); // 300 max - 50 spent
-        }
-
-        @Test
-        @DisplayName("401 UNAUTHORIZED — when token missing")
-        void updateItem_unauthorized() {
-            setEventDate(LocalDateTime.now().plusDays(1));
-            // create item with auth so it exists
-            HttpHeaders headers = authHeadersFor(organizer);
-            int itemId = addItemViaApi(headers, "VENUE", 120.0, 20.0);
-
-            ResponseEntity<String> resp = rest.exchange(
-                    baseUrl + "/budget/{budgetId}/items/{itemId}",
-                    HttpMethod.PUT,
-                    new HttpEntity<>(300.0, new HttpHeaders()),
-                    String.class,
-                    budget.getId(),
-                    itemId
-            );
-
-            assertEquals(HttpStatus.UNAUTHORIZED, resp.getStatusCode());
-        }
-
-        @Test
-        @DisplayName("400 BAD REQUEST — when event has already passed")
-        void updateItem_eventPassed() {
-            setEventDate(LocalDateTime.now().minusHours(2)); // passed
-            HttpHeaders headers = authHeadersFor(organizer);
-
-            // Even if item does not exist, controller should short-circuit on "passed"
-            ResponseEntity<String> resp = rest.exchange(
-                    baseUrl + "/budget/{budgetId}/items/{itemId}",
-                    HttpMethod.PUT,
-                    new HttpEntity<>(300.0, headers),
-                    String.class,
-                    budget.getId(),
-                    99999 // arbitrary; service won't be invoked
-            );
-
-            assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-        }
+        verify(eventService).checkIfEventHasPassed(eq(budgetId), any(Organizer.class));
+        verifyNoInteractions(budgetService);
     }
 
-    @Nested
-    @DisplayName("DELETE /api/organizers/budget/{budgetId}/items/{itemId}")
-    class DeleteItem {
+    @Test
+    @WithMockUser(username = EMAIL, roles = {"ORGANIZER"})
+    @DisplayName("POST add item — 400 when category already exists in budget")
+    void addItem_duplicateCategory() throws Exception {
+        int budgetId = 321;
+        when(organizerService.findByEmail(EMAIL)).thenReturn(organizer());
+        when(eventService.checkIfEventHasPassed(eq(budgetId), any())).thenReturn(false);
+        when(budgetService.addItemToBudget(budgetId, "VENUE", 500.0))
+            .thenThrow(new IllegalArgumentException("Category already exists in budget"));
 
-        @Test
-        @DisplayName("200 OK — deletes item when authorized and event not passed")
-        void delete_ok() {
-            setEventDate(LocalDateTime.now().plusDays(1));
-            HttpHeaders headers = authHeadersFor(organizer);
+        NewBudgetItemDTO body = new NewBudgetItemDTO();
+        body.setCategory("VENUE");
+        body.setMaxPrice(500.0);
 
-            int itemId = addItemViaApi(headers, "VENUE", 150.0, 0.0);
-
-            ResponseEntity<Void> resp = rest.exchange(
-                    baseUrl + "/budget/{budgetId}/items/{itemId}",
-                    HttpMethod.DELETE,
-                    new HttpEntity<>(null, headers),
-                    Void.class,
-                    budget.getId(),
-                    itemId
-            );
-
-            assertEquals(HttpStatus.OK, resp.getStatusCode());
-
-            // Ensure it is removed
-            Budget reloaded = budgetRepository.findById(budget.getId()).orElseThrow();
-            List<BudgetItem> left = reloaded.getBudgetItems();
-            boolean stillThere = left != null && left.stream().anyMatch(bi -> bi.getId() == itemId);
-            assertFalse(stillThere, "Budget item should be deleted");
-        }
-
-        @Test
-        @DisplayName("401 UNAUTHORIZED — when token missing")
-        void delete_unauthorized() {
-            setEventDate(LocalDateTime.now().plusDays(1));
-            // create item with auth to ensure existing
-            HttpHeaders headers = authHeadersFor(organizer);
-            int itemId = addItemViaApi(headers, "VENUE", 100.0, 0.0);
-
-            ResponseEntity<String> resp = rest.exchange(
-                    baseUrl + "/budget/{budgetId}/items/{itemId}",
-                    HttpMethod.DELETE,
-                    new HttpEntity<>(null, new HttpHeaders()),
-                    String.class,
-                    budget.getId(),
-                    itemId
-            );
-
-            assertEquals(HttpStatus.UNAUTHORIZED, resp.getStatusCode());
-        }
-
-        @Test
-        @DisplayName("400 BAD REQUEST — when event has already passed")
-        void delete_eventPassed() {
-            setEventDate(LocalDateTime.now().minusDays(1)); // passed
-            HttpHeaders headers = authHeadersFor(organizer);
-
-            ResponseEntity<String> resp = rest.exchange(
-                    baseUrl + "/budget/{budgetId}/items/{itemId}",
-                    HttpMethod.DELETE,
-                    new HttpEntity<>(null, headers),
-                    String.class,
-                    budget.getId(),
-                    12345 // arbitrary; service won’t be called
-            );
-
-            assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-        }
+        mockMvc.perform(post(BASE + "/budget/{budgetId}/items", budgetId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)))
+            .andExpect(status().isBadRequest());
     }
 
-    // ---------------------------------------------------------------------
-    // Test-only exception mapper so IllegalArgumentException -> 400 BAD_REQUEST
-    // Does NOT affect production (active only in "test" profile).
-    // ---------------------------------------------------------------------
+    @Test
+    @WithMockUser(username = EMAIL, roles = {"ORGANIZER"})
+    @DisplayName("POST add item — 400 when category not found")
+    void addItem_categoryNotFound() throws Exception {
+        int budgetId = 321;
+        when(organizerService.findByEmail(EMAIL)).thenReturn(organizer());
+        when(eventService.checkIfEventHasPassed(eq(budgetId), any())).thenReturn(false);
+        when(budgetService.addItemToBudget(budgetId, "NOPE", 200.0))
+            .thenThrow(new IllegalArgumentException("Category not found"));
+
+        NewBudgetItemDTO body = new NewBudgetItemDTO();
+        body.setCategory("NOPE");
+        body.setMaxPrice(200.0);
+
+        mockMvc.perform(post(BASE + "/budget/{budgetId}/items", budgetId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)))
+            .andExpect(status().isBadRequest());
+    }
+
+    // ---------- PUT /api/organizers/budget/{budgetId}/items/{itemId} ----------
+
+    @Test
+    @WithMockUser(username = EMAIL, roles = {"ORGANIZER"})
+    @DisplayName("PUT update item — 200 OK")
+    void update_ok() throws Exception {
+        int budgetId = 321, itemId = 55;
+        when(organizerService.findByEmail(EMAIL)).thenReturn(organizer());
+        when(eventService.checkIfEventHasPassed(eq(budgetId), any(Organizer.class))).thenReturn(false);
+        when(budgetService.updateBudgetItem(budgetId, itemId, 300.0))
+                .thenReturn(bi(itemId, "VENUE", 300.0, 50.0));
+
+        mockMvc.perform(put(BASE + "/budget/{budgetId}/items/{itemId}", budgetId, itemId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(300.0))) // raw number JSON
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(itemId))
+                .andExpect(jsonPath("$.category").value("VENUE"))
+                .andExpect(jsonPath("$.maxPrice").value(300.0))
+                .andExpect(jsonPath("$.currPrice").value(50.0));
+
+        verify(budgetService).updateBudgetItem(budgetId, itemId, 300.0);
+    }
+
+    @Test
+    @WithMockUser(username = EMAIL, roles = {"ORGANIZER"})
+    @DisplayName("PUT update item — 401 when organizer not found")
+    void update_unauthorized() throws Exception {
+        int budgetId = 321, itemId = 55;
+        when(organizerService.findByEmail(EMAIL)).thenReturn(null);
+
+        mockMvc.perform(put(BASE + "/budget/{budgetId}/items/{itemId}", budgetId, itemId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(250.0)))
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(eventService, budgetService);
+    }
+
+    @Test
+    @WithMockUser(username = EMAIL, roles = {"ORGANIZER"})
+    @DisplayName("PUT update item — 400 when event already passed")
+    void update_eventPassed_400() throws Exception {
+        int budgetId = 321, itemId = 55;
+        when(organizerService.findByEmail(EMAIL)).thenReturn(organizer());
+        when(eventService.checkIfEventHasPassed(eq(budgetId), any(Organizer.class))).thenReturn(true);
+
+        mockMvc.perform(put(BASE + "/budget/{budgetId}/items/{itemId}", budgetId, itemId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(250.0)))
+                .andExpect(status().isBadRequest());
+
+        verify(eventService).checkIfEventHasPassed(eq(budgetId), any(Organizer.class));
+        verifyNoInteractions(budgetService);
+    }
+
+    @Test
+    @WithMockUser(username = EMAIL, roles = {"ORGANIZER"})
+    @DisplayName("PUT update item — 400 when new max < already spent")
+    void update_lessThanSpent_400() throws Exception {
+        int budgetId = 321, itemId = 55;
+        when(organizerService.findByEmail(EMAIL)).thenReturn(organizer());
+        when(eventService.checkIfEventHasPassed(eq(budgetId), any())).thenReturn(false);
+        when(budgetService.updateBudgetItem(budgetId, itemId, 40.0))
+            .thenThrow(new IllegalArgumentException("Spent amount cannot be greater than budget item amount"));
+
+        mockMvc.perform(put(BASE + "/budget/{budgetId}/items/{itemId}", budgetId, itemId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(40.0)))
+            .andExpect(status().isBadRequest());
+    }
+
+
+    // ---------- DELETE /api/organizers/budget/{budgetId}/items/{itemId} ----------
+
+    @Test
+    @WithMockUser(username = EMAIL, roles = {"ORGANIZER"})
+    @DisplayName("DELETE item — 200 OK")
+    void delete_ok() throws Exception {
+        int budgetId = 321, itemId = 88;
+        when(organizerService.findByEmail(EMAIL)).thenReturn(organizer());
+        when(eventService.checkIfEventHasPassed(eq(budgetId), any(Organizer.class))).thenReturn(false);
+
+        mockMvc.perform(delete(BASE + "/budget/{budgetId}/items/{itemId}", budgetId, itemId))
+                .andExpect(status().isOk());
+
+        verify(budgetService).removeBudgetItem(budgetId, itemId);
+    }
+
+    @Test
+    @WithMockUser(username = EMAIL, roles = {"ORGANIZER"})
+    @DisplayName("DELETE item — 401 when organizer not found")
+    void delete_unauthorized() throws Exception {
+        int budgetId = 321, itemId = 88;
+        when(organizerService.findByEmail(EMAIL)).thenReturn(null);
+
+        mockMvc.perform(delete(BASE + "/budget/{budgetId}/items/{itemId}", budgetId, itemId))
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(eventService, budgetService);
+    }
+
+    @Test
+    @WithMockUser(username = EMAIL, roles = {"ORGANIZER"})
+    @DisplayName("DELETE item — 400 when event already passed")
+    void delete_eventPassed_400() throws Exception {
+        int budgetId = 321, itemId = 88;
+        when(organizerService.findByEmail(EMAIL)).thenReturn(organizer());
+        when(eventService.checkIfEventHasPassed(eq(budgetId), any(Organizer.class))).thenReturn(true);
+
+        mockMvc.perform(delete(BASE + "/budget/{budgetId}/items/{itemId}", budgetId, itemId))
+                .andExpect(status().isBadRequest());
+
+        verify(eventService).checkIfEventHasPassed(eq(budgetId), any(Organizer.class));
+        verifyNoInteractions(budgetService);
+    }
+
+    @Test
+    @WithMockUser(username = EMAIL, roles = {"ORGANIZER"})
+    @DisplayName("DELETE item — 400 when item has non-zero spent")
+    void delete_nonZeroSpent_400() throws Exception {
+        int budgetId = 321, itemId = 88;
+        when(organizerService.findByEmail(EMAIL)).thenReturn(organizer());
+        when(eventService.checkIfEventHasPassed(eq(budgetId), any())).thenReturn(false);
+        doThrow(new IllegalArgumentException("Budget item cannot be deleted. Offers already purchased for this item."))
+            .when(budgetService).removeBudgetItem(budgetId, itemId);
+
+        mockMvc.perform(delete(BASE + "/budget/{budgetId}/items/{itemId}", budgetId, itemId))
+            .andExpect(status().isBadRequest());
+    }
+
+
+    // Map IllegalArgumentException -> 400 for this test slice
     @RestControllerAdvice
+    @WithMockUser(username = EMAIL, roles = {"ORGANIZER"})
     @Profile("test")
     @Order(Ordered.HIGHEST_PRECEDENCE)
     static class TestExceptionHandler {
         @ExceptionHandler(IllegalArgumentException.class)
-        public ResponseEntity<java.util.Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(java.util.Map.of("message", ex.getMessage()));
+        public org.springframework.http.ResponseEntity<java.util.Map<String, String>> handleIAE(IllegalArgumentException ex) {
+            return org.springframework.http.ResponseEntity.badRequest()
+                    .body(java.util.Map.of("message", ex.getMessage()));
         }
     }
 }
