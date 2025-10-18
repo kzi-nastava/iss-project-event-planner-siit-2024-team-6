@@ -23,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -120,12 +121,7 @@ public class OrganizerController {
     }
 
     @PostMapping("budget/{budgetId}/items")
-    public ResponseEntity<BudgetItemDTO> addItemToBudget(@PathVariable int budgetId, @RequestBody NewBudgetItemDTO budgetDTO, HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null ) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+    public ResponseEntity<BudgetItemDTO> addItemToBudget(@PathVariable int budgetId, @RequestBody NewBudgetItemDTO budgetDTO,  @AuthenticationPrincipal(expression = "username") String email) {
         Organizer o = organizerService.findByEmail(email);
         if (o == null) {
              return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -138,12 +134,7 @@ public class OrganizerController {
     }
 
     @PutMapping("budget/{budgetId}/items/{itemId}")
-    public ResponseEntity<BudgetItemDTO> updateBudgetItem(@PathVariable int budgetId, @PathVariable int itemId, @RequestBody double price, HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null ) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+    public ResponseEntity<BudgetItemDTO> updateBudgetItem(@PathVariable int budgetId, @PathVariable int itemId, @RequestBody double price, @AuthenticationPrincipal(expression = "username") String email) {
         Organizer o = organizerService.findByEmail(email);
         if (o == null) {
              return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -156,12 +147,7 @@ public class OrganizerController {
     }
 
     @DeleteMapping("budget/{budgetId}/items/{itemId}")
-    public ResponseEntity<Void> deleteBudgetItem(@PathVariable int budgetId, @PathVariable int itemId, HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null ) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+    public ResponseEntity<Void> deleteBudgetItem(@PathVariable int budgetId, @PathVariable int itemId, @AuthenticationPrincipal(expression = "username") String email) {
         Organizer o = organizerService.findByEmail(email);
         if (o == null) {
              return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
