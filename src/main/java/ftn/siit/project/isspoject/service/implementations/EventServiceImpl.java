@@ -82,7 +82,7 @@ public class EventServiceImpl implements EventService {
         }
         for (Event event : eventRepository.findByOrganizer(organizer)) {
             if(event.getBudget().getId() == budgetId) {
-                if(event.getDate().isAfter(LocalDateTime.now())) {
+                if(event.getDate().isAfter(LocalDateTime.now()) || event.getIsDeleted() != true) {
                     return false;
                 }else{
                     return true;
