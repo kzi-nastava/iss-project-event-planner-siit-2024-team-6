@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -66,12 +67,7 @@ public class EventController {
     }
 
     @GetMapping("{eventId}/budget")
-    public  ResponseEntity<BudgetDTO> getBudget(@PathVariable Integer eventId, HttpServletRequest request) {
-        String jwtToken = this.tokenUtils.getToken(request);
-        if (jwtToken == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        String email = this.tokenUtils.getUsernameFromToken(jwtToken);
+    public  ResponseEntity<BudgetDTO> getBudget(@PathVariable Integer eventId, @AuthenticationPrincipal(expression = "username") String email) {
         Organizer user = organizerService.findByEmail(email);
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -79,11 +75,6 @@ public class EventController {
         Event event = eventService.findById(eventId);
         if(!event.getDate().isAfter(LocalDateTime.now())){
             throw new IllegalArgumentException("Cannot access budget of an event that has passed.");
-        }
-
-        if (event.getBudget() == null){
-            event.setBudget(new Budget());
-            eventService.save(event);
         }
 
         BudgetDTO dto = new BudgetDTO(event.getBudget());
