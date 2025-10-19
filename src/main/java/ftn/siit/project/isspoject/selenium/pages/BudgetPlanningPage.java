@@ -351,4 +351,61 @@ public class BudgetPlanningPage {
         jsScrollIntoView(next);
         jsClick(next);
     }
+    // --- OFFERS & PAGINATOR (add to your BudgetPlanningPage) ---
+
+    // Offer cards inside the child component
+    private final By offerCard = By.cssSelector("app-offer-card, .offer-card");
+    // Message when no offers
+    private final By noOffersMsg = By.cssSelector(".no-offers-message");
+    // Paginator range (e.g., "1 – 8 of 23")
+    private final By paginatorRange = By.cssSelector(".mat-mdc-paginator-range-label");
+    // Page-size select trigger
+    private final By pageSizeSelect = By.cssSelector(".mat-mdc-paginator-page-size-select, mat-select[aria-label='Items per page']");
+    // Page-size option panel
+    private final By matOption = By.cssSelector("mat-option");
+
+    // Return offer cards currently shown
+    public List<WebElement> getOfferCards() {
+        // Search inside the offers host if present; otherwise search globally as a fallback
+        List<WebElement> host = driver.findElements(offersList);
+        if (!host.isEmpty()) {
+            return host.get(0).findElements(offerCard);
+        }
+        return driver.findElements(offerCard);
+    }
+
+    // Whether the "No matching offers." message is visible
+    public boolean isNoOffersVisible() {
+        List<WebElement> host = driver.findElements(offersList);
+        if (!host.isEmpty()) {
+            List<WebElement> msg = host.get(0).findElements(noOffersMsg);
+            return !msg.isEmpty() && msg.get(0).isDisplayed();
+        }
+        List<WebElement> msg = driver.findElements(noOffersMsg);
+        return !msg.isEmpty() && msg.get(0).isDisplayed();
+    }
+
+    // Read paginator range label text (e.g., "1 – 8 of 23")
+    public String getPaginatorRangeText() {
+        return mustBeVisible(paginatorRange).getText().trim();
+    }
+
+    // Change page size (e.g., 4, 8, 12)
+    public void setPageSize(int size) {
+        WebElement trigger = mustBeClickable(pageSizeSelect);
+        jsClick(trigger);
+        // Wait for options panel and click matching option text
+        wait.until(ExpectedConditions.visibilityOfElementLocated(matOption));
+        List<WebElement> options = driver.findElements(matOption);
+        WebElement match = options.stream()
+                .filter(o -> o.getText().trim().equals(String.valueOf(size)))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("Page-size option not found: " + size));
+        jsClick(match);
+        // Wait for the menu to close (option panel becomes stale or invisible)
+        wait.until(ExpectedConditions.invisibilityOf(match));
+        // Give Angular a tick to update the list
+        mustBeVisible(offersList);
+    }
+
 }

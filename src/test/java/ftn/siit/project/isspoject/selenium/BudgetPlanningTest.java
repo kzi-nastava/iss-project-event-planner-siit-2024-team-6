@@ -6,8 +6,10 @@ import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.WebElement;
 
 import java.time.Duration;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -87,7 +89,7 @@ public class BudgetPlanningTest extends BaseTest {
     @Test
     @DisplayName("03 - Edit updates max price and changes totals by delta")
     void editItem_UpdatesMax_AndTotalsChangeByDelta() {
-        String category = "Catering";
+        String category = "Makeup";
         if (page.findBudgetRowByCategory(category) == null) {
             // Seed with a non-duplicate category
             category = page.createAnyAvailableCategoryAndReturnName("1000");
@@ -116,5 +118,71 @@ public class BudgetPlanningTest extends BaseTest {
 
         // The test remains resilient even if no offers match; nextPage should not crash
         assertDoesNotThrow(page::nextPage, "Paginator next should be clickable without errors.");
+    }
+     @Test
+    @DisplayName("05) Search renders offers or 'no offers' without crashing")
+    void searchRendersOffersOrEmptyMessage() {
+        page.clickSearch();
+        List<WebElement> cards = page.getOfferCards();
+        boolean noOffers = page.isNoOffersVisible();
+        assertTrue(!cards.isEmpty() || noOffers,
+                "After search, either offer cards should appear or 'No matching offers.' should be visible.");
+    }
+
+    @Test
+    @DisplayName("06) Pagination 'Next' is safe to click")
+    void paginationNextIsSafe() {
+        page.clickSearch();
+        assertDoesNotThrow(page::nextPage, "Paginator next should be clickable without errors.");
+    }
+
+    @Test
+    @DisplayName("3) Page size change updates visible count (when cards exist)")
+    void pageSizeAffectsVisibleCount() {
+        page.clickSearch();
+        List<WebElement> initialCards = page.getOfferCards();
+        if (initialCards.isEmpty()) {
+            assertTrue(page.isNoOffersVisible(), "No cards shown; 'No matching offers.' should be visible.");
+            return;
+        }
+        int targetSize = initialCards.size() >= 8 ? 4 : 8;
+        page.setPageSize(targetSize);
+        List<WebElement> afterCards = page.getOfferCards();
+        assertTrue(afterCards.size() <= targetSize,
+                "Visible offer cards should be <= selected page size: " + targetSize);
+    }
+
+    @Test
+    @DisplayName("4) Edit/add a budget item, then search remains stable")
+    void editOrAddItemThenSearch() {
+        String category = "Catering";
+        if (page.findBudgetRowByCategory(category) == null) {
+            category = page.createAnyAvailableCategoryAndReturnName("700");
+        }
+        page.editItem(category, "1200");
+        page.clickSearch();
+
+        List<WebElement> cards = page.getOfferCards();
+        boolean noOffers = page.isNoOffersVisible();
+        assertTrue(!cards.isEmpty() || noOffers,
+                "After editing/adding and searching, either cards should show or 'no offers' should be visible.");
+
+        String range = page.getPaginatorRangeText();
+        assertNotNull(range);
+        assertFalse(range.isBlank(), "Paginator range label should be present.");
+    }
+
+    @Test
+    @DisplayName("5) Search → Next keeps results area present")
+    void searchThenNextPageKeepsResultsArea() {
+        page.clickSearch();
+        String firstRange = page.getPaginatorRangeText();
+
+        page.nextPage();
+
+        String newRange = page.getPaginatorRangeText();
+        assertNotNull(newRange);
+        assertFalse(newRange.isBlank());
+        assertFalse(firstRange == null || firstRange.isBlank(), "Initial range should be present too.");
     }
 }
