@@ -158,14 +158,15 @@ public class BudgetPlanningPage {
         openCreateItemPopup();
         WebElement root = mustBeVisible(createPopupRoot);
 
-        // Select category inside this popup
+        // Ensure we pick a non-duplicate category
         waitForCategoryOptionsToLoad(root);
         WebElement selectEl = root.findElement(createPopupSelectRel);
         Select select = new Select(selectEl);
 
         boolean picked = false;
         for (WebElement opt : select.getOptions()) {
-            if (opt.getText().trim().equalsIgnoreCase(category)) {
+            String text = opt.getText().trim();
+            if (text.equalsIgnoreCase(category)) {
                 opt.click();
                 picked = true;
                 break;
@@ -176,7 +177,7 @@ public class BudgetPlanningPage {
                     "'. Available: " + getDropdownCategories());
         }
 
-        // Enter amount & confirm (scoped to THIS popup)
+        // Enter amount & confirm
         WebElement input = root.findElement(popupNumberInputRel);
         wait.until(ExpectedConditions.elementToBeClickable(input));
         input.clear();
@@ -186,9 +187,19 @@ public class BudgetPlanningPage {
         wait.until(ExpectedConditions.elementToBeClickable(confirm));
         jsClick(confirm);
 
-        // Wait for THIS popup to disappear
-        wait.until(ExpectedConditions.stalenessOf(root));
+        // Either the popup goes away OR we surface the snackbar text and fail fast
+        try {
+            wait.until(ExpectedConditions.stalenessOf(root));
+        } catch (org.openqa.selenium.TimeoutException te) {
+            String snack = "";
+            try { snack = getSnackBarText(); } catch (Exception ignored) {}
+            throw new AssertionError(
+                "Create Item popup did not close. Likely validation failure (duplicate or invalid amount)." +
+                (snack.isBlank() ? "" : " Snackbar: " + snack)
+            );
+        }
     }
+
 
     // ====== RECOMMENDATIONS POPUP ======
     public boolean hasRecommendations() {
@@ -272,6 +283,60 @@ public class BudgetPlanningPage {
 
         wait.until(d -> findBudgetRowByCategory(category) == null);
     }
+    // --- Put these inside BudgetPlanningPage ---
+
+    // Parse totals from summary labels
+    public double readTotalMax() {
+        String text = getTotalMaxAmountText();
+        String digits = text.replaceAll("[^0-9.]", "");
+        return digits.isEmpty() ? 0.0 : Double.parseDouble(digits);
+    }
+
+    public double readSpent() {
+        String text = getSpentAmountText();
+        String digits = text.replaceAll("[^0-9.]", "");
+        return digits.isEmpty() ? 0.0 : Double.parseDouble(digits);
+    }
+
+    // Count rows in the budget table
+    public int countBudgetRows() {
+        return driver.findElements(budgetRows).size();
+    }
+
+    public String createAnyAvailableCategoryAndReturnName(String amount) {
+        openCreateItemPopup();
+        var candidates = getAvailableCategoriesNotInTable();
+        cancelCreateItemPopup();
+        if (candidates.isEmpty())
+            throw new IllegalStateException("No selectable categories available (all are already in the table).");
+        String chosen = candidates.get(0);
+        createNewItem(chosen, amount);
+        return chosen;
+    }
+
+        // Return category names present in the table
+    public List<String> getTableCategories() {
+        return driver.findElements(budgetRows).stream()
+                .map(r -> r.findElement(rowCategory(r)).getText().trim())
+                .filter(t -> !t.isEmpty())
+                .toList();
+    }
+
+    // From the create popup, return only categories NOT in table
+    public List<String> getAvailableCategoriesNotInTable() {
+        WebElement root = mustBeVisible(createPopupRoot);
+        waitForCategoryOptionsToLoad(root);
+        List<String> dropdown = root.findElements(selectOptionsRel).stream()
+                .map(o -> o.getText().trim())
+                .filter(t -> t.length() > 0 && !t.equalsIgnoreCase("Select a category"))
+                .toList();
+        var present = getTableCategories().stream().map(String::toLowerCase).toList();
+        return dropdown.stream()
+                .filter(c -> !present.contains(c.toLowerCase()))
+                .toList();
+    }
+
+
 
     // ====== SEARCH / PAGINATION ======
     public void clickSearch() {
