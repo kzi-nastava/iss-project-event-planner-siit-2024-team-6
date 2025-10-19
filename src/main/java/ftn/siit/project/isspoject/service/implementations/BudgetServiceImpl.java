@@ -31,6 +31,10 @@ public class BudgetServiceImpl implements BudgetService {
 
   @Override
     public BudgetItem addItemToBudget(int budgetId, String category, double price) {
+        if (category == null || category.isBlank()) {
+            throw new IllegalArgumentException("Category must be provided");
+        }
+
         if (price <= 0.0) {
             throw new IllegalArgumentException("Price must be greater than zero");
         }
