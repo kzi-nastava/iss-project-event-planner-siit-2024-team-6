@@ -842,7 +842,7 @@ public class BudgetPlanningPage {
             if (!txt.equals("cancel") && !txt.equals("no") && !txt.contains("close")) {
                 return b;
             }
-        
+        }
         return btns.isEmpty() ? null : btns.get(btns.size() - 1);
     }
 
