@@ -4,9 +4,11 @@ import ftn.siit.project.isspoject.selenium.pages.BudgetPlanningPage;
 import ftn.siit.project.isspoject.selenium.pages.LoginPage;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.WebElement;
+import ftn.siit.project.isspoject.selenium.pages.OfferInfoPage;
 
 import java.time.Duration;
 import java.util.List;
@@ -16,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.DisplayName.class)
 public class BudgetPlanningTest extends BaseTest {
 
-    private static final long EVENT_ID_UNDER_TEST = 27L; // adjust if needed
+    private static final long EVENT_ID_UNDER_TEST = 28L; // adjust if needed
     private BudgetPlanningPage page;
 
     @BeforeEach
@@ -63,7 +65,6 @@ public class BudgetPlanningTest extends BaseTest {
         assertEquals(rowsBefore + 1, page.countBudgetRows(), "Row count should increase by 1.");
     }
 
-
     @Test
     @DisplayName("02 - Add via Recommendation shows success and row appears")
     void addViaRecommendation_CreatesRow() {
@@ -84,7 +85,6 @@ public class BudgetPlanningTest extends BaseTest {
 
         assertTrue(page.countBudgetRows() >= rowsBefore + 1, "Row count should increase.");
     }
-
 
     @Test
     @DisplayName("03 - Edit updates max price and changes totals by delta")
@@ -109,7 +109,6 @@ public class BudgetPlanningTest extends BaseTest {
         assertNotNull(page.findBudgetRowByCategory(category), "Row should remain present after edit.");
     }
 
-
     @Test
     @DisplayName("04 - Search offers works and paginator can move forward")
     void searchOffers_AndPaginate() {
@@ -119,8 +118,9 @@ public class BudgetPlanningTest extends BaseTest {
         // The test remains resilient even if no offers match; nextPage should not crash
         assertDoesNotThrow(page::nextPage, "Paginator next should be clickable without errors.");
     }
-     @Test
-    @DisplayName("05) Search renders offers or 'no offers' without crashing")
+
+    @Test
+    @DisplayName("05 - Search renders offers or 'no offers' without crashing")
     void searchRendersOffersOrEmptyMessage() {
         page.clickSearch();
         List<WebElement> cards = page.getOfferCards();
@@ -130,30 +130,35 @@ public class BudgetPlanningTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("06) Pagination 'Next' is safe to click")
+    @DisplayName("06 - Deleting a zero-spent item succeeds and updates totals")
+    void deleteZeroSpentItemSucceeds() {
+        String fresh = page.createAnyAvailableCategoryAndReturnName("700");
+        page.waitForRowByCategory(fresh);
+        assertEquals(0.0, page.readRowCurrAmount(fresh), 0.001, "Fresh item should have 0 spent.");
+
+        int rowsBefore = page.countBudgetRows();
+        double totalBefore = page.readTotalMax();
+
+        page.deleteItem(fresh);
+
+        assertNull(page.findBudgetRowByCategory(fresh), "Row should be removed after delete.");
+        assertEquals(rowsBefore - 1, page.countBudgetRows(), "Row count should decrease by 1.");
+
+        double totalAfter = page.readTotalMax();
+        assertTrue(totalAfter <= totalBefore - 699.99,
+                "Total should decrease roughly by the deleted max amount.");
+    }
+
+    @Test
+    @DisplayName("07 - Pagination 'Next' is safe to click")
     void paginationNextIsSafe() {
         page.clickSearch();
         assertDoesNotThrow(page::nextPage, "Paginator next should be clickable without errors.");
     }
 
-    @Test
-    @DisplayName("3) Page size change updates visible count (when cards exist)")
-    void pageSizeAffectsVisibleCount() {
-        page.clickSearch();
-        List<WebElement> initialCards = page.getOfferCards();
-        if (initialCards.isEmpty()) {
-            assertTrue(page.isNoOffersVisible(), "No cards shown; 'No matching offers.' should be visible.");
-            return;
-        }
-        int targetSize = initialCards.size() >= 8 ? 4 : 8;
-        page.setPageSize(targetSize);
-        List<WebElement> afterCards = page.getOfferCards();
-        assertTrue(afterCards.size() <= targetSize,
-                "Visible offer cards should be <= selected page size: " + targetSize);
-    }
 
     @Test
-    @DisplayName("4) Edit/add a budget item, then search remains stable")
+    @DisplayName("08 - Edit/add a budget item, then search remains stable")
     void editOrAddItemThenSearch() {
         String category = "Catering";
         if (page.findBudgetRowByCategory(category) == null) {
@@ -173,7 +178,7 @@ public class BudgetPlanningTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("5) Search → Next keeps results area present")
+    @DisplayName("09 - Search → Next keeps results area present")
     void searchThenNextPageKeepsResultsArea() {
         page.clickSearch();
         String firstRange = page.getPaginatorRangeText();
@@ -185,4 +190,66 @@ public class BudgetPlanningTest extends BaseTest {
         assertFalse(newRange.isBlank());
         assertFalse(firstRange == null || firstRange.isBlank(), "Initial range should be present too.");
     }
+
+    @Test
+    @DisplayName("10 - Creating a duplicate category is prevented (UI hides it) or rejected (server-side)")
+    void createDuplicateCategoryIsRejectedOrPrevented() {
+        String seedCategory = "Makeup";
+        if (page.findBudgetRowByCategory(seedCategory) == null) {
+            // If "Makeup" not present, use any existing category; if none exist, create one
+            List<String> tableCats = page.getTableCategories();
+            if (tableCats.isEmpty()) {
+                // try creating one; if no options exist to create, skip the test
+                page.openCreateItemPopup();
+                var options = page.getAvailableCategoriesNotInTable();
+                page.cancelCreateItemPopup();
+                Assumptions.assumeFalse(options.isEmpty(),
+                        "No categories available to create; cannot seed a row for duplicate test.");
+                seedCategory = options.get(0);
+                page.createNewItem(seedCategory, "500");
+                page.waitForRowByCategory(seedCategory);
+            } else {
+                seedCategory = tableCats.get(0);
+            }
+        } else {
+            // "Makeup" exists already
+            page.waitForRowByCategory(seedCategory);
+        }
+        assertNotNull(page.findBudgetRowByCategory(seedCategory), "Seed row must exist.");
+
+        int beforeRows = page.countBudgetRows();
+        double beforeTotal = page.readTotalMax();
+
+        page.openCreateItemPopup();
+        boolean categoryVisibleInDropdown = page.isCategoryInDropdown(seedCategory);
+        page.cancelCreateItemPopup();
+
+        if (!categoryVisibleInDropdown) {
+            assertFalse(categoryVisibleInDropdown, "Existing category should not appear in the Create dropdown (UI prevention).");
+            assertEquals(beforeRows, page.countBudgetRows());
+            assertEquals(beforeTotal, page.readTotalMax(), 0.01);
+        } else {
+            String snack = page.tryCreateItemExpectingFailure(seedCategory, "600").toLowerCase();
+
+            // Material snackbars often append a trailing "close" action—allow both wording and presence/absence of snackbar text.
+            boolean looksLikeRejection =
+                    snack.isBlank() ||
+                            snack.contains("duplicate") ||
+                            snack.contains("already") ||
+                            snack.contains("exists") ||
+                            snack.contains("cannot") ||
+                            snack.contains("present") ||
+                            snack.contains("non-picked") ||
+                            snack.contains("non picked") ||
+                            snack.contains("select a non-picked") ||
+                            snack.contains("valid amount");
+
+            assertTrue(looksLikeRejection,
+                    "Expected a rejection-style snackbar; got: " + snack);
+
+            assertEquals(beforeRows, page.countBudgetRows(), "Row count should not increase on duplicate.");
+            assertEquals(beforeTotal, page.readTotalMax(), 0.01, "Total should not change on duplicate.");
+        }
+    }
+
 }

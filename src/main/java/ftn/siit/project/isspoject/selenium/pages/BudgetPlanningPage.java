@@ -30,27 +30,37 @@ public class BudgetPlanningPage {
 
     // Precise popup roots (no :has(); scoped by headings)
     private final By createPopupRoot = By.xpath(
-        "//div[contains(@class,'popup-backdrop')][.//div[contains(@class,'popup-modal')]//h5[normalize-space()='Add new budget item']]"
+            "//div[contains(@class,'popup-backdrop')][.//div[contains(@class,'popup-modal')]//h5[normalize-space()='Add new budget item']]"
     );
     private final By editPopupRoot = By.xpath(
-        "//div[contains(@class,'popup-backdrop')][.//div[contains(@class,'popup-modal')]//h5[contains(normalize-space(),'Edit maximal price')]]"
+            "//div[contains(@class,'popup-backdrop')][.//div[contains(@class,'popup-modal')]//h5[contains(normalize-space(),'Edit maximal price')]]"
     );
     private final By addPopupRoot = By.xpath(
-        "//div[contains(@class,'popup-backdrop')][.//div[contains(@class,'popup-modal')]//h4[contains(normalize-space(),'Add \"')]]"
+            "//div[contains(@class,'popup-backdrop')][.//div[contains(@class,'popup-modal')]//h4[contains(normalize-space(),'Add \"')]]"
     );
 
     // Elements inside any popup root (relative selectors)
     private final By popupNumberInputRel = By.cssSelector(".popup-modal input[type='number']");
-    private final By popupConfirmBtnRel  = By.xpath(".//div[contains(@class,'popup-modal')]//button[normalize-space()='Confirm']");
-    private final By popupCancelBtnRel   = By.xpath(".//div[contains(@class,'popup-modal')]//button[normalize-space()='Cancel']");
+    private final By popupConfirmBtnRel = By.xpath(".//div[contains(@class,'popup-modal')]//button[normalize-space()='Confirm']");
+    private final By popupCancelBtnRel = By.xpath(".//div[contains(@class,'popup-modal')]//button[normalize-space()='Cancel']");
     private final By createPopupSelectRel = By.cssSelector(".popup-modal select");
     private final By selectOptionsRel = By.cssSelector("option");
 
     // Budget table
     private final By budgetRows = By.cssSelector("[data-testid^='budget-row-'], .budget-row");
-    private By rowCategory(WebElement row) { return By.cssSelector("[data-testid='row-category'], span:nth-of-type(1)"); }
-    private By rowMax(WebElement row)      { return By.cssSelector("[data-testid='row-max'], span:nth-of-type(2)"); }
-    private By rowCurr(WebElement row)     { return By.cssSelector("[data-testid='row-curr'], span:nth-of-type(3)"); }
+
+    private By rowCategory(WebElement row) {
+        return By.cssSelector("[data-testid='row-category'], span:nth-of-type(1)");
+    }
+
+    private By rowMax(WebElement row) {
+        return By.cssSelector("[data-testid='row-max'], span:nth-of-type(2)");
+    }
+
+    private By rowCurr(WebElement row) {
+        return By.cssSelector("[data-testid='row-curr'], span:nth-of-type(3)");
+    }
+
     private final By rowEditBtn = By.cssSelector("[data-testid='row-edit'], .edit-button");
     private final By rowDeleteBtn = By.cssSelector("[data-testid='row-delete'], .delete-button");
 
@@ -59,6 +69,7 @@ public class BudgetPlanningPage {
     private final By spentAmount = By.cssSelector(".leftover-amount");
     private final By searchBtn = By.cssSelector("[data-testid='search-btn'], .search-button");
     private final By offersList = By.cssSelector("[data-testid='offers'], app-budget-offer-list.offers");
+    private final By offerCardContentRel = By.cssSelector(".offer-card-content");
 
     // Material components
     private final By snackBarLabel = By.cssSelector(".mdc-snackbar__label, .mat-mdc-snack-bar-label");
@@ -74,35 +85,70 @@ public class BudgetPlanningPage {
         PageFactory.initElements(driver, this);
     }
 
-    /** Navigate to the page and wait until it’s loaded. */
+    /**
+     * Navigate to the page and wait until it’s loaded.
+     */
     public BudgetPlanningPage open(String baseUrl, long eventId) {
         driver.get(baseUrl + "/budget-planning/" + eventId);
         ensureLoaded();
         return this;
     }
 
-    /** Convenience factory. */
+    /**
+     * Convenience factory.
+     */
     public static BudgetPlanningPage go(WebDriver driver, String baseUrl, long eventId) {
         return new BudgetPlanningPage(driver).open(baseUrl, eventId);
     }
 
-    /** Wait for a key element that proves the page is ready. */
+    /**
+     * Wait for a key element that proves the page is ready.
+     */
     private void ensureLoaded() {
         wait.until(ExpectedConditions.visibilityOfElementLocated(title));
     }
 
     // ---------- Utilities ----------
-    private WebElement mustBeClickable(By by) { return wait.until(ExpectedConditions.elementToBeClickable(by)); }
-    private WebElement mustBeVisible(By by) { return wait.until(ExpectedConditions.visibilityOfElementLocated(by)); }
-    private List<WebElement> mustSeeAll(By by) { return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(by)); }
-    private void jsClick(WebElement el) { ((JavascriptExecutor) driver).executeScript("arguments[0].click();", el); }
-    private void jsScrollIntoView(WebElement el) { ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", el); }
+    private WebElement mustBeClickable(By by) {
+        return wait.until(ExpectedConditions.elementToBeClickable(by));
+    }
+
+    private WebElement mustBeVisible(By by) {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(by));
+    }
+
+    private List<WebElement> mustSeeAll(By by) {
+        return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(by));
+    }
+
+    private void jsClick(WebElement el) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", el);
+    }
+
+    private void jsScrollIntoView(WebElement el) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", el);
+    }
 
     // ---------- Basic getters ----------
-    public String getTitle() { return mustBeVisible(title).getText(); }
-    public String getTotalMaxAmountText() { return mustBeVisible(totalMaxAmount).getText(); }
-    public String getSpentAmountText() { return mustBeVisible(spentAmount).getText(); }
-    public String getSnackBarText() { return mustBeVisible(snackBarLabel).getText().trim(); }
+    public String getTitle() {
+        return mustBeVisible(title).getText();
+    }
+
+    public String getTotalMaxAmountText() {
+        return mustBeVisible(totalMaxAmount).getText();
+    }
+
+    public String getSpentAmountText() {
+        return mustBeVisible(spentAmount).getText();
+    }
+
+    public String getSnackBarText() {
+        return mustBeVisible(snackBarLabel).getText().trim();
+    }
+
+    private final By offerCardGlobal = By.cssSelector("app-budget-offer-list.offers app-offer-card, .offers app-offer-card, .offers .offer-card, .offer-card");
+    private final By noOffersGlobal = By.cssSelector("app-budget-offer-list.offers .no-offers-message, .offers .no-offers-message, .no-offers-message");
+
 
     // ---------- Actions ----------
     public void clickGoBack() {
@@ -192,10 +238,13 @@ public class BudgetPlanningPage {
             wait.until(ExpectedConditions.stalenessOf(root));
         } catch (org.openqa.selenium.TimeoutException te) {
             String snack = "";
-            try { snack = getSnackBarText(); } catch (Exception ignored) {}
+            try {
+                snack = getSnackBarText();
+            } catch (Exception ignored) {
+            }
             throw new AssertionError(
-                "Create Item popup did not close. Likely validation failure (duplicate or invalid amount)." +
-                (snack.isBlank() ? "" : " Snackbar: " + snack)
+                    "Create Item popup did not close. Likely validation failure (duplicate or invalid amount)." +
+                            (snack.isBlank() ? "" : " Snackbar: " + snack)
             );
         }
     }
@@ -269,20 +318,6 @@ public class BudgetPlanningPage {
         wait.until(ExpectedConditions.stalenessOf(root));
     }
 
-    public void deleteItem(String category) {
-        WebElement row = findBudgetRowByCategory(category);
-        if (row == null) throw new NoSuchElementException("No row for category: " + category);
-
-        WebElement del = row.findElement(rowDeleteBtn);
-        jsScrollIntoView(del);
-        jsClick(del);
-
-        wait.until(ExpectedConditions.visibilityOfElementLocated(matDialog));
-        jsClick(mustBeClickable(matDialogConfirmBtn));
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(matDialog));
-
-        wait.until(d -> findBudgetRowByCategory(category) == null);
-    }
     // --- Put these inside BudgetPlanningPage ---
 
     // Parse totals from summary labels
@@ -311,10 +346,11 @@ public class BudgetPlanningPage {
             throw new IllegalStateException("No selectable categories available (all are already in the table).");
         String chosen = candidates.get(0);
         createNewItem(chosen, amount);
+        waitForRowByCategory(chosen);
         return chosen;
     }
 
-        // Return category names present in the table
+    // Return category names present in the table
     public List<String> getTableCategories() {
         return driver.findElements(budgetRows).stream()
                 .map(r -> r.findElement(rowCategory(r)).getText().trim())
@@ -337,13 +373,19 @@ public class BudgetPlanningPage {
     }
 
 
-
     // ====== SEARCH / PAGINATION ======
     public void clickSearch() {
         WebElement btn = mustBeClickable(searchBtn);
         jsScrollIntoView(btn);
         jsClick(btn);
         mustBeVisible(offersList);
+        wait.until(d -> {
+            try {
+                return !getOfferCards().isEmpty() || isNoOffersVisible();
+            } catch (Exception e) {
+                return false;
+            }
+        });
     }
 
     public void nextPage() {
@@ -392,20 +434,440 @@ public class BudgetPlanningPage {
 
     // Change page size (e.g., 4, 8, 12)
     public void setPageSize(int size) {
-        WebElement trigger = mustBeClickable(pageSizeSelect);
+        // Ensure paginator area in view
+        By containerBy = By.cssSelector(".mat-mdc-paginator-page-size, .mat-mdc-paginator-page-size-select");
+        WebElement container = driver.findElements(containerBy).isEmpty()
+                ? mustBeVisible(By.cssSelector("mat-paginator"))
+                : mustBeVisible(containerBy);
+        jsScrollIntoView(container);
+
+        // ===== PATH A: Native <select> (no overlay) =====
+        List<WebElement> nativeSelects = container.findElements(By.cssSelector("select"));
+        if (!nativeSelects.isEmpty()) {
+            Select sel = new Select(nativeSelects.get(0));
+            sel.selectByVisibleText(String.valueOf(size));
+            // Wait for list re-render
+            waitForOffersSettled();
+            wait.until(d -> getOfferCards().size() <= size || isNoOffersVisible());
+            return;
+        }
+
+        // ===== PATH B: mat-select (overlay) =====
+        By triggerBy = By.cssSelector(
+                ".mat-mdc-paginator-page-size .mat-mdc-select-trigger, " +
+                        "mat-select[aria-label='Items per page'] .mat-mdc-select-trigger"
+        );
+        WebElement trigger = mustBeClickable(triggerBy);
         jsClick(trigger);
-        // Wait for options panel and click matching option text
-        wait.until(ExpectedConditions.visibilityOfElementLocated(matOption));
-        List<WebElement> options = driver.findElements(matOption);
-        WebElement match = options.stream()
+
+        // Panel can take a tick; sometimes the arrow is the clickable target
+        By panelBy = By.cssSelector(".cdk-overlay-pane .mat-mdc-select-panel");
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(panelBy));
+        } catch (org.openqa.selenium.TimeoutException first) {
+            // Retry by clicking the arrow icon if present
+            List<WebElement> arrow = container.findElements(By.cssSelector(".mat-mdc-select-arrow"));
+            if (!arrow.isEmpty()) {
+                jsClick(arrow.get(0));
+            } else {
+                jsClick(trigger); // retry trigger
+            }
+            wait.until(ExpectedConditions.visibilityOfElementLocated(panelBy));
+        }
+
+        // Options might be <mat-option> or generic [role=option]
+        List<WebElement> opts = driver.findElements(By.cssSelector(".cdk-overlay-pane .mat-mdc-select-panel mat-option"));
+        if (opts.isEmpty()) {
+            opts = driver.findElements(By.cssSelector(".cdk-overlay-pane .mat-mdc-select-panel [role='option']"));
+        }
+        WebElement match = opts.stream()
                 .filter(o -> o.getText().trim().equals(String.valueOf(size)))
                 .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("Page-size option not found: " + size));
+                .orElseThrow(() -> new NoSuchElementException("Page-size option not found in panel: " + size));
+
         jsClick(match);
-        // Wait for the menu to close (option panel becomes stale or invisible)
-        wait.until(ExpectedConditions.invisibilityOf(match));
-        // Give Angular a tick to update the list
-        mustBeVisible(offersList);
+
+        // Wait for panel to close and list to settle
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(panelBy));
+        waitForOffersSettled();
+        // Wait until visible count is <= selected size OR panel shows the size
+        wait.until(d -> {
+            try {
+                int visible = getVisibleOfferCardsCount();
+                if (visible <= size || isNoOffersVisible()) return true;
+
+                // extra resilience: some themes update the page-size label reliably
+                String lbl = getPageSizeValueText();
+                if (!lbl.isEmpty() && lbl.equals(String.valueOf(size))) {
+                    // still allow a couple of polls for UI to re-render
+                    return getVisibleOfferCardsCount() <= size || isNoOffersVisible();
+                }
+                return false;
+            } catch (Exception e) {
+                return false;
+            }
+        });
     }
+
+    private final By pageSizeValue = By.cssSelector(".mat-mdc-paginator-page-size-value");
+
+    public String getPageSizeValueText() {
+        List<WebElement> v = driver.findElements(pageSizeValue);
+        return v.isEmpty() ? "" : v.get(0).getText().trim();
+    }
+
+
+    // Count only *visible* cards (displayed)
+    public int getVisibleOfferCardsCount() {
+        int n = 0;
+        for (WebElement el : getOfferCards()) {
+            try {
+                if (el.isDisplayed()) n++;
+            } catch (org.openqa.selenium.StaleElementReferenceException ignored) {
+            }
+        }
+        return n;
+    }
+
+
+    // BudgetPlanningPage
+    public boolean hasPageSizeControl() {
+        // container may differ across themes but this covers standard paginator
+        By containerBy = By.cssSelector(".mat-mdc-paginator-page-size, .mat-mdc-paginator-page-size-select, mat-select[aria-label='Items per page']");
+        if (driver.findElements(containerBy).isEmpty()) return false;
+
+        // Either a native <select> exists...
+        if (!driver.findElements(By.cssSelector(".mat-mdc-paginator-page-size select")).isEmpty()) return true;
+
+        // ...or a mat-select trigger exists
+        return !driver.findElements(By.cssSelector(".mat-mdc-paginator-page-size .mat-mdc-select-trigger")).isEmpty()
+                || !driver.findElements(By.cssSelector("mat-select[aria-label='Items per page'] .mat-mdc-select-trigger")).isEmpty();
+    }
+
+
+    public void openOfferCardByIndex(int index) {
+        var cards = getOfferCards();
+        if (index >= cards.size()) throw new IllegalArgumentException("No offer at index " + index);
+
+        WebElement clickTarget;
+        try {
+            // Prefer the clickable content; if not found, fall back to the card itself
+            clickTarget = cards.get(index).findElement(By.cssSelector(".offer-card-content"));
+        } catch (NoSuchElementException e) {
+            clickTarget = cards.get(index);
+        }
+        jsScrollIntoView(clickTarget);
+        jsClick(clickTarget);
+
+        // Route change to /offer/:id
+        wait.until(ExpectedConditions.or(
+                ExpectedConditions.urlContains("/offer/"),
+                ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".offer-title, h1.offer-title"))
+        ));
+    }
+
+    public double readRowMaxAmount(String category) {
+        String text = readRowMax(category);
+        try {
+            return Double.parseDouble(text.replaceAll("[^0-9.]", ""));
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
+
+    private void waitForOffersSettled() {
+        wait.until(d -> {
+            try {
+                // Use fresh, global queries each poll
+                if (!d.findElements(offerCardGlobal).isEmpty()) return true;
+                if (!d.findElements(noOffersGlobal).isEmpty()) {
+                    // ensure the empty element is actually visible
+                    for (WebElement el : d.findElements(noOffersGlobal)) {
+                        try {
+                            if (el.isDisplayed()) return true;
+                        } catch (StaleElementReferenceException ignored) {
+                        }
+                    }
+                }
+                return false;
+            } catch (StaleElementReferenceException e) {
+                return false;
+            }
+        });
+    }
+
+    // Add to BudgetPlanningPage
+    public void waitForRowByCategory(String category) {
+        wait.until(d -> {
+            try {
+                // Re-query rows without the "mustSeeAll" hard wait to avoid nested waits
+                List<WebElement> rows = d.findElements(budgetRows);
+                for (WebElement r : rows) {
+                    try {
+                        String cat = r.findElement(rowCategory(r)).getText().trim();
+                        if (cat.equalsIgnoreCase(category)) return true;
+                    } catch (StaleElementReferenceException ignored) {
+                    }
+                }
+                return false;
+            } catch (Exception e) {
+                return false;
+            }
+        });
+    }
+
+    // ===== Negative test helpers & utilities =====
+
+    // Parse a money label like "€1,234.50" -> 1234.50
+    private double parseAmount(String text) {
+        String digits = text.replaceAll("[^0-9.,]", "").replace(',', '.');
+        if (digits.chars().filter(ch -> ch == '.').count() > 1) {
+            // normalize "1.234.567,89" style if needed (best-effort)
+            digits = digits.replaceAll("\\.(?=.*\\.)", "");
+        }
+        return digits.isBlank() ? 0.0 : Double.parseDouble(digits);
+    }
+
+    public double readRowCurrAmount(String category) {
+        return parseAmount(readRowCurr(category));
+    }
+
+    public boolean isCreatePopupOpen() {
+        return !driver.findElements(createPopupRoot).isEmpty();
+    }
+
+    public boolean isEditPopupOpen() {
+        return !driver.findElements(editPopupRoot).isEmpty();
+    }
+
+    // Try to create an item but EXPECT a validation failure (e.g., duplicate category)
+    public String tryCreateItemExpectingFailure(String category, String amount) {
+        openCreateItemPopup();
+        WebElement root = mustBeVisible(createPopupRoot);
+
+        waitForCategoryOptionsToLoad(root);
+        WebElement selectEl = root.findElement(createPopupSelectRel);
+        Select select = new Select(selectEl);
+
+        boolean picked = false;
+        for (WebElement opt : select.getOptions()) {
+            if (opt.getText().trim().equalsIgnoreCase(category)) {
+                opt.click();
+                picked = true;
+                break;
+            }
+        }
+        if (!picked) throw new NoSuchElementException("Category not found: " + category);
+
+        WebElement input = root.findElement(popupNumberInputRel);
+        wait.until(ExpectedConditions.elementToBeClickable(input));
+        input.clear();
+        input.sendKeys(amount);
+
+        WebElement confirm = root.findElement(popupConfirmBtnRel);
+        wait.until(ExpectedConditions.elementToBeClickable(confirm));
+        jsClick(confirm);
+
+        // Expect the popup to remain (validation prevents closing)
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(createPopupRoot));
+        } catch (Exception ignored) {
+        }
+
+        String snack = "";
+        try {
+            snack = getSnackBarText();
+        } catch (Exception ignored) {
+        }
+
+        // clean up popup so the test can proceed
+        try {
+            WebElement cancel = root.findElement(popupCancelBtnRel);
+            jsClick(cancel);
+            wait.until(ExpectedConditions.stalenessOf(root));
+        } catch (Exception ignored) {
+        }
+
+        return snack == null ? "" : snack.trim();
+    }
+
+    // Try to edit an item but EXPECT a validation failure (e.g., newMax < spent)
+    public String tryEditItemExpectingFailure(String category, String newMax) {
+        WebElement row = findBudgetRowByCategory(category);
+        if (row == null) throw new NoSuchElementException("No row for category: " + category);
+
+        WebElement edit = row.findElement(rowEditBtn);
+        jsScrollIntoView(edit);
+        jsClick(edit);
+
+        WebElement root = mustBeVisible(editPopupRoot);
+        WebElement input = root.findElement(popupNumberInputRel);
+        wait.until(ExpectedConditions.elementToBeClickable(input));
+        input.clear();
+        input.sendKeys(newMax);
+
+        WebElement confirm = root.findElement(popupConfirmBtnRel);
+        wait.until(ExpectedConditions.elementToBeClickable(confirm));
+        jsClick(confirm);
+
+        // Expect the popup to remain open
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(editPopupRoot));
+        } catch (Exception ignored) {
+        }
+
+        String snack = "";
+        try {
+            snack = getSnackBarText();
+        } catch (Exception ignored) {
+        }
+
+        // Dismiss popup to recover
+        try {
+            WebElement cancel = root.findElement(popupCancelBtnRel);
+            jsClick(cancel);
+            wait.until(ExpectedConditions.stalenessOf(root));
+        } catch (Exception ignored) {
+        }
+
+        return snack == null ? "" : snack.trim();
+    }
+
+    // Attempt delete but don't wait for disappearance; capture snackbar & whether row persists.
+    // Broaden dialog locator (some themes render different containers)
+
+    // --- REPLACE attemptDeleteAndCaptureSnack WITH THIS ---
+    public String attemptDeleteAndCaptureSnack(String category) {
+        WebElement row = findBudgetRowByCategory(category);
+        if (row == null) throw new NoSuchElementException("No row for " + category);
+
+        WebElement del = row.findElement(rowDeleteBtn);
+        jsScrollIntoView(del);
+
+        // If UI disables delete when spent>0, clicking won’t open dialog (but still click just in case)
+        boolean disabled = !del.isEnabled()
+                || "true".equalsIgnoreCase(del.getAttribute("aria-disabled"))
+                || del.getAttribute("disabled") != null;
+
+        try {
+            jsClick(del);
+        } catch (Exception ignored) {
+        }
+
+        // --- SHORT PROBE: look for a dialog quickly (2s), otherwise assume "blocked w/o dialog" flow.
+        WebElement dialog = null;
+        try {
+            dialog = new WebDriverWait(driver, Duration.ofSeconds(2))
+                    .until(ExpectedConditions.visibilityOfElementLocated(matDialog));
+        } catch (org.openqa.selenium.TimeoutException ignored) {
+            dialog = null; // no dialog -> fall through
+        }
+
+        if (dialog != null) {
+            // Confirm inside the dialog (robust confirm finder)
+            WebElement confirm = new WebDriverWait(driver, Duration.ofSeconds(4))
+                    .until(d -> {
+                        WebElement dlog = topMostDialog();
+                        WebElement c = findConfirmButtonIn(dlog);
+                        return (c != null && c.isDisplayed() && c.isEnabled()) ? c : null;
+                    });
+            jsScrollIntoView(confirm);
+            jsClick(confirm);
+
+            // Don’t hang waiting forever for close
+            try {
+                new WebDriverWait(driver, Duration.ofSeconds(4))
+                        .until(ExpectedConditions.invisibilityOf(dialog));
+            } catch (org.openqa.selenium.TimeoutException ignored) {
+            }
+        }
+
+        // --- In BOTH flows, try to read a snackbar quickly; allow empty
+        try {
+            WebElement label = new WebDriverWait(driver, Duration.ofSeconds(3))
+                    .until(ExpectedConditions.visibilityOfElementLocated(snackBarLabel));
+            String txt = label.getText();
+            return (txt == null) ? "" : txt.trim();
+        } catch (Exception ignored) {
+        }
+
+        // No snackbar visible (some UIs just ignore/disable button) — let the test assert invariants.
+        return "";
+    }
+
+
+    // Find any category whose "spent" > 0 (for delete-blocked test)
+    public String findAnyCategoryWithSpentPositive() {
+        List<WebElement> rows = driver.findElements(budgetRows);
+        for (WebElement r : rows) {
+            try {
+                String cat = r.findElement(rowCategory(r)).getText().trim();
+                String currTxt = r.findElement(rowCurr(r)).getText();
+                if (parseAmount(currTxt) > 0.0) return cat;
+            } catch (StaleElementReferenceException ignored) {
+            }
+        }
+        return null;
+    }
+
+    public void deleteItem(String category) {
+        WebElement row = findBudgetRowByCategory(category);
+        if (row == null) throw new NoSuchElementException("No row for category: " + category);
+
+        WebElement del = row.findElement(rowDeleteBtn);
+        jsScrollIntoView(del);
+        jsClick(del);
+
+        // Wait for dialog to appear
+        wait.until(ExpectedConditions.visibilityOfElementLocated(matDialog));
+        WebElement dialog = topMostDialog();
+
+        // Find a suitable confirm button and click it
+        WebElement confirm = wait.until(d -> {
+            WebElement dlog = topMostDialog();
+            WebElement c = findConfirmButtonIn(dlog);
+            return (c != null && c.isDisplayed() && c.isEnabled()) ? c : null;
+        });
+
+        jsScrollIntoView(confirm);
+        mustBeClickable(matDialogButtons); // small guard to ensure buttons are interactable
+        jsClick(confirm);
+
+        // Wait for dialog to close and row to disappear
+        wait.until(ExpectedConditions.invisibilityOf(dialog));
+        wait.until(d -> findBudgetRowByCategory(category) == null);
+    }
+
+    // Put near your Material locators
+    private final By matDialogButtons = By.cssSelector(".mat-mdc-dialog-container button");
+
+    // Returns the topmost dialog container
+    private WebElement topMostDialog() {
+        List<WebElement> dialogs = driver.findElements(matDialog);
+        if (dialogs.isEmpty()) throw new NoSuchElementException("No dialog visible");
+        return dialogs.get(dialogs.size() - 1); // topmost
+    }
+
+    private WebElement findConfirmButtonIn(WebElement dialog) {
+        List<WebElement> btns = dialog.findElements(matDialogButtons);
+        // Prefer common confirm labels (span or direct text)
+        for (WebElement b : btns) {
+            String txt = b.getText().trim().toLowerCase();
+            if (txt.equals("confirm") || txt.equals("yes") || txt.equals("delete") || txt.equals("ok")) {
+                return b;
+            }
+        }
+        // Fallback: pick a non-cancel-ish button
+        for (WebElement b : btns) {
+            String txt = b.getText().trim().toLowerCase();
+            if (!txt.equals("cancel") && !txt.equals("no") && !txt.contains("close")) {
+                return b;
+            }
+        }
+        // Last resort: return the last button
+        return btns.isEmpty() ? null : btns.get(btns.size() - 1);
+    }
+
 
 }
