@@ -35,12 +35,9 @@ public class OfferInfoPage {
     private final By snackBar = By.cssSelector(".mdc-snackbar__label, .mat-mdc-snack-bar-label");
     private final By anyDialogContainer = By.cssSelector(".mat-mdc-dialog-container");
     private final By cancelOrCloseBtn = By.xpath("//div[contains(@class,'mat-mdc-dialog-container')]//button[contains(.,'Cancel') or contains(.,'Close')]");
-    // in OfferInfoPage.java
 
-    // just below your other locators:
     private final By categoryBlock = By.xpath("//strong[normalize-space()='Category']/following-sibling::p[1]");
 
-    // ...
     public String getCategoryText() {
         try {
             return driver.findElement(categoryBlock).getText().trim();
@@ -54,8 +51,6 @@ public class OfferInfoPage {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
         wait.until(ExpectedConditions.visibilityOfElementLocated(offerTitle));
     }
-
-    // ---------- Availability & type helpers ----------
 
     /**
      * True when the page shows "Available." and not "Currently unavailable".

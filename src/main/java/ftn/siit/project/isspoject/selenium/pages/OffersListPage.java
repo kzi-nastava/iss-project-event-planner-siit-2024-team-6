@@ -158,7 +158,6 @@ public class OffersListPage {
     /**
      * Extract the category text from a card (matches your first info-item span).
      */
-    // In OffersListPage
     private String readCardCategoryByIndex(int index) {
         for (int attempt = 0; attempt < 6; attempt++) {
             try {
@@ -188,17 +187,14 @@ public class OffersListPage {
             String cat = readCardCategoryByIndex(i);
             if (cat.isBlank() || beforeCatsLower.contains(cat.toLowerCase(Locale.ROOT))) continue;
 
-            // Open detail for this candidate
             openCardByIndex(i);
             OfferInfoPage info = new OfferInfoPage(driver);
 
-            // Must be a Product (BUY NOW button visible)
             if (!info.isBuyNowVisible()) {
                 info.goBack();
                 waitForListSettled();
                 continue;
             }
-            // We found a product in a NEW category and we are on detail page now.
             return true;
         }
         return false;

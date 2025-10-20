@@ -441,7 +441,6 @@ public class BudgetPlanningPage {
                 : mustBeVisible(containerBy);
         jsScrollIntoView(container);
 
-        // ===== PATH A: Native <select> (no overlay) =====
         List<WebElement> nativeSelects = container.findElements(By.cssSelector("select"));
         if (!nativeSelects.isEmpty()) {
             Select sel = new Select(nativeSelects.get(0));
@@ -452,7 +451,6 @@ public class BudgetPlanningPage {
             return;
         }
 
-        // ===== PATH B: mat-select (overlay) =====
         By triggerBy = By.cssSelector(
                 ".mat-mdc-paginator-page-size .mat-mdc-select-trigger, " +
                         "mat-select[aria-label='Items per page'] .mat-mdc-select-trigger"
@@ -475,7 +473,6 @@ public class BudgetPlanningPage {
             wait.until(ExpectedConditions.visibilityOfElementLocated(panelBy));
         }
 
-        // Options might be <mat-option> or generic [role=option]
         List<WebElement> opts = driver.findElements(By.cssSelector(".cdk-overlay-pane .mat-mdc-select-panel mat-option"));
         if (opts.isEmpty()) {
             opts = driver.findElements(By.cssSelector(".cdk-overlay-pane .mat-mdc-select-panel [role='option']"));
@@ -529,17 +526,12 @@ public class BudgetPlanningPage {
         return n;
     }
 
-
-    // BudgetPlanningPage
     public boolean hasPageSizeControl() {
-        // container may differ across themes but this covers standard paginator
         By containerBy = By.cssSelector(".mat-mdc-paginator-page-size, .mat-mdc-paginator-page-size-select, mat-select[aria-label='Items per page']");
         if (driver.findElements(containerBy).isEmpty()) return false;
 
-        // Either a native <select> exists...
         if (!driver.findElements(By.cssSelector(".mat-mdc-paginator-page-size select")).isEmpty()) return true;
 
-        // ...or a mat-select trigger exists
         return !driver.findElements(By.cssSelector(".mat-mdc-paginator-page-size .mat-mdc-select-trigger")).isEmpty()
                 || !driver.findElements(By.cssSelector("mat-select[aria-label='Items per page'] .mat-mdc-select-trigger")).isEmpty();
     }
@@ -734,10 +726,6 @@ public class BudgetPlanningPage {
         return snack == null ? "" : snack.trim();
     }
 
-    // Attempt delete but don't wait for disappearance; capture snackbar & whether row persists.
-    // Broaden dialog locator (some themes render different containers)
-
-    // --- REPLACE attemptDeleteAndCaptureSnack WITH THIS ---
     public String attemptDeleteAndCaptureSnack(String category) {
         WebElement row = findBudgetRowByCategory(category);
         if (row == null) throw new NoSuchElementException("No row for " + category);
@@ -745,7 +733,6 @@ public class BudgetPlanningPage {
         WebElement del = row.findElement(rowDeleteBtn);
         jsScrollIntoView(del);
 
-        // If UI disables delete when spent>0, clicking won’t open dialog (but still click just in case)
         boolean disabled = !del.isEnabled()
                 || "true".equalsIgnoreCase(del.getAttribute("aria-disabled"))
                 || del.getAttribute("disabled") != null;
@@ -755,7 +742,6 @@ public class BudgetPlanningPage {
         } catch (Exception ignored) {
         }
 
-        // --- SHORT PROBE: look for a dialog quickly (2s), otherwise assume "blocked w/o dialog" flow.
         WebElement dialog = null;
         try {
             dialog = new WebDriverWait(driver, Duration.ofSeconds(2))
@@ -765,7 +751,6 @@ public class BudgetPlanningPage {
         }
 
         if (dialog != null) {
-            // Confirm inside the dialog (robust confirm finder)
             WebElement confirm = new WebDriverWait(driver, Duration.ofSeconds(4))
                     .until(d -> {
                         WebElement dlog = topMostDialog();
@@ -775,7 +760,6 @@ public class BudgetPlanningPage {
             jsScrollIntoView(confirm);
             jsClick(confirm);
 
-            // Don’t hang waiting forever for close
             try {
                 new WebDriverWait(driver, Duration.ofSeconds(4))
                         .until(ExpectedConditions.invisibilityOf(dialog));
@@ -823,7 +807,6 @@ public class BudgetPlanningPage {
         wait.until(ExpectedConditions.visibilityOfElementLocated(matDialog));
         WebElement dialog = topMostDialog();
 
-        // Find a suitable confirm button and click it
         WebElement confirm = wait.until(d -> {
             WebElement dlog = topMostDialog();
             WebElement c = findConfirmButtonIn(dlog);
@@ -834,15 +817,12 @@ public class BudgetPlanningPage {
         mustBeClickable(matDialogButtons); // small guard to ensure buttons are interactable
         jsClick(confirm);
 
-        // Wait for dialog to close and row to disappear
         wait.until(ExpectedConditions.invisibilityOf(dialog));
         wait.until(d -> findBudgetRowByCategory(category) == null);
     }
 
-    // Put near your Material locators
     private final By matDialogButtons = By.cssSelector(".mat-mdc-dialog-container button");
 
-    // Returns the topmost dialog container
     private WebElement topMostDialog() {
         List<WebElement> dialogs = driver.findElements(matDialog);
         if (dialogs.isEmpty()) throw new NoSuchElementException("No dialog visible");
@@ -851,21 +831,18 @@ public class BudgetPlanningPage {
 
     private WebElement findConfirmButtonIn(WebElement dialog) {
         List<WebElement> btns = dialog.findElements(matDialogButtons);
-        // Prefer common confirm labels (span or direct text)
         for (WebElement b : btns) {
             String txt = b.getText().trim().toLowerCase();
             if (txt.equals("confirm") || txt.equals("yes") || txt.equals("delete") || txt.equals("ok")) {
                 return b;
             }
         }
-        // Fallback: pick a non-cancel-ish button
         for (WebElement b : btns) {
             String txt = b.getText().trim().toLowerCase();
             if (!txt.equals("cancel") && !txt.equals("no") && !txt.contains("close")) {
                 return b;
             }
-        }
-        // Last resort: return the last button
+        
         return btns.isEmpty() ? null : btns.get(btns.size() - 1);
     }
 
