@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.DisplayName.class)
 public class BudgetPlanningTest extends BaseTest {
 
-    private static final long EVENT_ID_UNDER_TEST = 28L; // adjust if needed
+    private static final long EVENT_ID_UNDER_TEST = 27L;
     private BudgetPlanningPage page;
 
     @BeforeEach
